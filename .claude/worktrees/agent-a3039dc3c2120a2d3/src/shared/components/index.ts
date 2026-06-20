@@ -1,6 +1,0 @@
-export { default as CardData } from './CardData'
-export { default as EksekutifData } from './EksekutifData'
-export { default as Icon } from './Icon'
-export { default as ListEksekutif } from './ListEksekutif'
-export { default as Loader } from './Loader'
-export { default as PlaceholderSection } from './PlaceholderSection'
