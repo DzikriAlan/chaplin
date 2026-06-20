@@ -1,0 +1,115 @@
+/**
+ * DESIGN SYSTEM TEMPLATE — src/shared/styles/globals.css
+ *
+ * Instruksi untuk AI:
+ * Isi semua nilai [FILL: ...] menggunakan format HSL tanpa fungsi hsl().
+ * Format wajib: "H S% L%" — contoh: "220 14% 96%"
+ * Jangan tulis "hsl(220, 14%, 96%)" — Shadcn membungkusnya sendiri via hsl(var(...)).
+ * Setelah diisi, salin seluruh isi file ini ke: src/shared/styles/globals.css
+ *
+ * Cara konversi hex ke HSL:
+ * Gunakan tool seperti https://colorkit.co/color/ atau konversi manual.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Background & Foreground ─────────────────────────────────────────── */
+    --background: 18 100% 97%;   /* #FFF6F0 — primary-50 */
+    --foreground: 226 34% 24%;   /* #283252 — dark-text */
+
+    /* ── Card ────────────────────────────────────────────────────────────── */
+    --card:            0 0% 100%;           /* #fff */
+    --card-foreground: 226 34% 24%;        /* #283252 — dark-text */
+
+    /* ── Popover / Dropdown ──────────────────────────────────────────────── */
+    --popover:            0 0% 100%;        /* #fff */
+    --popover-foreground: 226 34% 24%;     /* #283252 — dark-text */
+
+    /* ── Primary — warna aksi utama (button, link, focus ring) ──────────── */
+    --primary:            18 82% 53%;       /* #EF7E48 — brand orange */
+    --primary-foreground: 0 0% 100%;        /* #fff */
+
+    /* ── Secondary — aksi sekunder ──────────────────────────────────────── */
+    --secondary:            222 82% 56%;    /* #346beb — dari SCSS secondary */
+    --secondary-foreground: 0 0% 100%;      /* #fff */
+
+    /* ── Muted — elemen disabled / placeholder ───────────────────────────── */
+    --muted:            0 0% 93%;           /* #ededed — fade-grey */
+    --muted-foreground: 0 0% 60%;           /* #999 — muted-grey */
+
+    /* ── Accent — highlight / hover state ───────────────────────────────── */
+    --accent:            49 100% 50%;       /* #fed400 — gold aksen dashboard */
+    --accent-foreground: 0 0% 100%;         /* #fff */
+
+    /* ── Destructive — error / delete ───────────────────────────────────── */
+    --destructive:            341 79% 53%;  /* #E62965 — dari SCSS danger */
+    --destructive-foreground: 0 0% 100%;    /* #fff */
+
+    /* ── Border & Input ──────────────────────────────────────────────────── */
+    --border: 0 0% 86%;       /* hsl(0deg 0% 86%) — dari SCSS border */
+    --input:  0 0% 86%;       /* sama dengan border */
+    --ring:   18 82% 53%;     /* #EF7E48 — primary */
+
+    /* ── Border Radius Base ──────────────────────────────────────────────── */
+    /* sm = radius - 4px, md = radius - 2px, lg = radius (via tailwind.config) */
+    --radius: 0.25rem;       /* 4px — dari SCSS --radius */
+
+    /* ── Chart Colors ────────────────────────────────────────────────────── */
+    --chart-1: 18 82% 53%;   /* #EF7E48 — primary orange */
+    --chart-2: 358 68% 51%;  /* #D9292F — brand red */
+    --chart-3: 49 100% 50%;  /* #fed400 — gold */
+    --chart-4: 148 54% 51%;  /* #3EC764 — positive green */
+    --chart-5: 261 32% 55%;  /* #8269b2 — purple */
+  }
+
+  /* ── Dark Mode ─────────────────────────────────────────────────────────── */
+  /* Skema gelap berdasarkan dark-sidebar: hsl(240, 4%, 14%) */
+  .dark {
+    --background: 240 4% 14%;            /* #232326 — dark-sidebar */
+    --foreground: 232 14% 68%;            /* #A2A5B9 — light-text */
+
+    --card:            240 4% 18%;        /* sedikit lebih terang dari bg */
+    --card-foreground: 232 14% 68%;       /* #A2A5B9 — light-text */
+
+    --popover:            240 4% 18%;     /* sama dengan card */
+    --popover-foreground: 232 14% 68%;    /* #A2A5B9 — light-text */
+
+    --primary:            18 82% 55%;     /* primary sedikit lebih terang */
+    --primary-foreground: 0 0% 100%;      /* #fff */
+
+    --secondary:            222 70% 50%;  /* secondary lebih redup */
+    --secondary-foreground: 0 0% 100%;    /* #fff */
+
+    --muted:            240 4% 22%;       /* lebih gelap dari card */
+    --muted-foreground: 232 14% 50%;      /* light-text lebih redup */
+
+    --accent:            49 100% 45%;     /* gold lebih redup untuk dark */
+    --accent-foreground: 0 0% 100%;       /* #fff */
+
+    --destructive:            341 79% 45%;/* danger lebih redup */
+    --destructive-foreground: 0 0% 100%;  /* #fff */
+
+    --border: 240 4% 25%;
+    --input:  240 4% 25%;
+    --ring:   18 82% 55%;                 /* primary lebih terang */
+
+    --chart-1: 18 82% 60%;   /* primary orange lebih terang */
+    --chart-2: 358 68% 60%;  /* brand red lebih terang */
+    --chart-3: 49 100% 55%;  /* gold lebih terang */
+    --chart-4: 148 54% 56%;  /* positive green lebih terang */
+    --chart-5: 261 32% 60%;  /* purple lebih terang */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

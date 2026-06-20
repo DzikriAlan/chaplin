@@ -1,0 +1,54 @@
+import type { ReactNode } from 'react'
+import { PanelLeft } from 'lucide-react'
+import Sidebar from './Sidebar'
+import ChatSearchModal from '@/features/chat/components/ChatSearchModal'
+import { useUIStates } from '@/shared/states/uiStates'
+
+interface Props {
+  title?: string
+  noPadding?: boolean
+  children: ReactNode
+}
+
+export default function Layout({ title, noPadding, children }: Readonly<Props>) {
+  const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUIStates()
+
+  return (
+    <div className="flex min-h-screen bg-background">
+      <Sidebar />
+      <ChatSearchModal />
+
+      {sidebarOpen && (
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 z-20 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <div
+        className={`flex-1 flex flex-col min-h-screen transition-[margin-left] duration-300 ease-in-out ${
+          sidebarOpen ? 'md:ml-64' : 'md:ml-[52px]'
+        }`}
+      >
+        <div className="md:hidden flex h-14 shrink-0 items-center px-4 bg-card sticky top-0 z-10">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Toggle sidebar"
+          >
+            <PanelLeft className="h-5 w-5" />
+          </button>
+        </div>
+
+        {title && (
+          <header className="flex h-14 md:h-16 shrink-0 items-center bg-card px-4 md:px-6">
+            <h1 className="text-rem-100 md:text-rem-110 font-semibold text-foreground">{title}</h1>
+          </header>
+        )}
+        <main className={`flex-1 ${noPadding ? 'overflow-hidden' : 'p-4 md:p-6'}`}>{children}</main>
+      </div>
+    </div>
+  )
+}

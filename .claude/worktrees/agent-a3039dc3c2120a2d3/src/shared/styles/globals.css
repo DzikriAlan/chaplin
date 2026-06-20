@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-size: 14px;
+  }
+
+  :root {
+    /* ── Background & Foreground ─────────────────────────────────────────── */
+    --background: 0 0% 100%;    /* #fff — putih */
+    --foreground: 226 34% 24%;   /* #283252 — dark-text */
+
+    /* ── Card ────────────────────────────────────────────────────────────── */
+    --card:            0 0% 100%;           /* #fff */
+    --card-foreground: 226 34% 24%;        /* #283252 — dark-text */
+
+    /* ── Popover / Dropdown ──────────────────────────────────────────────── */
+    --popover:            0 0% 100%;        /* #fff */
+    --popover-foreground: 226 34% 24%;     /* #283252 — dark-text */
+
+    /* ── Primary — warna aksi utama ──────────────────────────────────────── */
+    --primary:            18 82% 53%;       /* #EF7E48 — brand orange */
+    --primary-foreground: 0 0% 100%;        /* #fff */
+
+    /* ── Secondary ───────────────────────────────────────────────────────── */
+    --secondary:            222 82% 56%;    /* #346beb */
+    --secondary-foreground: 0 0% 100%;      /* #fff */
+
+    /* ── Muted ───────────────────────────────────────────────────────────── */
+    --muted:            0 0% 93%;           /* #ededed */
+    --muted-foreground: 0 0% 60%;           /* #999 */
+
+    /* ── Accent — gold dashboard ────────────────────────────────────────── */
+    --accent:            49 100% 50%;       /* #fed400 */
+    --accent-foreground: 0 0% 100%;         /* #fff */
+
+    /* ── Destructive ────────────────────────────────────────────────────── */
+    --destructive:            341 79% 53%;  /* #E62965 */
+    --destructive-foreground: 0 0% 100%;    /* #fff */
+
+    /* ── Border & Input ──────────────────────────────────────────────────── */
+    --border: 0 0% 86%;       /* #dbdbdb */
+    --input:  0 0% 86%;       /* #dbdbdb */
+    --ring:   18 82% 53%;     /* #EF7E48 — primary */
+
+    /* ── Border Radius ───────────────────────────────────────────────────── */
+    --radius: 0.25rem;       /* 4px */
+    --radius-small: 2px;
+    --radius-large: 6px;
+    --radius-rounded: 9999px;
+
+    /* ── Chart Colors ────────────────────────────────────────────────────── */
+    --chart-1: 18 82% 53%;   /* #EF7E48 — primary orange */
+    --chart-2: 358 68% 51%;  /* #D9292F — brand red */
+    --chart-3: 49 100% 50%;  /* #fed400 — gold */
+    --chart-4: 148 54% 51%;  /* #3EC764 — positive green */
+    --chart-5: 261 32% 55%;  /* #8269b2 — purple */
+  }
+
+  .dark {
+    --background: 240 4% 14%;            /* #232326 */
+    --foreground: 232 14% 68%;            /* #A2A5B9 */
+
+    --card:            240 4% 18%;
+    --card-foreground: 232 14% 68%;
+
+    --popover:            240 4% 18%;
+    --popover-foreground: 232 14% 68%;
+
+    --primary:            18 82% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary:            222 70% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted:            240 4% 22%;
+    --muted-foreground: 232 14% 50%;
+
+    --accent:            49 100% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive:            341 79% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 4% 25%;
+    --input:  240 4% 25%;
+    --ring:   18 82% 55%;
+
+    --chart-1: 18 82% 60%;
+    --chart-2: 358 68% 60%;
+    --chart-3: 49 100% 55%;
+    --chart-4: 148 54% 56%;
+    --chart-5: 261 32% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* PlaceholderSection */
+.section-placeholder {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.section-placeholder .placeholder-content {
+  text-align: center;
+}
+
+.section-placeholder .placeholder-content > img {
+  display: block;
+  max-width: 480px;
+  margin: 0 auto 10px;
+}
+
+.section-placeholder .placeholder-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.section-placeholder .placeholder-content p {
+  font-size: 1rem;
+  color: hsl(var(--muted-foreground));
+  max-width: 480px;
+  margin: 0 auto 12px;
+}
+
+/* ListEksekutif — layout utilities */
+.is-flex { display: flex; }
+.is-align-items-center { align-items: center; }
+.is-justify-content-space-between { justify-content: space-between; }
+
+/* ListEksekutif — news list */
+.news-list { display: flex; flex-direction: column; gap: 0; }
+.news-item { padding: 8px 0; border-bottom: 1px solid hsl(var(--border)); }
+.news-item:last-child { border-bottom: none; }
+.news-body { width: 100%; }
+.news-title { font-size: 0.875rem; font-weight: 500; color: hsl(var(--foreground)); line-height: 1.4; }
+.news-description { font-size: 0.8rem; color: hsl(var(--muted-foreground)); margin-top: 2px; }
+.news-date { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin-top: 2px; }
+
+/* ListEksekutif — item number */
+.item-number { min-width: 24px; font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin-right: 8px; }
+
+/* ListEksekutif — meta tags */
+.meta-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.meta-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 9999px; background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+
+/* ListEksekutif — badge 3P */
+.badge-3p { display: flex; gap: 4px; }
+.is-badge-portfolio { background: #b45309; color: #fff; }
+.is-badge-people { background: #1d4ed8; color: #fff; }
+.is-badge-public { background: #047857; color: #fff; }
+
+/* ListEksekutif — media info */
+.media-logo-wrapper { flex-shrink: 0; }
+.media-info { flex: 1; min-width: 0; }
+.media-name { font-size: 0.875rem; font-weight: 500; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+
+/* ListEksekutif — avatar */
+.list-avatar { width: 40px; height: 40px; border-radius: 9999px; overflow: hidden; flex-shrink: 0; background: hsl(var(--secondary)); display: flex; align-items: center; justify-content: center; }
+.list-avatar-img { width: 100%; height: 100%; object-fit: cover; }
+.list-avatar-initials { font-size: 0.75rem; font-weight: 600; color: hsl(var(--secondary-foreground)); }
+
+/* ListEksekutif — tag */
+.tag { display: inline-flex; align-items: center; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+.is-rounded { border-radius: 9999px; }
+
+/* ListEksekutif — sentiment colors */
+.is-sentiment-pos { background: #dcfce7; color: #16a34a; }
+.is-sentiment-neg { background: #fee2e2; color: #dc2626; }
+.is-sentiment-net { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+.is-success { background: #15803d; color: #fff; }
+.is-danger { background: #b91c1c; color: #fff; }
+.is-grey { background: hsl(var(--secondary)); }
+.col-white { color: #fff; }
+.col-dark-text { color: hsl(var(--foreground)); font-size: 0.8rem; }
+
+/* ListEksekutif — responsive visibility */
+@media (min-width: 1200px) { .less-than-1200 { display: none !important; } }
+@media (max-width: 1199px) { .more-than-1200 { display: none !important; } }
