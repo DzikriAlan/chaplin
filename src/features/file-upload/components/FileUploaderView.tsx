@@ -17,6 +17,7 @@ import { useFileUploadControllers } from '../controllers/fileUploadControllers'
 import { useFileUploadStates } from '../states/fileUploadStates'
 import type { DataUploadFolder, DataUploadFile } from '../types/fileUploadTypes'
 import { getSupabaseClient, isSupabaseConfigured, STORAGE_BUCKET } from '@/shared/lib/supabase'
+import ListCardRow from '@/shared/components/ListCardRow'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -116,76 +117,64 @@ function FolderNode({
     setDragOver(true)
   }, [])
 
+  const chevronIcon = expanded
+    ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+    : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+  const folderPrefixIcon = hasContent ? chevronIcon : <span className="w-3.5 shrink-0" />
+
+  const folderActions = (
+    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+      {isUploading
+        ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+        : (
+          <>
+            <input
+              ref={inputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => e.target.files && onDropFiles(e.target.files, folder.id)}
+            />
+            <button type="button" title="Upload ke folder ini" onClick={() => inputRef.current?.click()} className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-muted">
+              <Upload className="h-3.5 w-3.5" />
+            </button>
+          </>
+        )
+      }
+      <button type="button" title="Hapus folder" onClick={() => onDeleteFolder(folder.id)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted">
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  )
+
   return (
     <div>
       <div
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors group ${dragOver ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-muted/50'}`}
-        style={{ paddingLeft: `${paddingLeft + 12}px` }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={() => setDragOver(false)}
       >
-        <IndeterminateCheckbox
-          checked={isChecked}
-          indeterminate={isIndeterminate}
-          onChange={() => onToggleFolder(folder)}
-          label={`Pilih folder ${folder.name}`}
+        <ListCardRow
+          selectionNode={
+            <IndeterminateCheckbox
+              checked={isChecked}
+              indeterminate={isIndeterminate}
+              onChange={() => onToggleFolder(folder)}
+              label={`Pilih folder ${folder.name}`}
+            />
+          }
+          prefixNode={<>{folderPrefixIcon}<FolderOpen className="h-4 w-4 shrink-0 text-primary" /></>}
+          title={folder.name}
+          subtitle={`${folder.files.length + folder.children.length} item`}
+          onClickContent={hasContent ? () => setExpanded(!expanded) : undefined}
+          actions={folderActions}
+          dragOver={dragOver}
+          style={{ paddingLeft: `${paddingLeft + 16}px` }}
         />
-
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1.5 flex-1 min-w-0 text-left"
-        >
-          {hasContent
-            ? expanded
-              ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            : <span className="w-3.5 shrink-0" />
-          }
-          <FolderOpen className="h-4 w-4 shrink-0 text-primary" />
-          <span className="text-rem-85 font-medium text-foreground truncate">{folder.name}</span>
-          <span className="text-rem-75 text-muted-foreground shrink-0 ml-1">
-            {folder.files.length + folder.children.length} item
-          </span>
-        </button>
-
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-          {isUploading
-            ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-            : (
-              <>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => e.target.files && onDropFiles(e.target.files, folder.id)}
-                />
-                <button
-                  type="button"
-                  title="Upload ke folder ini"
-                  onClick={() => inputRef.current?.click()}
-                  className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-muted"
-                >
-                  <Upload className="h-3.5 w-3.5" />
-                </button>
-              </>
-            )
-          }
-          <button
-            type="button"
-            title="Hapus folder"
-            onClick={() => onDeleteFolder(folder.id)}
-            className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
       </div>
 
       {expanded && (
-        <div>
+        <div className="divide-y divide-border">
           {folder.children.map((child) => (
             <FolderNode
               key={child.id}
@@ -229,35 +218,42 @@ interface FileRowProps {
 
 function FileRow({ file, depth, isSelected, onToggle, onDelete }: Readonly<FileRowProps>) {
   return (
-    <div
-      className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted/40 transition-colors group"
-      style={{ paddingLeft: `${depth * 16 + 28}px` }}
-    >
-      <input
-        type="checkbox"
-        aria-label={`Pilih ${file.name}`}
-        checked={isSelected}
-        onChange={onToggle}
-        className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0"
-      />
-      <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-      <span className="text-rem-80 text-foreground truncate flex-1">{file.name}</span>
-      <span className="text-rem-75 text-muted-foreground shrink-0">{formatBytes(file.size)}</span>
-      <button
-        type="button"
-        title="Hapus file"
-        onClick={onDelete}
-        className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
-    </div>
+    <ListCardRow
+      selectionNode={
+        <input
+          type="checkbox"
+          aria-label={`Pilih ${file.name}`}
+          checked={isSelected}
+          onChange={onToggle}
+          className="h-4 w-4 rounded border-border accent-primary cursor-pointer"
+        />
+      }
+      prefixNode={<File className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+      title={file.name}
+      subtitle={formatBytes(file.size)}
+      actions={
+        <button
+          type="button"
+          title="Hapus file"
+          onClick={onDelete}
+          className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      }
+      style={{ paddingLeft: `${depth * 16 + 32}px` }}
+    />
   )
 }
 
 // ── FileUploaderView ───────────────────────────────────────────────────────
 
-export default function FileUploaderView() {
+interface FileUploaderViewProps {
+  openFolderFormSignal?: number
+  openUploadSignal?: number
+}
+
+export default function FileUploaderView({ openFolderFormSignal, openUploadSignal }: Readonly<FileUploaderViewProps>) {
   const { fetchUploadFolders, storeUploadFolder, removeUploadFolder, storeSignedUrl, removeUploadFile } =
     useFileUploadControllers()
   const { selectedIds, setSelectedIds, toggleSelected, clearSelected } = useFileUploadStates()
@@ -271,6 +267,22 @@ export default function FileUploaderView() {
 
   const folders = (fetchUploadFolders.data ?? []) as DataUploadFolder[]
   const supabaseReady = isSupabaseConfigured()
+
+  const prevFolderSignalRef = useRef(openFolderFormSignal ?? 0)
+  useEffect(() => {
+    if (openFolderFormSignal && openFolderFormSignal !== prevFolderSignalRef.current) {
+      setShowFolderForm(true)
+      prevFolderSignalRef.current = openFolderFormSignal
+    }
+  }, [openFolderFormSignal])
+
+  const prevUploadSignalRef = useRef(openUploadSignal ?? 0)
+  useEffect(() => {
+    if (openUploadSignal && openUploadSignal !== prevUploadSignalRef.current) {
+      rootInputRef.current?.click()
+      prevUploadSignalRef.current = openUploadSignal
+    }
+  }, [openUploadSignal])
 
   const handleToggleFolder = useCallback((folder: DataUploadFolder) => {
     const allIds = collectFileIds(folder)
@@ -384,57 +396,35 @@ export default function FileUploaderView() {
           </span>
         </div>
       )}
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          {someSelected && (
-            <button
-              type="button"
-              onClick={handleDeleteSelected}
-              className="flex items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-rem-85 font-medium text-destructive hover:bg-destructive/10 transition-colors"
-            >
-              <Trash2 className="h-4 w-4" />
-              Hapus {selectedIds.size} dipilih
-            </button>
-          )}
-          {someSelected && (
-            <button
-              type="button"
-              onClick={clearSelected}
-              className="flex items-center gap-1 text-rem-80 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="h-3.5 w-3.5" />
-              Batal pilih
-            </button>
-          )}
-        </div>
+      <input
+        ref={rootInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={(e) => e.target.files && uploadFiles(e.target.files)}
+      />
 
-        <div className="flex items-center gap-2">
+      {/* Selection toolbar — desktop only, shown when items are selected */}
+      {someSelected && (
+        <div className="hidden sm:flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setShowFolderForm(!showFolderForm)}
-            className="flex items-center gap-1.5 rounded-lg border bg-card px-3 py-2 text-rem-85 font-medium text-foreground hover:bg-muted transition-colors"
+            onClick={handleDeleteSelected}
+            className="flex items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-rem-85 font-medium text-destructive hover:bg-destructive/10 transition-colors"
           >
-            <FolderPlus className="h-4 w-4" />
-            Folder Baru
+            <Trash2 className="h-4 w-4" />
+            Hapus {selectedIds.size} dipilih
           </button>
           <button
             type="button"
-            onClick={() => rootInputRef.current?.click()}
-            className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-rem-85 font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            onClick={clearSelected}
+            className="flex items-center gap-1 text-rem-80 text-muted-foreground hover:text-foreground transition-colors"
           >
-            <Upload className="h-4 w-4" />
-            Upload File
+            <X className="h-3.5 w-3.5" />
+            Batal pilih
           </button>
-          <input
-            ref={rootInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={(e) => e.target.files && uploadFiles(e.target.files, undefined)}
-          />
         </div>
-      </div>
+      )}
 
       {/* New folder form */}
       {showFolderForm && (
@@ -481,71 +471,114 @@ export default function FileUploaderView() {
         </div>
       )}
 
-      {/* File tree */}
-      <div className="rounded-xl border bg-card shadow-card overflow-hidden">
-        {/* Header row */}
-        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">
-          <IndeterminateCheckbox
-            checked={allSelected}
-            indeterminate={someSelected && !allSelected}
-            onChange={handleSelectAll}
-            label="Pilih semua"
-          />
-          {someSelected && (
-            <div className="flex items-center gap-1.5 ml-1">
-              <CheckSquare className="h-3.5 w-3.5 text-primary" />
-              <span className="text-rem-80 text-primary font-medium">{selectedIds.size} dipilih</span>
-            </div>
-          )}
-          <span className="text-rem-80 font-semibold text-muted-foreground ml-auto">
-            {folders.length} folder
-          </span>
-        </div>
-
-        {/* Loading */}
-        {fetchUploadFolders.isLoading && (
+      {/* Loading state */}
+      {fetchUploadFolders.isLoading && (
+        <div className="rounded-xl border bg-card shadow-card overflow-hidden">
           <div className="flex items-center justify-center py-12 gap-2">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             <span className="text-rem-85 text-muted-foreground">Memuat...</span>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Empty state + root drop zone */}
-        {!fetchUploadFolders.isLoading && (
+      {/* Error state — no card border */}
+      {fetchUploadFolders.isError && !fetchUploadFolders.isLoading && (
+        <div className="py-12 text-center">
+          <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
+          <p className="text-rem-85 text-muted-foreground mt-1">Silakan coba lagi.</p>
+        </div>
+      )}
+
+      {/* Empty state — no card border, drop zone active */}
+      {!fetchUploadFolders.isLoading && !fetchUploadFolders.isError && folders.length === 0 && (
+        <div
+          onDrop={handleRootDrop}
+          onDragOver={(e) => { e.preventDefault(); setRootDragOver(true) }}
+          onDragLeave={() => setRootDragOver(false)}
+          className={`py-12 text-center rounded-xl transition-colors ${rootDragOver ? 'bg-primary/5' : ''}`}
+        >
+          <FolderOpen className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-rem-100 font-medium text-foreground">Belum ada file</p>
+          <p className="text-rem-85 text-muted-foreground mt-1">
+            Drag & drop file ke sini, atau buat folder dulu
+          </p>
+        </div>
+      )}
+
+      {/* File tree — card shown only when data exists */}
+      {!fetchUploadFolders.isLoading && !fetchUploadFolders.isError && folders.length > 0 && (
+        <div className="rounded-xl border bg-card shadow-card overflow-hidden">
+          {/* Header row */}
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">
+            <IndeterminateCheckbox
+              checked={allSelected}
+              indeterminate={someSelected && !allSelected}
+              onChange={handleSelectAll}
+              label="Pilih semua"
+            />
+            {someSelected && (
+              <div className="flex items-center gap-1.5 ml-1">
+                <CheckSquare className="h-3.5 w-3.5 text-primary" />
+                <span className="text-rem-80 text-primary font-medium">{selectedIds.size} dipilih</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1 ml-auto">
+              <span className="text-rem-80 font-semibold text-muted-foreground">{folders.length} folder</span>
+              {someSelected ? (
+                <button
+                  type="button"
+                  title="Hapus dipilih"
+                  onClick={handleDeleteSelected}
+                  className="sm:hidden p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    title="Folder Baru"
+                    onClick={() => setShowFolderForm(!showFolderForm)}
+                    className="sm:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <FolderPlus className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    title="Upload File"
+                    onClick={() => rootInputRef.current?.click()}
+                    className="sm:hidden p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
+                  >
+                    <Upload className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Folder list with root drop zone */}
           <div
             onDrop={handleRootDrop}
             onDragOver={(e) => { e.preventDefault(); setRootDragOver(true) }}
             onDragLeave={() => setRootDragOver(false)}
             className={`transition-colors ${rootDragOver ? 'bg-primary/5' : ''}`}
           >
-            {folders.length === 0 ? (
-              <div className={`py-14 text-center transition-colors ${rootDragOver ? 'bg-primary/5' : ''}`}>
-                <FolderOpen className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-rem-90 font-medium text-foreground">Belum ada file</p>
-                <p className="text-rem-80 text-muted-foreground mt-1">
-                  Drag & drop file ke sini, atau buat folder dulu
-                </p>
-              </div>
-            ) : (
-              <div className="py-1">
-                {folders.map((folder) => (
-                  <FolderNode
-                    key={folder.id}
-                    folder={folder}
-                    depth={0}
-                    selectedIds={selectedIds}
-                    onToggleFolder={handleToggleFolder}
-                    onToggleFile={handleToggleFile}
-                    onDeleteFolder={handleDeleteFolder}
-                    onDeleteFile={handleDeleteFile}
-                    onDropFiles={handleFolderFiles}
-                    uploadingFolderId={uploadingFolderId}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Root drag overlay hint */}
+            <div className="divide-y divide-border">
+              {folders.map((folder) => (
+                <FolderNode
+                  key={folder.id}
+                  folder={folder}
+                  depth={0}
+                  selectedIds={selectedIds}
+                  onToggleFolder={handleToggleFolder}
+                  onToggleFile={handleToggleFile}
+                  onDeleteFolder={handleDeleteFolder}
+                  onDeleteFile={handleDeleteFile}
+                  onDropFiles={handleFolderFiles}
+                  uploadingFolderId={uploadingFolderId}
+                />
+              ))}
+            </div>
             {rootDragOver && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="rounded-xl bg-primary/10 border-2 border-dashed border-primary px-6 py-4">
@@ -554,16 +587,16 @@ export default function FileUploaderView() {
               </div>
             )}
           </div>
-        )}
 
-        {/* Root upload progress */}
-        {uploadingFolderId === 'root' && (
-          <div className="flex items-center gap-2 px-4 py-2.5 border-t border-border bg-primary/5">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <span className="text-rem-85 text-primary font-medium">Mengupload file...</span>
-          </div>
-        )}
-      </div>
+          {/* Root upload progress */}
+          {uploadingFolderId === 'root' && (
+            <div className="flex items-center gap-2 px-4 py-2.5 border-t border-border bg-primary/5">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-rem-85 text-primary font-medium">Mengupload file...</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

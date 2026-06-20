@@ -1,12 +1,13 @@
 'use client'
 
-import { Bot, Plus, Search, X, ArrowLeft } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { Bot, Plus, Search, X, ArrowLeft, PanelLeft } from 'lucide-react'
+import { useState, useMemo, useRef } from 'react'
 import type { DataAgent } from '../types/agentsTypes'
 import { useAgentsControllers } from '../controllers/agentsControllers'
-import AgentForm from './AgentForm'
+import AgentForm, { type AgentFormHandle } from './AgentForm'
 import AgentPreviewInline from './AgentPreviewInline'
 import AgentCard from './AgentCard'
+import { useUIStates } from '@/shared/states/uiStates'
 
 type ViewMode = 'list' | 'create' | 'preview'
 
@@ -16,6 +17,8 @@ export default function AgentsList() {
   const [editAgent, setEditAgent] = useState<DataAgent | null>(null)
   const [previewAgent, setPreviewAgent] = useState<DataAgent | null>(null)
   const [prevMode, setPrevMode] = useState<ViewMode>('list')
+  const agentFormRef = useRef<AgentFormHandle>(null)
+  const { toggleSidebar } = useUIStates()
   const { fetchAgents, storeAgent, removeAgent, changeAgent } = useAgentsControllers()
   const agents = (fetchAgents.data as DataAgent[]) ?? []
   const filtered = agents.filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
@@ -60,10 +63,28 @@ export default function AgentsList() {
   if (viewMode === 'create') {
     return (
       <div className="flex-1 max-w-3xl mx-auto w-full">
-        <button type="button" onClick={handleBack} className="flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
+        {/* Mobile navbar overlay */}
+        <div className="md:hidden fixed top-0 inset-x-0 h-14 z-40 bg-card border-b flex items-center justify-between px-4">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <PanelLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleBack}
+            className="flex items-center gap-1.5 text-rem-90 font-medium text-foreground hover:text-muted-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" /> Kembali
+          </button>
+        </div>
+        {/* Desktop back button */}
+        <button type="button" onClick={handleBack} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
           <ArrowLeft className="h-4 w-4" /> Kembali ke daftar agent
         </button>
-        <AgentForm agent={editAgent} isSaving={isSaving} onSave={handleSave} onPreview={goToPreview} />
+        <AgentForm ref={agentFormRef} agent={editAgent} isSaving={isSaving} onSave={handleSave} onPreview={goToPreview} />
       </div>
     )
   }
@@ -71,7 +92,25 @@ export default function AgentsList() {
   if (viewMode === 'preview' && previewAgent) {
     return (
       <div className="flex-1 max-w-3xl mx-auto w-full flex flex-col min-h-0">
-        <button type="button" onClick={handleBack} className="flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4 shrink-0">
+        {/* Mobile navbar overlay */}
+        <div className="md:hidden fixed top-0 inset-x-0 h-14 z-40 bg-card border-b flex items-center justify-between px-4">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <PanelLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleBack}
+            className="flex items-center gap-1.5 text-rem-90 font-medium text-foreground hover:text-muted-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" /> {prevMode === 'create' ? 'Kembali ke buat agent' : 'Kembali'}
+          </button>
+        </div>
+        {/* Desktop back button */}
+        <button type="button" onClick={handleBack} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4 shrink-0">
           <ArrowLeft className="h-4 w-4" /> {prevMode === 'create' ? 'Kembali ke buat agent' : 'Kembali ke daftar agent'}
         </button>
         <AgentPreviewInline agent={previewAgent} />

@@ -7,10 +7,11 @@ import { useUIStates } from '@/shared/states/uiStates'
 interface Props {
   title?: string
   noPadding?: boolean
+  hideTitleMobile?: boolean
   children: ReactNode
 }
 
-export default function Layout({ title, noPadding, children }: Readonly<Props>) {
+export default function Layout({ title, noPadding, hideTitleMobile, children }: Readonly<Props>) {
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUIStates()
 
   return (
@@ -43,7 +44,7 @@ export default function Layout({ title, noPadding, children }: Readonly<Props>) 
         </div>
 
         {title && (
-          <header className="flex h-14 md:h-16 shrink-0 items-center bg-card px-4 md:px-6">
+          <header className={`h-14 md:h-16 shrink-0 items-center bg-card px-4 md:px-6 ${hideTitleMobile ? 'hidden md:flex' : 'flex'}`}>
             <h1 className="text-rem-100 md:text-rem-110 font-semibold text-foreground">{title}</h1>
           </header>
         )}

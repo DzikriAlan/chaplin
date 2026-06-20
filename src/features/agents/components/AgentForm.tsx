@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -20,6 +20,10 @@ export const agentSchema = z.object({
 
 export type AgentFormValues = z.infer<typeof agentSchema>
 
+export interface AgentFormHandle {
+  triggerPreview: () => void
+}
+
 interface AgentFormProps {
   agent: DataAgent | null
   isSaving: boolean
@@ -27,22 +31,33 @@ interface AgentFormProps {
   onPreview: (a: DataAgent) => void
 }
 
-export default function AgentForm({ agent, isSaving, onSave, onPreview }: Readonly<AgentFormProps>) {
+const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm(
+  { agent, isSaving, onSave, onPreview }: Readonly<AgentFormProps>,
+  ref,
+) {
   const isEdit = agent != null
   const [selectedKbIds, setSelectedKbIds] = useState<Set<string>>(new Set(agent?.knowledgeBaseIds ?? []))
   const [imagePreview, setImagePreview] = useState(agent?.image ?? '')
   const [embedCopied, setEmbedCopied] = useState(false)
   const [waCopied, setWaCopied] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const rightColRef = useRef<HTMLDivElement>(null)
   const [imageBoxSize, setImageBoxSize] = useState(160)
 
   useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 640)
+    checkDesktop()
+    window.addEventListener('resize', checkDesktop)
+    return () => window.removeEventListener('resize', checkDesktop)
+  }, [])
+
+  useEffect(() => {
     const el = rightColRef.current
-    if (!el) return
+    if (!el || !isDesktop) return
     const observer = new ResizeObserver(() => setImageBoxSize(el.offsetHeight))
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [isDesktop])
 
   const { data: kbRaw } = useQuery<Array<{ id: string; question: string; answer: string; tags: string[]; isActive: boolean }>>({
     queryKey: ['knowledgeBase'],
@@ -84,6 +99,8 @@ export default function AgentForm({ agent, isSaving, onSave, onPreview }: Readon
 
   const handlePreviewClick = () => { onPreview({ id: agent?.id ?? 'preview', name: formValues.name || 'Preview Agent', description: formValues.description || null, image: formValues.image || null, personalization: formValues.personalization || null, knowledgeBaseIds: Array.from(selectedKbIds), isDefault: formValues.isDefault, embedScript: null, whatsappScript: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }) }
 
+  useImperativeHandle(ref, () => ({ triggerPreview: handlePreviewClick }))
+
   const getSubmitLabel = () => {
     if (isSaving) return 'Menyimpan...'
     if (isEdit) return 'Simpan Perubahan'
@@ -97,12 +114,14 @@ export default function AgentForm({ agent, isSaving, onSave, onPreview }: Readon
       </div>
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-        <div className="flex gap-4">
-          <div className="shrink-0" style={{ width: imageBoxSize, height: imageBoxSize }}>
-            <label className="w-full h-full relative cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50 transition-colors overflow-hidden">
-              <span className="absolute top-2.5 left-3 text-rem-85 font-medium text-foreground">Gambar</span>
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-4">
+          <div
+            className="shrink-0 w-24 h-24"
+            style={isDesktop ? { width: imageBoxSize, height: imageBoxSize } : undefined}
+          >
+            <label className="w-full h-full cursor-pointer flex flex-col items-center justify-center rounded-full border-2 border-dashed border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50 transition-colors overflow-hidden">
               {imagePreview ? (
-                <Image src={imagePreview} alt="Agent" className="h-full w-full object-cover" />
+                <Image src={imagePreview} alt="Agent" className="h-full w-full object-cover" width={160} height={160} />
               ) : (
                 <>
                   <ImageIcon className="h-6 w-6 text-muted-foreground" />
@@ -118,7 +137,7 @@ export default function AgentForm({ agent, isSaving, onSave, onPreview }: Readon
             </label>
           </div>
 
-          <div ref={rightColRef} className="flex-1 min-w-0 space-y-3">
+          <div ref={rightColRef} className="flex-1 min-w-0 space-y-3 w-full">
             <div>
               <label htmlFor="agent-name" className="text-rem-85 font-medium text-foreground">Nama Agent</label>
               <input id="agent-name" {...register('name')} placeholder="Contoh: Asisten Akademik" className="w-full rounded-lg border bg-background px-3 py-2.5 text-rem-95 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mt-1.5" />
@@ -212,4 +231,6 @@ export default function AgentForm({ agent, isSaving, onSave, onPreview }: Readon
       </form>
     </div>
   )
-}
+})
+
+export default AgentForm

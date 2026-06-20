@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
-import { Plus, Pencil, Trash2, HelpCircle, FileText, BookOpen, Upload } from 'lucide-react'
+import { Plus, Pencil, Trash2, HelpCircle, FileText, Upload, ChevronDown, RefreshCw, Cloud, CloudOff, FolderPlus, FolderOpen, Unlink } from 'lucide-react'
 import type { DataKnowledgeBase } from '../types/knowledgeBaseTypes'
 import { useKnowledgeBaseControllers } from '../controllers/knowledgeBaseControllers'
+import { useDriveControllers } from '@/features/drive/controllers/driveControllers'
 import KnowledgeBaseModal from './KnowledgeBaseModal'
 import DocumentsList from '@/features/documents/components/DocumentsList'
 import FAQTableSkeleton from './FAQTableSkeleton'
-import FaqManagerView from '@/features/faq-manager/components/FaqManagerView'
 import FileUploaderView from '@/features/file-upload/components/FileUploaderView'
+import ListCardRow from '@/shared/components/ListCardRow'
 
-type Tab = 'faq' | 'faq-manager' | 'documents' | 'upload'
+type Tab = 'faq' | 'documents' | 'upload'
+
+interface DriveConfig {
+  folderName?: string
+}
 
 function getTabStatus(isLoading: boolean, isError: boolean, isEmpty: boolean) {
   if (isLoading) return 'loading'
@@ -23,9 +28,20 @@ export default function KnowledgeBaseView() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('faq')
   const [modalItem, setModalItem] = useState<DataKnowledgeBase | null | undefined>(undefined)
+  const [documentsSyncSignal, setDocumentsSyncSignal] = useState(0)
+  const [documentsFolderPickerSignal, setDocumentsFolderPickerSignal] = useState(0)
+  const [myDriveFolderSignal, setMyDriveFolderSignal] = useState(0)
+  const [myDriveUploadSignal, setMyDriveUploadSignal] = useState(0)
 
   const { fetchKnowledgeBase, storeKnowledgeBase, removeKnowledgeBase, changeKnowledgeBase } =
     useKnowledgeBaseControllers()
+  const { fetchDriveConfig, removeDriveConfig } = useDriveControllers(false)
+  const driveConfig = fetchDriveConfig.data as DriveConfig | undefined
+
+  const handleDisconnectDrive = () => {
+    if (!confirm('Putuskan koneksi Google Drive?')) return
+    removeDriveConfig.mutate(undefined, { onSuccess: () => toast.success('Koneksi diputus') })
+  }
 
   const items = (fetchKnowledgeBase.data as DataKnowledgeBase[] ?? [])
   const tabStatus = getTabStatus(fetchKnowledgeBase.isLoading, fetchKnowledgeBase.isError, items.length === 0)
@@ -73,11 +89,87 @@ export default function KnowledgeBaseView() {
   const isSaving = storeKnowledgeBase.isPending || changeKnowledgeBase.isPending
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'faq',         label: 'Knowledge Base', icon: <HelpCircle className="h-4 w-4" /> },
-    { id: 'faq-manager', label: 'FAQ Manager',    icon: <BookOpen className="h-4 w-4" /> },
-    { id: 'documents',   label: 'Dokumen',        icon: <FileText className="h-4 w-4" /> },
-    { id: 'upload',      label: 'Upload File',    icon: <Upload className="h-4 w-4" /> },
+    { id: 'faq',       label: 'FAQ',          icon: <HelpCircle className="h-4 w-4" /> },
+    { id: 'documents', label: 'Google Drive', icon: <FileText className="h-4 w-4" /> },
+    { id: 'upload',    label: 'My Drive',     icon: <Upload className="h-4 w-4" /> },
   ]
+
+  function getActionButton() {
+    if (activeTab === 'faq') {
+      return (
+        <div className="flex items-center rounded-xl border bg-card shadow-card p-1 sm:contents">
+          <button type="button" onClick={handleOpenAdd} className="flex items-center justify-center gap-2 rounded-lg bg-primary p-2 text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 sm:px-4 sm:py-2 sm:text-rem-85 sm:font-medium">
+            <Plus className="h-4 w-4" /><span className="hidden sm:inline">Tambah FAQ</span>
+          </button>
+        </div>
+      )
+    }
+    if (activeTab === 'documents') {
+      return (
+        <div className="flex items-center gap-1 rounded-xl border bg-card shadow-card p-1 shrink-0 sm:gap-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:shadow-none sm:p-0">
+          {driveConfig && (
+            <>
+              <span className="hidden sm:flex items-center gap-1.5 text-rem-85 text-muted-foreground">
+                <Cloud className="h-4 w-4 shrink-0" />
+                {driveConfig.folderName ?? 'My Drive'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setDocumentsFolderPickerSignal((v) => v + 1)}
+                className="flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0 sm:p-0 sm:gap-1 sm:text-rem-80 sm:font-medium sm:text-primary sm:hover:bg-transparent sm:hover:underline sm:hover:text-primary"
+              >
+                <FolderOpen className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Ganti</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleDisconnectDrive}
+                className="flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-destructive transition-colors shrink-0 sm:p-1 sm:rounded"
+                title="Putuskan koneksi Drive"
+              >
+                <Unlink className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              </button>
+            </>
+          )}
+          {driveConfig ? (
+            <button
+              type="button"
+              onClick={() => setDocumentsSyncSignal((v) => v + 1)}
+              className="flex items-center justify-center gap-2 rounded-lg bg-primary p-2 text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 sm:px-4 sm:py-2 sm:text-rem-85 sm:font-medium"
+            >
+              <RefreshCw className="h-4 w-4" /><span className="hidden sm:inline">Sync</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDocumentsFolderPickerSignal((v) => v + 1)}
+              className="flex items-center justify-center gap-2 rounded-lg bg-primary p-2 text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 sm:px-4 sm:py-2 sm:text-rem-85 sm:font-medium"
+            >
+              <CloudOff className="h-4 w-4" /><span className="hidden sm:inline">Hubungkan Drive</span>
+            </button>
+          )}
+        </div>
+      )
+    }
+    return (
+      <div className="flex items-center gap-1 rounded-xl border bg-card shadow-card p-1 shrink-0 sm:gap-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:shadow-none sm:p-0">
+        <button
+          type="button"
+          onClick={() => setMyDriveFolderSignal((v) => v + 1)}
+          className="flex items-center justify-center gap-1.5 rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0 sm:border sm:bg-card sm:px-3 sm:py-2 sm:text-rem-85 sm:font-medium sm:text-foreground sm:hover:bg-muted"
+        >
+          <FolderPlus className="h-4 w-4" /><span className="hidden sm:inline">Folder Baru</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMyDriveUploadSignal((v) => v + 1)}
+          className="flex items-center justify-center gap-1.5 rounded-lg bg-primary p-2 text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 sm:px-3 sm:py-2 sm:text-rem-85 sm:font-medium"
+        >
+          <Upload className="h-4 w-4" /><span className="hidden sm:inline">Upload File</span>
+        </button>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -90,40 +182,47 @@ export default function KnowledgeBaseView() {
         />
       )}
 
-      <div className="space-y-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="overflow-x-auto">
-            <div className="flex items-center rounded-xl border bg-card p-1 gap-1 shadow-card w-max min-w-full sm:min-w-0">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-rem-80 sm:px-4 sm:text-rem-85 font-medium transition-colors whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {activeTab === 'faq' && (
-            <button
-              type="button"
-              onClick={handleOpenAdd}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-rem-85 font-medium text-primary-foreground hover:bg-primary/90 transition-colors self-start sm:self-auto shrink-0"
+      <div className="max-w-3xl mx-auto space-y-5">
+        {/* Mobile header: action button left, dropdown right */}
+        <div className="flex items-center justify-between sm:hidden">
+          {getActionButton()}
+          <div className="relative">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as Tab)}
+              className="appearance-none rounded-lg border bg-card pl-3 pr-8 py-2 text-rem-85 font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
             >
-              <Plus className="h-4 w-4" />
-              Tambah FAQ
-            </button>
-          )}
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id}>{tab.label}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          </div>
         </div>
 
+        {/* Desktop header: tab bar left, action button right */}
+        <div className="hidden sm:flex items-center justify-between">
+          <div className="flex items-center rounded-xl border bg-card p-1 gap-1 shadow-card">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-rem-85 font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          {getActionButton()}
+        </div>
+
+        <div className="min-h-[28rem]">
         {activeTab === 'faq' && (
           <>
             {tabStatus === 'loading' && <FAQTableSkeleton />}
@@ -144,75 +243,52 @@ export default function KnowledgeBaseView() {
             )}
 
             {tabStatus === 'success' && (
-              <div className="rounded-xl border bg-card shadow-card overflow-hidden">
-                <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/40 border-b border-border">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-rem-80 font-semibold text-muted-foreground">Pertanyaan</th>
-                      <th className="px-4 py-3 text-left text-rem-80 font-semibold text-muted-foreground">Jawaban</th>
-                      <th className="px-4 py-3 text-left text-rem-80 font-semibold text-muted-foreground">Tags</th>
-                      <th className="px-4 py-3 text-left text-rem-80 font-semibold text-muted-foreground">Dibuat</th>
-                      <th className="px-4 py-3 text-left text-rem-80 font-semibold text-muted-foreground">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item) => (
-                      <tr key={item.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-3 max-w-[220px]">
-                          <span className="text-rem-85 font-medium text-foreground line-clamp-2">{item.question}</span>
-                        </td>
-                        <td className="px-4 py-3 max-w-[280px]">
-                          <span className="text-rem-85 text-muted-foreground line-clamp-2">{item.answer}</span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1">
-                            {item.tags.length > 0
-                              ? item.tags.slice(0, 3).map((tag) => (
-                                  <span key={tag} className="rounded-full bg-primary/10 px-2 py-0.5 text-rem-70 font-medium text-primary">{tag}</span>
-                                ))
-                              : <span className="text-rem-80 text-muted-foreground">—</span>
-                            }
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-rem-80 text-muted-foreground">{new Date(item.createdAt).toLocaleDateString('id-ID')}</span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEdit(item)}
-                              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                              title="Edit"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(item.id)}
-                              className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
-                              title="Hapus"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                </div>
+              <div className="rounded-xl border bg-card shadow-card overflow-hidden divide-y divide-border">
+                {items.map((item) => (
+                  <ListCardRow
+                    key={item.id}
+                    title={item.question}
+                    subtitle={item.answer}
+                    tags={item.tags}
+                    date={new Date(item.createdAt).toLocaleDateString('id-ID')}
+                    actions={
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(item)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          title="Edit"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item.id)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
+                          title="Hapus"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    }
+                  />
+                ))}
               </div>
             )}
           </>
         )}
 
-        {activeTab === 'faq-manager' && <FaqManagerView />}
+        {activeTab === 'documents' && (
+          <DocumentsList
+            syncSignal={documentsSyncSignal}
+            openFolderPickerSignal={documentsFolderPickerSignal}
+          />
+        )}
 
-        {activeTab === 'documents' && <DocumentsList />}
-
-        {activeTab === 'upload' && <FileUploaderView />}
+        {activeTab === 'upload' && (
+          <FileUploaderView openFolderFormSignal={myDriveFolderSignal} openUploadSignal={myDriveUploadSignal} />
+        )}
+        </div>
       </div>
     </>
   )

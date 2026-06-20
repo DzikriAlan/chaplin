@@ -7,6 +7,7 @@
 export {}
 declare global {
   const Layout: typeof import('./shared/components/Layout').default
+  const ListCardRow: typeof import('./shared/components/ListCardRow').default
   const LoadData: typeof import('./shared/components/LoadData').default
   const Loader: typeof import('./shared/components/Loader').default
   const PlaceholderSection: typeof import('./shared/components/PlaceholderSection').default

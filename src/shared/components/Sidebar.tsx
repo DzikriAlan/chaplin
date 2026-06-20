@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useState } from 'react'
+import Image from 'next/image'
 import {
   MessageSquare,
   Search,
@@ -18,6 +19,7 @@ import {
   X,
   Wallet,
 } from 'lucide-react'
+import chaplinLogo from '@/shared/assets/chaplin.png'
 import { getChatSessions, patchChatSession, deleteChatSession } from '@/features/chat/services/chatServices'
 import { useUIStates } from '@/shared/states/uiStates'
 import ThemeToggle from './ThemeToggle'
@@ -147,7 +149,7 @@ export default function Sidebar() {
       <div className="flex h-14 shrink-0 items-center justify-between px-3 overflow-hidden">
         {sidebarOpen ? (
           <>
-            <span className="text-rem-100 font-bold tracking-tight text-foreground select-none">chaplin</span>
+            <Image src={chaplinLogo} alt="Chaplin" height={28} className="select-none" />
             <button
               type="button"
               onClick={toggleSidebar}
@@ -159,7 +161,7 @@ export default function Sidebar() {
           </>
         ) : (
           <div className="group flex w-full justify-center">
-            <span className="text-rem-85 font-bold tracking-tight text-foreground select-none group-hover:hidden">c</span>
+            <Image src={chaplinLogo} alt="Chaplin" height={24} className="select-none group-hover:hidden" />
             <button
               type="button"
               onClick={toggleSidebar}

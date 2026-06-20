@@ -12,7 +12,7 @@ const AgentsPage: NextPage = () => {
       </Head>
       <Toaster position="top-right" />
       <Layout noPadding>
-        <div className="p-6 h-full flex flex-col">
+        <div className="px-4 py-6 h-full flex flex-col">
           <AgentsList />
         </div>
       </Layout>
