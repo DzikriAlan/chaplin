@@ -14,7 +14,7 @@ function StatCardSkeletonItem() {
 }
 
 export default function StatCardSkeleton() {
-  const keys = ['doc', 'chunk', 'chat', 'soal', 'faq']
+  const keys = ['doc', 'chunk', 'chat', 'faq']
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {keys.map((k) => <StatCardSkeletonItem key={k} />)}

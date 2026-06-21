@@ -1,4 +1,4 @@
-import { FileText, MessageSquare, BookOpen, HelpCircle, Database } from 'lucide-react'
+import { FileText, MessageSquare, HelpCircle, Database } from 'lucide-react'
 import { useDashboardControllers } from '../controllers/dashboardControllers'
 import type { DataDashboard } from '../types/dashboardTypes'
 import LoadData from '@/shared/components/LoadData'
@@ -48,13 +48,6 @@ export default function DashboardView() {
             icon={<MessageSquare className="h-5 w-5 text-emerald-600" />}
             href="/chat"
             iconBg="bg-emerald-50"
-          />
-          <StatCard
-            label="Soal Dibuat"
-            value={stats?.questionCount ?? 0}
-            icon={<BookOpen className="h-5 w-5 text-amber-600" />}
-            href="/questions"
-            iconBg="bg-amber-50"
           />
           <StatCard
             label="FAQ Aktif"

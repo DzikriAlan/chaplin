@@ -4,7 +4,6 @@ export default function QuickActions() {
   const actions = [
     { label: 'Sinkronisasi Dokumen', href: '/documents', description: 'Sync & kelola dokumen dari Google Drive' },
     { label: 'Mulai Percakapan', href: '/chat', description: 'Tanyakan sesuatu kepada AI' },
-    { label: 'Generate Soal', href: '/questions', description: 'Buat soal ujian otomatis dari materi' },
     { label: 'Kelola FAQ', href: '/knowledge-base', description: 'Tambah atau edit knowledge base' },
   ]
 
