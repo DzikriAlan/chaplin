@@ -222,73 +222,74 @@ export default function KnowledgeBaseView() {
           {getActionButton()}
         </div>
 
-        <div className="min-h-[28rem]">
-        {activeTab === 'faq' && (
-          <>
-            {tabStatus === 'loading' && <FAQTableSkeleton />}
+        {activeTab !== 'upload' && (
+          <div className="rounded-xl border bg-card shadow-card overflow-hidden">
+            {activeTab === 'faq' && (
+              <div>
+                {tabStatus === 'loading' && <FAQTableSkeleton />}
 
-            {tabStatus === 'empty' && (
-              <div className="rounded-xl border bg-card shadow-card p-12 text-center">
-                <HelpCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-rem-100 font-medium text-foreground">Belum ada FAQ</p>
-                <p className="text-rem-85 text-muted-foreground mt-1">Tambah FAQ baru dengan tombol di atas</p>
+                {tabStatus === 'empty' && (
+                  <div className="p-12 text-center">
+                    <HelpCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-rem-100 font-medium text-foreground">Belum ada FAQ</p>
+                    <p className="text-rem-85 text-muted-foreground mt-1">Tambah FAQ baru dengan tombol di atas</p>
+                  </div>
+                )}
+
+                {tabStatus === 'error' && (
+                  <div className="p-12 text-center">
+                    <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
+                    <p className="text-rem-85 text-muted-foreground mt-1">Silakan coba lagi.</p>
+                  </div>
+                )}
+
+                {tabStatus === 'success' && (
+                  <div className="divide-y divide-border">
+                    {items.map((item) => (
+                      <ListCardRow
+                        key={item.id}
+                        title={item.question}
+                        subtitle={item.answer}
+                        dateBelow={new Date(item.createdAt).toLocaleDateString('id-ID')}
+                        actions={
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEdit(item)}
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              title="Edit"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id)}
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
+                              title="Hapus"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {tabStatus === 'error' && (
-              <div className="rounded-xl border bg-card shadow-card p-12 text-center">
-                <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
-                <p className="text-rem-85 text-muted-foreground mt-1">Silakan coba lagi.</p>
-              </div>
+            {activeTab === 'documents' && (
+              <DocumentsList
+                syncSignal={documentsSyncSignal}
+                openFolderPickerSignal={documentsFolderPickerSignal}
+              />
             )}
-
-            {tabStatus === 'success' && (
-              <div className="rounded-xl border bg-card shadow-card overflow-hidden divide-y divide-border">
-                {items.map((item) => (
-                  <ListCardRow
-                    key={item.id}
-                    title={item.question}
-                    subtitle={item.answer}
-                    tags={item.tags}
-                    date={new Date(item.createdAt).toLocaleDateString('id-ID')}
-                    actions={
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(item)}
-                          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                          title="Edit"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
-                          title="Hapus"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </>
-                    }
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {activeTab === 'documents' && (
-          <DocumentsList
-            syncSignal={documentsSyncSignal}
-            openFolderPickerSignal={documentsFolderPickerSignal}
-          />
+          </div>
         )}
 
         {activeTab === 'upload' && (
           <FileUploaderView openFolderFormSignal={myDriveFolderSignal} openUploadSignal={myDriveUploadSignal} />
         )}
-        </div>
       </div>
     </>
   )

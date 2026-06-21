@@ -92,7 +92,7 @@ export default function ChatInputBar({
     <div className="rounded-2xl border bg-white dark:bg-card shadow-card">
       {hiddenInput}
       <UploadedFilesBar files={uploadedFiles} onRemoveFile={onRemoveFile} onPreviewImage={onPreviewImage} />
-      <div className="flex items-end gap-3 px-4 py-3">
+      <div className="flex items-center gap-3 px-4 py-3">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}

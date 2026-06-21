@@ -108,23 +108,28 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
     }
   }, [openFolderPickerSignal])
 
+  const hasAuxiliary = selectedCount > 0 || isAutoProcessing
+
   return (
-    <div className="space-y-4">
+    <div>
       {showFolderPicker && <DriveFolderPicker folders={folders} isLoading={fetchDriveFolders.isLoading} isSaving={storeDriveFolders.isPending} onSelectFolder={handleFolderSelect} onClose={() => setShowFolderPicker(false)} />}
 
-      {(selectedCount > 0 || isAutoProcessing) && (
-        <div className="flex items-center justify-end gap-2">
-          {selectedCount > 0 && <button type="button" onClick={handleDeleteSelected} className="rounded-lg border border-destructive/30 px-3 py-2 text-rem-80 font-medium text-destructive hover:bg-destructive/5 transition-colors"><X className="h-3.5 w-3.5 inline mr-1" />Hapus ({selectedCount})</button>}
-          {isAutoProcessing && <button type="button" onClick={handleTogglePause} className="rounded-lg border px-3 py-2 text-rem-80 font-medium text-foreground hover:bg-muted transition-colors">{isPaused ? <><Play className="h-3.5 w-3.5 inline mr-1" />Lanjutkan</> : <><Pause className="h-3.5 w-3.5 inline mr-1" />Jeda</>}</button>}
+      {hasAuxiliary && (
+        <div className="space-y-3 pt-4 pb-1">
+          {(selectedCount > 0 || isAutoProcessing) && (
+            <div className="flex items-center justify-end gap-2">
+              {selectedCount > 0 && <button type="button" onClick={handleDeleteSelected} className="rounded-lg border border-destructive/30 px-3 py-2 text-rem-80 font-medium text-destructive hover:bg-destructive/5 transition-colors"><X className="h-3.5 w-3.5 inline mr-1" />Hapus ({selectedCount})</button>}
+              {isAutoProcessing && <button type="button" onClick={handleTogglePause} className="rounded-lg border px-3 py-2 text-rem-80 font-medium text-foreground hover:bg-muted transition-colors">{isPaused ? <><Play className="h-3.5 w-3.5 inline mr-1" />Lanjutkan</> : <><Pause className="h-3.5 w-3.5 inline mr-1" />Jeda</>}</button>}
+            </div>
+          )}
+          {isAutoProcessing && <div className="rounded-lg bg-muted/40 px-4 py-2 text-rem-80 text-muted-foreground">{getProcessingLabel()}</div>}
         </div>
       )}
-
-      {isAutoProcessing && <div className="rounded-lg bg-muted/40 px-4 py-2 text-rem-80 text-muted-foreground">{getProcessingLabel()}</div>}
 
       {loadStatus === 'loading' && <DocumentsTableSkeleton />}
 
       {loadStatus === 'empty' && (
-        <div className="rounded-xl border bg-card shadow-card p-12 text-center">
+        <div className="p-12 text-center">
           <CloudOff className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-rem-100 font-medium text-foreground">Belum ada dokumen</p>
           <p className="text-rem-85 text-muted-foreground mt-1">Hubungkan Google Drive untuk mulai menyinkronkan dokumen</p>
@@ -132,14 +137,14 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
       )}
 
       {loadStatus === 'error' && (
-        <div className="rounded-xl border bg-card shadow-card p-12 text-center">
+        <div className="p-12 text-center">
           <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
           <p className="text-rem-85 text-muted-foreground mt-1">Silakan coba lagi.</p>
         </div>
       )}
 
       {loadStatus === 'success' && docs.length > 0 && (
-        <div className="rounded-xl border bg-card shadow-card overflow-hidden divide-y divide-border">
+        <div className="divide-y divide-border">
           {docs.map((doc) => (
             <DocumentRow
               key={doc.id}

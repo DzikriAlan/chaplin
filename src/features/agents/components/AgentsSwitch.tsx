@@ -59,7 +59,7 @@ export default function AgentsSwitch({ selectedAgentId, onSelectAgent }: Readonl
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-64 rounded-xl border bg-card shadow-xl z-30 py-1 max-h-60 overflow-y-auto">
+        <div className="absolute top-full right-0 mt-1 w-64 rounded-xl border bg-card shadow-xl z-30 py-1 max-h-60 overflow-y-auto">
           {/* Default option */}
           <button
             type="button"

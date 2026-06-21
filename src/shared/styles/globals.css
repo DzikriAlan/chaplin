@@ -1,3 +1,51 @@
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,6 +56,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Reserve scrollbar space permanently so it never appears/disappears
+       between loading and loaded states — prevents the layout (and the
+       fixed sidebar) from shifting/shrinking when content height changes. */
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -20,6 +73,10 @@
 
   /* ── Light mode — logo blue-violet ──────────────────────────────────────────── */
   :root {
+    /* ── Font families ─────────────────────────────────────────────────────── */
+    /* Labels/UI: Quera (Professional & Clear) */
+    /* Headings: Fallback to system until Gudlak added */
+
     /* Page background — pure white */
     --background: 0 0% 100%;          /* #FFFFFF                            */
     --foreground: 224 40% 10%;        /* #0F1524  near-black blue-tinted    */

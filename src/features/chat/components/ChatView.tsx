@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Bot, Plus } from 'lucide-react'
+import { Bot, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { DataChatMessage } from '../types/chatTypes'
 import { useChatControllers } from '../controllers/chatControllers'
 import { useUIStates } from '@/shared/states/uiStates'
-import AgentsSwitch from '@/features/agents/components/AgentsSwitch'
 import { consumeStream } from './chatStreamHelpers'
 import { MAX_FILE_SIZE, ALLOWED_TYPES, isImageType, readFileAsDataUrl, type UploadedFile } from './chatFileUtils'
 import { backendFetch } from '@/shared/lib/backendClient'
@@ -21,7 +20,7 @@ interface ChatViewProps {
 const displayName = process.env.NEXT_PUBLIC_USER_NAME ?? 'Dzikri'
 
 export default function ChatView({ docs, isEmbed }: Readonly<ChatViewProps>) {
-  const { chatSessionId, newChatSession, selectedAgentId, setSelectedAgentId } = useUIStates()
+  const { chatSessionId, selectedAgentId } = useUIStates()
   const queryClient = useQueryClient()
 
   const [inputValue, setInputValue] = useState('')
@@ -37,6 +36,7 @@ export default function ChatView({ docs, isEmbed }: Readonly<ChatViewProps>) {
   const serverMessages = (fetchChat.data as DataChatMessage[]) ?? []
   const messages = serverMessages.length > 0 ? serverMessages : localMessages
   const hasMessages = messages.length > 0
+  const isSwitchingSession = !!chatSessionId && fetchChat.isLoading && !isSending
 
   useEffect(() => {
     if (chatSessionId !== prevSessionIdRef.current) {
@@ -112,48 +112,51 @@ export default function ChatView({ docs, isEmbed }: Readonly<ChatViewProps>) {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  if (isEmbed) {
-    return (
-      <div className="flex flex-col h-full bg-background">
-        {hasMessages ? (
-          <>
-            <div className="flex items-center justify-between px-4 py-3 shrink-0">
-              <div className="flex items-center gap-2"><Bot className="h-4 w-4 text-primary" /><AgentsSwitch selectedAgentId={selectedAgentId} onSelectAgent={(agent) => setSelectedAgentId(agent?.id ?? null)} /></div>
-              <button type="button" onClick={newChatSession} className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-rem-80 font-medium text-muted-foreground hover:bg-muted transition-colors"><Plus className="h-3.5 w-3.5" /> Baru</button>
-            </div>
-            <div className="flex-1 overflow-y-auto"><div className="max-w-3xl mx-auto px-4 py-8 space-y-8">{messages.map((msg) => (<MessageBubble key={msg.id} message={msg} isStreaming={msg.id === streamingMsgId} />))}<div ref={bottomRef} /></div></div>
-            <div className="px-4 py-6 shrink-0"><div className="max-w-3xl mx-auto"><ChatInputBar value={inputValue} isLoading={isSending} onChangeValue={setInputValue} onSubmit={handleSend} onUploadFiles={handleUploadFiles} uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} onPreviewImage={handlePreviewImage} /></div></div>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center px-4 pb-24">
-            <div className="w-full max-w-3xl space-y-8">
-              <div className="text-center space-y-3"><div className="flex justify-center mb-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10"><Bot className="h-8 w-8 text-primary" /></div></div><h1 className="text-rem-160 font-bold text-foreground tracking-tight">Tanyakan apa saja</h1><p className="text-rem-90 text-muted-foreground">Asisten akan menjawab berdasarkan dokumen yang telah diindeks</p></div>
-              <ChatInputBar value={inputValue} isLoading={isSending} onChangeValue={setInputValue} onSubmit={handleSend} onUploadFiles={handleUploadFiles} uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} onPreviewImage={handlePreviewImage} variant="centered" />
-            </div>
+  function getContent(variant: 'embed' | 'default') {
+    if (isSwitchingSession) {
+      return (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )
+    }
+    if (hasMessages) {
+      return (
+        <>
+          <div className="flex-1 overflow-y-auto"><div className="max-w-3xl mx-auto px-4 py-8 space-y-8">{messages.map((msg) => (<MessageBubble key={msg.id} message={msg} isStreaming={msg.id === streamingMsgId} />))}<div ref={bottomRef} /></div></div>
+          <div className="px-4 py-6 shrink-0"><div className="max-w-3xl mx-auto"><ChatInputBar value={inputValue} isLoading={isSending} onChangeValue={setInputValue} onSubmit={handleSend} onUploadFiles={handleUploadFiles} uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} onPreviewImage={handlePreviewImage} /></div></div>
+        </>
+      )
+    }
+    if (variant === 'embed') {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-24">
+          <div className="w-full max-w-3xl space-y-8">
+            <div className="text-center space-y-3"><div className="flex justify-center mb-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10"><Bot className="h-8 w-8 text-primary" /></div></div><h1 className="text-rem-160 font-bold text-foreground tracking-tight">Tanyakan apa saja</h1><p className="text-rem-90 text-muted-foreground">Asisten akan menjawab berdasarkan dokumen yang telah diindeks</p></div>
+            <ChatInputBar value={inputValue} isLoading={isSending} onChangeValue={setInputValue} onSubmit={handleSend} onUploadFiles={handleUploadFiles} uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} onPreviewImage={handlePreviewImage} variant="centered" />
           </div>
-        )}
+        </div>
+      )
+    }
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-24">
+        <div className="w-full max-w-2xl space-y-10">
+          <div className="text-center"><p className="text-rem-130 font-medium tracking-tight bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--muted-foreground))] bg-clip-text text-transparent">Hei {displayName}, lagi ada yang pengen lo bahas?</p></div>
+          <ChatInputBar value={inputValue} isLoading={isSending} onChangeValue={setInputValue} onSubmit={handleSend} onUploadFiles={handleUploadFiles} uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} onPreviewImage={handlePreviewImage} variant="centered" />
+        </div>
       </div>
     )
+  }
+
+  if (isEmbed) {
+    return <div className="flex flex-col h-full bg-background">{getContent('embed')}</div>
   }
 
   return (
     <>
       {previewImage && <ImagePreviewModal file={previewImage} onClose={() => setPreviewImage(null)} />}
       <div className="flex flex-col h-full bg-background">
-        {hasMessages ? (
-          <>
-            <div className="flex items-center justify-between px-4 md:px-6 py-3 shrink-0 border-b"><div className="flex items-center gap-2"><Bot className="h-4 w-4 text-primary" /><AgentsSwitch selectedAgentId={selectedAgentId} onSelectAgent={(agent) => setSelectedAgentId(agent?.id ?? null)} /></div><button type="button" onClick={newChatSession} className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-rem-80 font-medium text-muted-foreground hover:bg-muted transition-colors"><Plus className="h-3.5 w-3.5" /> Baru</button></div>
-            <div className="flex-1 overflow-y-auto"><div className="max-w-3xl mx-auto px-4 py-8 space-y-8">{messages.map((msg) => (<MessageBubble key={msg.id} message={msg} isStreaming={msg.id === streamingMsgId} />))}<div ref={bottomRef} /></div></div>
-            <div className="px-4 py-6 shrink-0"><div className="max-w-3xl mx-auto"><ChatInputBar value={inputValue} isLoading={isSending} onChangeValue={setInputValue} onSubmit={handleSend} onUploadFiles={handleUploadFiles} uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} onPreviewImage={handlePreviewImage} /></div></div>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center px-4 pb-24">
-            <div className="w-full max-w-2xl space-y-10">
-              <div className="text-center"><p className="text-rem-130 font-medium tracking-tight bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--muted-foreground))] bg-clip-text text-transparent">Hei {displayName}, lagi ada yang pengen lo bahas?</p></div>
-              <ChatInputBar value={inputValue} isLoading={isSending} onChangeValue={setInputValue} onSubmit={handleSend} onUploadFiles={handleUploadFiles} uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} onPreviewImage={handlePreviewImage} variant="centered" />
-            </div>
-          </div>
-        )}
+        {getContent('default')}
       </div>
     </>
   )

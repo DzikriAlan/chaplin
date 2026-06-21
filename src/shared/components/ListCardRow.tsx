@@ -12,6 +12,8 @@ interface ListCardRowProps {
   statusBadge?: StatusBadge
   tags?: string[]
   date?: string
+  dateBelow?: string
+  inlineSubtitle?: boolean
   isSelected?: boolean
   dragOver?: boolean
   selectionNode?: React.ReactNode
@@ -27,6 +29,8 @@ export default function ListCardRow({
   statusBadge,
   tags,
   date,
+  dateBelow,
+  inlineSubtitle,
   isSelected,
   dragOver,
   selectionNode,
@@ -41,29 +45,33 @@ export default function ListCardRow({
       ? 'bg-primary/[0.06]'
       : 'hover:bg-muted/30'
 
+  const SubtitleEl = inlineSubtitle ? 'span' : 'p'
+  const subtitleClass = inlineSubtitle
+    ? 'text-rem-80 font-sans text-muted-foreground'
+    : 'text-rem-80 font-sans text-muted-foreground line-clamp-2'
+
   const contentInner = (
     <>
       <div className="flex items-center gap-1.5">
         {prefixNode}
-        <p className="text-rem-90 font-medium text-foreground truncate">{title}</p>
+        <p className="text-rem-90 font-gudlak font-bold text-foreground truncate">{title}</p>
       </div>
-      {(subtitle !== undefined || statusBadge !== undefined) && (
-        <div className="flex items-center gap-2 flex-wrap">
+      {(subtitle !== undefined || statusBadge !== undefined || dateBelow !== undefined) && (
+        <div className={inlineSubtitle ? 'flex items-center gap-2 flex-wrap' : 'space-y-1'}>
           {statusBadge !== undefined && (
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-rem-70 font-medium ${statusBadge.color}`}>
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-rem-70 font-quera font-semibold ${statusBadge.color}`}>
               {statusBadge.isAnimating === true && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
               {statusBadge.label}
             </span>
           )}
-          {subtitle !== undefined && (
-            <span className="text-rem-80 text-muted-foreground line-clamp-2">{subtitle}</span>
-          )}
+          {subtitle !== undefined && <SubtitleEl className={subtitleClass}>{subtitle}</SubtitleEl>}
+          {dateBelow !== undefined && <SubtitleEl className="text-rem-75 font-sans text-muted-foreground">{dateBelow}</SubtitleEl>}
         </div>
       )}
       {tags !== undefined && tags.length > 0 && (
         <div className="flex flex-wrap gap-1 pt-0.5">
           {tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="rounded-full bg-primary/10 px-2 py-0.5 text-rem-70 font-medium text-primary">
+            <span key={tag} className="rounded-full bg-primary/10 px-2 py-0.5 text-rem-70 font-quera font-semibold text-primary">
               {tag}
             </span>
           ))}
@@ -94,7 +102,7 @@ export default function ListCardRow({
       {(date !== undefined || actions !== undefined) && (
         <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
           {date !== undefined && (
-            <span className="text-rem-75 text-muted-foreground mr-1.5">{date}</span>
+            <span className="text-rem-75 font-sans text-muted-foreground mr-1.5">{date}</span>
           )}
           {actions}
         </div>

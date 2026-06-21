@@ -3,7 +3,7 @@ import Skeleton from '@/shared/components/Skeleton'
 export default function DocumentsTableSkeleton() {
   const rows = ['a', 'b', 'c', 'd', 'e']
   return (
-    <div className="rounded-xl border bg-card shadow-card overflow-hidden divide-y divide-border">
+    <div className="divide-y divide-border">
       {rows.map((k) => (
         <div key={k} className="flex items-start gap-3 px-4 py-3.5">
           <Skeleton className="h-4 w-4 shrink-0 rounded mt-1" />

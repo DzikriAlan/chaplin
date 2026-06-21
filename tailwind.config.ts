@@ -12,8 +12,11 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font)", "DM Sans", "system-ui", "sans-serif"],
-        mono: ["var(--font-monospace)", "ui-monospace", "monospace"],
+        // General Sans — default body text & general UI (Professional & Clear)
+        sans: ["General Sans", "system-ui", "sans-serif"],
+        // Clash Display — headlines, titles, emphasis (Powerful & Modern)
+        gudlak: ["Clash Display", "system-ui", "sans-serif"],
+        mono: ["Fira Code", "ui-monospace", "monospace"],
       },
 
       // ─── Custom rem-based font sizes used across components ────────────────

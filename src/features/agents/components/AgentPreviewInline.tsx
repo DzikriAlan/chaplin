@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Bot, Star, Send } from 'lucide-react'
+import { Bot, Send } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import type { DataAgent } from '../types/agentsTypes'
 import { backendFetch } from '@/shared/lib/backendClient'
@@ -64,14 +64,6 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-      <div className="flex items-center gap-2 mb-4 shrink-0">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 overflow-hidden">
-          {agent.image ? <img src={agent.image} alt={agent.name} className="h-full w-full object-cover" /> : <Bot className="h-4 w-4 text-primary" />}
-        </div>
-        <span className="text-rem-95 font-semibold text-foreground">{agent.name}</span>
-        {agent.isDefault && <span className="text-rem-70 font-medium text-primary bg-primary/10 rounded-full px-2 py-0.5"><Star className="h-2.5 w-2.5 inline mr-0.5" />Default</span>}
-      </div>
-
       <div className="flex-1 overflow-y-auto min-h-0">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center px-4">
@@ -115,7 +107,7 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
 
       <div className="pt-4 shrink-0">
         <div className="rounded-2xl border bg-card">
-          <div className="flex items-end gap-3 px-4 py-3">
+          <div className="flex items-center gap-3 px-4 py-3">
             <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Ketik pesan untuk test agent..." rows={1} className="flex-1 resize-none bg-transparent text-rem-90 text-foreground placeholder:text-muted-foreground focus:outline-none leading-relaxed max-h-32 overflow-y-auto" />
             <button type="button" onClick={handleSend} disabled={isDisabled} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
               <Send className="h-4 w-4" />

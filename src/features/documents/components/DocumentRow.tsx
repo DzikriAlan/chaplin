@@ -52,7 +52,8 @@ export default function DocumentRow({ doc, isSelected, onToggleSelect, onDeleteD
       title={doc.title}
       statusBadge={{ label: badge.label, color: badge.color, isAnimating: doc.status === 'PROCESSING' }}
       subtitle={`${doc._count.chunks} chunks`}
-      date={updatedDate}
+      dateBelow={updatedDate}
+      inlineSubtitle
       isSelected={isSelected}
       actions={rowActions}
     />

@@ -21,6 +21,8 @@ src/features/{folderName}/
 - **Forms**: React Hook Form + Zod
 - **Database ORM**: Prisma (PostgreSQL)
 
+---
+
 ## Shared Directory
 
 ```txt

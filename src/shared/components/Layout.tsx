@@ -8,10 +8,11 @@ interface Props {
   title?: string
   noPadding?: boolean
   hideTitleMobile?: boolean
+  headerRight?: ReactNode
   children: ReactNode
 }
 
-export default function Layout({ title, noPadding, hideTitleMobile, children }: Readonly<Props>) {
+export default function Layout({ title, noPadding, hideTitleMobile, headerRight, children }: Readonly<Props>) {
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUIStates()
 
   return (
@@ -32,7 +33,7 @@ export default function Layout({ title, noPadding, hideTitleMobile, children }: 
           sidebarOpen ? 'md:ml-64' : 'md:ml-[52px]'
         }`}
       >
-        <div className="md:hidden flex h-14 shrink-0 items-center px-4 bg-card sticky top-0 z-10">
+        <div className={`md:hidden flex h-14 shrink-0 items-center ${headerRight ? 'justify-between' : ''} px-4 bg-card sticky top-0 z-10`}>
           <button
             type="button"
             onClick={toggleSidebar}
@@ -41,6 +42,7 @@ export default function Layout({ title, noPadding, hideTitleMobile, children }: 
           >
             <PanelLeft className="h-5 w-5" />
           </button>
+          {headerRight}
         </div>
 
         {title && (
@@ -48,7 +50,7 @@ export default function Layout({ title, noPadding, hideTitleMobile, children }: 
             <h1 className="text-rem-100 md:text-rem-110 font-semibold text-foreground">{title}</h1>
           </header>
         )}
-        <main className={`flex-1 ${noPadding ? 'overflow-hidden' : 'p-4 md:p-6'}`}>{children}</main>
+        <main className={`flex-1 ${noPadding ? 'min-h-0 overflow-hidden' : 'p-4 md:p-6'}`}>{children}</main>
       </div>
     </div>
   )

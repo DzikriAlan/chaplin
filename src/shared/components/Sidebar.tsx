@@ -56,7 +56,7 @@ function NavItem({ href, icon, label, collapsed, isActive, onClick }: Readonly<N
     return (
       <Link href={href} title={collapsed ? undefined : label} className={baseClass}>
         {icon}
-        {!collapsed && <span className="text-rem-90 font-medium truncate">{label}</span>}
+        {!collapsed && <span className="text-rem-90 font-quera font-semibold truncate">{label}</span>}
       </Link>
     )
   }
@@ -64,7 +64,7 @@ function NavItem({ href, icon, label, collapsed, isActive, onClick }: Readonly<N
   return (
     <button type="button" onClick={onClick} title={collapsed ? undefined : label} className={baseClass}>
       {icon}
-      {!collapsed && <span className="text-rem-90 font-medium truncate">{label}</span>}
+      {!collapsed && <span className="text-rem-90 font-quera font-semibold truncate">{label}</span>}
     </button>
   )
 }
@@ -217,7 +217,7 @@ export default function Sidebar() {
       {sidebarOpen && (
         <div className="flex flex-col flex-1 overflow-hidden px-2 pb-2">
           <div className="px-3 py-2 shrink-0 flex items-center justify-between">
-            <span className="text-rem-75 font-semibold text-muted-foreground">Recent Chats</span>
+            <span className="text-rem-75 font-gudlak font-bold text-muted-foreground">Recent Chats</span>
             <button
               type="button"
               onClick={() => setSearchModalOpen(true)}
@@ -248,11 +248,12 @@ export default function Sidebar() {
                         if (e.key === 'Enter') handleRenameSession(s.sessionId)
                         if (e.key === 'Escape') setEditingSession(null)
                       }}
+                      onBlur={() => setEditingSession(null)}
                       autoFocus
-                      className="flex-1 rounded border bg-background px-2 py-1 text-rem-80 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="flex-1 bg-transparent text-rem-80 font-sans text-foreground focus:outline-none"
                     />
-                    <button type="button" onClick={() => handleRenameSession(s.sessionId)} className="p-1 text-muted-foreground hover:text-foreground"><CheckIcon className="h-3 w-3" /></button>
-                    <button type="button" onClick={() => setEditingSession(null)} className="p-1 text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleRenameSession(s.sessionId)} className="p-1 text-muted-foreground hover:text-foreground"><CheckIcon className="h-3 w-3" /></button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingSession(null)} className="p-1 text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>
                   </div>
                 ) : (
                   <button
@@ -266,7 +267,7 @@ export default function Sidebar() {
                   >
                     <div className="flex items-center gap-2">
                       <MessageCircle className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                      <p className="text-rem-80 font-medium truncate flex-1">
+                      <p className="text-rem-80 font-sans font-medium truncate flex-1">
                         {s.title ?? truncateText(s.lastMessage ?? '', 22)}
                       </p>
                       {hoveredSession === s.sessionId && (
@@ -319,8 +320,8 @@ export default function Sidebar() {
                 </div>
               )}
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-rem-85 font-semibold text-foreground truncate">{displayName}</p>
-                <p className="text-rem-70 text-muted-foreground">{session ? 'Google Account' : 'Free Plan'}</p>
+                <p className="text-rem-85 font-gudlak font-bold text-foreground truncate">{displayName}</p>
+                <p className="text-rem-70 font-sans text-muted-foreground">{session ? 'Google Account' : 'Free Plan'}</p>
               </div>
               <Settings className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             </button>

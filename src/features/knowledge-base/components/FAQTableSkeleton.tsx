@@ -5,7 +5,7 @@ interface FAQTableSkeletonProps { rows?: number }
 export default function FAQTableSkeleton({ rows = 5 }: Readonly<FAQTableSkeletonProps>) {
   const keys = Array.from({ length: rows }, (_, i) => i)
   return (
-    <div className="rounded-xl border bg-card shadow-card overflow-hidden divide-y divide-border">
+    <div className="divide-y divide-border">
       {keys.map((k) => (
         <div key={k} className="flex items-start gap-3 px-4 py-3.5">
           <div className="flex-1 min-w-0 space-y-2">

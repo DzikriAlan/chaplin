@@ -18,6 +18,7 @@ import { useFileUploadStates } from '../states/fileUploadStates'
 import type { DataUploadFolder, DataUploadFile } from '../types/fileUploadTypes'
 import { getSupabaseClient, isSupabaseConfigured, STORAGE_BUCKET } from '@/shared/lib/supabase'
 import ListCardRow from '@/shared/components/ListCardRow'
+import DocumentsTableSkeleton from '@/features/documents/components/DocumentsTableSkeleton'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -28,6 +29,7 @@ function formatBytes(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
 }
+
 
 function collectFileIds(folder: DataUploadFolder): string[] {
   const ids = folder.files.map((f) => f.id)
@@ -166,6 +168,7 @@ function FolderNode({
           prefixNode={<>{folderPrefixIcon}<FolderOpen className="h-4 w-4 shrink-0 text-primary" /></>}
           title={folder.name}
           subtitle={`${folder.files.length + folder.children.length} item`}
+          inlineSubtitle
           onClickContent={hasContent ? () => setExpanded(!expanded) : undefined}
           actions={folderActions}
           dragOver={dragOver}
@@ -231,6 +234,7 @@ function FileRow({ file, depth, isSelected, onToggle, onDelete }: Readonly<FileR
       prefixNode={<File className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
       title={file.name}
       subtitle={formatBytes(file.size)}
+      inlineSubtitle
       actions={
         <button
           type="button"
@@ -388,9 +392,9 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
   const flatFolders = flattenFolders(folders)
 
   return (
-    <div className="space-y-4">
+    <div className="px-4">
       {!supabaseReady && (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-400/40 bg-amber-50 px-4 py-3 dark:bg-amber-950/30 dark:border-amber-400/20">
+        <div className="flex items-start gap-3 rounded-xl border border-amber-400/40 bg-amber-50 px-4 py-3 mt-4 dark:bg-amber-950/30 dark:border-amber-400/20">
           <span className="text-rem-85 text-amber-800 dark:text-amber-300">
             <strong>Supabase belum dikonfigurasi.</strong> Tambahkan <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">NEXT_PUBLIC_SUPABASE_URL</code> dan <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> ke <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">.env.local</code> untuk mengaktifkan upload file.
           </span>
@@ -406,7 +410,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
 
       {/* Selection toolbar — desktop only, shown when items are selected */}
       {someSelected && (
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2 pt-4">
           <button
             type="button"
             onClick={handleDeleteSelected}
@@ -428,7 +432,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
 
       {/* New folder form */}
       {showFolderForm && (
-        <div className="flex items-center gap-2 rounded-xl border bg-card p-3">
+        <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-3 mt-4">
           <FolderPlus className="h-4 w-4 shrink-0 text-primary" />
           <input
             type="text"
@@ -472,30 +476,23 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
       )}
 
       {/* Loading state */}
-      {fetchUploadFolders.isLoading && (
-        <div className="rounded-xl border bg-card shadow-card overflow-hidden">
-          <div className="flex items-center justify-center py-12 gap-2">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            <span className="text-rem-85 text-muted-foreground">Memuat...</span>
-          </div>
-        </div>
-      )}
+      {fetchUploadFolders.isLoading && <DocumentsTableSkeleton />}
 
-      {/* Error state — no card border */}
+      {/* Error state */}
       {fetchUploadFolders.isError && !fetchUploadFolders.isLoading && (
-        <div className="py-12 text-center">
+        <div className="p-12 text-center">
           <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
           <p className="text-rem-85 text-muted-foreground mt-1">Silakan coba lagi.</p>
         </div>
       )}
 
-      {/* Empty state — no card border, drop zone active */}
+      {/* Empty state — card with drop zone active */}
       {!fetchUploadFolders.isLoading && !fetchUploadFolders.isError && folders.length === 0 && (
         <div
           onDrop={handleRootDrop}
           onDragOver={(e) => { e.preventDefault(); setRootDragOver(true) }}
           onDragLeave={() => setRootDragOver(false)}
-          className={`py-12 text-center rounded-xl transition-colors ${rootDragOver ? 'bg-primary/5' : ''}`}
+          className={`p-12 text-center transition-colors ${rootDragOver ? 'bg-primary/5' : ''}`}
         >
           <FolderOpen className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-rem-100 font-medium text-foreground">Belum ada file</p>
@@ -505,9 +502,9 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
         </div>
       )}
 
-      {/* File tree — card shown only when data exists */}
+      {/* File tree — shown only when data exists */}
       {!fetchUploadFolders.isLoading && !fetchUploadFolders.isError && folders.length > 0 && (
-        <div className="rounded-xl border bg-card shadow-card overflow-hidden">
+        <div className="overflow-hidden">
           {/* Header row */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">
             <IndeterminateCheckbox
