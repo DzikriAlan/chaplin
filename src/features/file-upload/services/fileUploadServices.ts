@@ -4,7 +4,7 @@ const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
 export const getUploadFolders = async (): Promise<DataUploadFolder[]> => {
   try {
-    const res = await fetch(`${base}/upload/folders`)
+    const res = await fetch(`${base}/knowledge-base/my-drive/folders`)
     if (!res.ok) throw new Error(res.statusText)
     const json = await res.json() as { data: DataUploadFolder[] }
     return json.data ?? []
@@ -16,7 +16,7 @@ export const getUploadFolders = async (): Promise<DataUploadFolder[]> => {
 
 export const postUploadFolder = async (payload: PayloadPostUploadFolder) => {
   try {
-    const res = await fetch(`${base}/upload/folders`, {
+    const res = await fetch(`${base}/knowledge-base/my-drive/folders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -32,7 +32,7 @@ export const postUploadFolder = async (payload: PayloadPostUploadFolder) => {
 
 export const deleteUploadFolder = async (id: string) => {
   try {
-    const res = await fetch(`${base}/upload/folders?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+    const res = await fetch(`${base}/knowledge-base/my-drive/folders?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
     if (!res.ok) throw new Error(res.statusText)
     const json = await res.json() as { data: unknown }
     return json.data
@@ -44,7 +44,7 @@ export const deleteUploadFolder = async (id: string) => {
 
 export const postSignedUrl = async (payload: PayloadPostSignedUrl): Promise<DataSignedUrl> => {
   try {
-    const res = await fetch(`${base}/upload/signed-url`, {
+    const res = await fetch(`${base}/knowledge-base/my-drive/signed-url`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -60,7 +60,7 @@ export const postSignedUrl = async (payload: PayloadPostSignedUrl): Promise<Data
 
 export const deleteUploadFile = async (id: string) => {
   try {
-    const res = await fetch(`${base}/upload/files?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+    const res = await fetch(`${base}/knowledge-base/my-drive/files?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
     if (!res.ok) throw new Error(res.statusText)
     const json = await res.json() as { data: unknown }
     return json.data
