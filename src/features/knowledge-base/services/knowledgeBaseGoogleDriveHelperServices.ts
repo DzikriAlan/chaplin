@@ -1,4 +1,4 @@
-import type { PayloadPostDriveFolders } from '../types/driveTypes'
+import type { PayloadPostDriveFolders } from '../types/knowledgeBaseGoogleDriveHelperTypes'
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 

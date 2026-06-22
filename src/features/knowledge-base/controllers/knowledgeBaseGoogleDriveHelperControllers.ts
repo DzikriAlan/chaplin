@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getDriveFolders, postDriveFolders, getDriveConfig, deleteDriveConfig } from '../services/driveServices'
-import type { PayloadPostDriveFolders } from '../types/driveTypes'
+import { getDriveFolders, postDriveFolders, getDriveConfig, deleteDriveConfig } from '../services/knowledgeBaseGoogleDriveHelperServices'
+import type { PayloadPostDriveFolders } from '../types/knowledgeBaseGoogleDriveHelperTypes'
 
 export const useDriveControllers = (enabled = false) => {
   const queryClient = useQueryClient()

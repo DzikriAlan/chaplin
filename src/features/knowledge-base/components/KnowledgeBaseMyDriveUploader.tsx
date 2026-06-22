@@ -13,12 +13,12 @@ import {
   X,
   CheckSquare,
 } from 'lucide-react'
-import { useFileUploadControllers } from '../controllers/fileUploadControllers'
-import { useFileUploadStates } from '../states/fileUploadStates'
-import type { DataUploadFolder, DataUploadFile } from '../types/fileUploadTypes'
+import { useFileUploadControllers } from '../controllers/knowledgeBaseMyDriveControllers'
+import { useFileUploadStates } from '../states/knowledgeBaseMyDriveStates'
+import type { DataUploadFolder, DataUploadFile } from '../types/knowledgeBaseMyDriveTypes'
 import { getSupabaseClient, isSupabaseConfigured, STORAGE_BUCKET } from '@/shared/lib/supabase'
 import ListCardRow from '@/shared/components/ListCardRow'
-import DocumentsTableSkeleton from '@/features/documents/components/DocumentsTableSkeleton'
+import KnowledgeBaseGoogleDriveTableSkeleton from './KnowledgeBaseGoogleDriveTableSkeleton'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -476,7 +476,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
       )}
 
       {/* Loading state */}
-      {fetchUploadFolders.isLoading && <DocumentsTableSkeleton />}
+      {fetchUploadFolders.isLoading && <KnowledgeBaseGoogleDriveTableSkeleton />}
 
       {/* Error state */}
       {fetchUploadFolders.isError && !fetchUploadFolders.isLoading && (

@@ -1,5 +1,5 @@
 import { Folder, X, Check } from 'lucide-react'
-import type { DataDriveFolders } from '../types/driveTypes'
+import type { DataDriveFolders } from '../types/knowledgeBaseGoogleDriveHelperTypes'
 import Loader from '@/shared/components/Loader'
 
 interface Props {

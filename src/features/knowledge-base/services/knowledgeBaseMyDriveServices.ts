@@ -1,4 +1,4 @@
-import type { DataUploadFolder, PayloadPostUploadFolder, PayloadPostSignedUrl, DataSignedUrl } from '../types/fileUploadTypes'
+import type { DataUploadFolder, PayloadPostUploadFolder, PayloadPostSignedUrl, DataSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 

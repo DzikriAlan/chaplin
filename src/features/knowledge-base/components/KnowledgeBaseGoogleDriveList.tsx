@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { CloudOff, Pause, Play, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import type { DataDocuments } from '../types/documentsTypes'
-import { useDocumentsControllers } from '../controllers/documentsControllers'
-import { useDriveControllers } from '@/features/drive/controllers/driveControllers'
-import type { DataDriveFolders } from '@/features/drive/types/driveTypes'
-import DriveFolderPicker from '@/features/drive/components/DriveFolderPicker'
-import DocumentRow from './DocumentRow'
-import DocumentsTableSkeleton from './DocumentsTableSkeleton'
+import type { DataDocuments } from '../types/knowledgeBaseGoogleDriveTypes'
+import { useDocumentsControllers } from '../controllers/knowledgeBaseGoogleDriveControllers'
+import { useDriveControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
+import type { DataDriveFolders } from '../types/knowledgeBaseGoogleDriveHelperTypes'
+import KnowledgeBaseGoogleDriveFolderPicker from './KnowledgeBaseGoogleDriveFolderPicker'
+import KnowledgeBaseGoogleDriveRow from './KnowledgeBaseGoogleDriveRow'
+import KnowledgeBaseGoogleDriveTableSkeleton from './KnowledgeBaseGoogleDriveTableSkeleton'
 
 function getDocsStatus(isLoading: boolean, isError: boolean, isEmpty: boolean) {
   if (isLoading) return 'loading'
@@ -112,7 +112,7 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
 
   return (
     <div>
-      {showFolderPicker && <DriveFolderPicker folders={folders} isLoading={fetchDriveFolders.isLoading} isSaving={storeDriveFolders.isPending} onSelectFolder={handleFolderSelect} onClose={() => setShowFolderPicker(false)} />}
+      {showFolderPicker && <KnowledgeBaseGoogleDriveFolderPicker folders={folders} isLoading={fetchDriveFolders.isLoading} isSaving={storeDriveFolders.isPending} onSelectFolder={handleFolderSelect} onClose={() => setShowFolderPicker(false)} />}
 
       {hasAuxiliary && (
         <div className="space-y-3 pt-4 pb-1">
@@ -126,7 +126,7 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
         </div>
       )}
 
-      {loadStatus === 'loading' && <DocumentsTableSkeleton />}
+      {loadStatus === 'loading' && <KnowledgeBaseGoogleDriveTableSkeleton />}
 
       {loadStatus === 'empty' && (
         <div className="p-12 text-center">
@@ -146,7 +146,7 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
       {loadStatus === 'success' && docs.length > 0 && (
         <div className="divide-y divide-border">
           {docs.map((doc) => (
-            <DocumentRow
+            <KnowledgeBaseGoogleDriveRow
               key={doc.id}
               doc={doc}
               isSelected={selectedIds.has(doc.id)}

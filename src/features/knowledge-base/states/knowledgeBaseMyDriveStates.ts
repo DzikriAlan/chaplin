@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { UploadFolders } from '../types/fileUploadTypes'
+import type { UploadFolders } from '../types/knowledgeBaseMyDriveTypes'
 
 interface FileUploadStore {
   uploadFolders: UploadFolders

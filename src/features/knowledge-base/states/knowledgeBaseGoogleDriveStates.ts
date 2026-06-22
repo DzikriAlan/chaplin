@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Documents, DocumentsSync } from '../types/documentsTypes'
+import type { Documents, DocumentsSync } from '../types/knowledgeBaseGoogleDriveTypes'
 
 interface DocumentsStore {
   documents: Documents

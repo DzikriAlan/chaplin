@@ -4,11 +4,11 @@ import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, HelpCircle, FileText, Upload, ChevronDown, RefreshCw, Cloud, CloudOff, FolderPlus, FolderOpen, Unlink } from 'lucide-react'
 import type { DataKnowledgeBase } from '../types/knowledgeBaseTypes'
 import { useKnowledgeBaseControllers } from '../controllers/knowledgeBaseControllers'
-import { useDriveControllers } from '@/features/drive/controllers/driveControllers'
+import { useDriveControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
 import KnowledgeBaseModal from './KnowledgeBaseModal'
-import DocumentsList from '@/features/documents/components/DocumentsList'
+import KnowledgeBaseGoogleDriveList from './KnowledgeBaseGoogleDriveList'
 import FAQTableSkeleton from './FAQTableSkeleton'
-import FileUploaderView from '@/features/file-upload/components/FileUploaderView'
+import KnowledgeBaseMyDriveUploader from './KnowledgeBaseMyDriveUploader'
 import ListCardRow from '@/shared/components/ListCardRow'
 
 type Tab = 'faq' | 'documents' | 'upload'
@@ -279,7 +279,7 @@ export default function KnowledgeBaseView() {
             )}
 
             {activeTab === 'documents' && (
-              <DocumentsList
+              <KnowledgeBaseGoogleDriveList
                 syncSignal={documentsSyncSignal}
                 openFolderPickerSignal={documentsFolderPickerSignal}
               />
@@ -288,7 +288,7 @@ export default function KnowledgeBaseView() {
         )}
 
         {activeTab === 'upload' && (
-          <FileUploaderView openFolderFormSignal={myDriveFolderSignal} openUploadSignal={myDriveUploadSignal} />
+          <KnowledgeBaseMyDriveUploader openFolderFormSignal={myDriveFolderSignal} openUploadSignal={myDriveUploadSignal} />
         )}
       </div>
     </>

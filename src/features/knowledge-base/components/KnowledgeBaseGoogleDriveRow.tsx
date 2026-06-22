@@ -1,6 +1,6 @@
 import { SkipForward, RotateCcw, ExternalLink, Trash2 } from 'lucide-react'
-import type { DataDocuments } from '../types/documentsTypes'
-import CheckboxCell from './CheckboxCell'
+import type { DataDocuments } from '../types/knowledgeBaseGoogleDriveTypes'
+import KnowledgeBaseGoogleDriveCheckboxCell from './KnowledgeBaseGoogleDriveCheckboxCell'
 import ListCardRow from '@/shared/components/ListCardRow'
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -48,7 +48,7 @@ export default function DocumentRow({ doc, isSelected, onToggleSelect, onDeleteD
 
   return (
     <ListCardRow
-      selectionNode={<CheckboxCell checked={isSelected} onChange={() => onToggleSelect(doc.id)} />}
+      selectionNode={<KnowledgeBaseGoogleDriveCheckboxCell checked={isSelected} onChange={() => onToggleSelect(doc.id)} />}
       title={doc.title}
       statusBadge={{ label: badge.label, color: badge.color, isAnimating: doc.status === 'PROCESSING' }}
       subtitle={`${doc._count.chunks} chunks`}

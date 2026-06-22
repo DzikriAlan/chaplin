@@ -5,7 +5,7 @@ import {
   deleteDocumentsBulk,
   patchDocuments,
   postDocumentsSync,
-} from '../services/documentsServices'
+} from '../services/knowledgeBaseGoogleDriveServices'
 
 export const useDocumentsControllers = () => {
   const queryClient = useQueryClient()

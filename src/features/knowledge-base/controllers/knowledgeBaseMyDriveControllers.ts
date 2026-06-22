@@ -5,8 +5,8 @@ import {
   deleteUploadFolder,
   postSignedUrl,
   deleteUploadFile,
-} from '../services/fileUploadServices'
-import type { PayloadPostUploadFolder, PayloadPostSignedUrl } from '../types/fileUploadTypes'
+} from '../services/knowledgeBaseMyDriveServices'
+import type { PayloadPostUploadFolder, PayloadPostSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
 
 const QUERY_KEY = 'upload-folders'
 
