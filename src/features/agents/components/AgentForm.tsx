@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
 import { ImageIcon, Eye, Info, Copy, Check as CheckIcon } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
-import { getKnowledgeBase } from '@/features/knowledge-base/services/knowledgeBaseServices'
+import { getKBFaqItems } from '@/features/knowledge-base/services/knowledgeBaseFaqServices'
 
 export const agentSchema = z.object({
   name: z.string().min(2, 'Nama minimal 2 karakter'),
@@ -62,7 +62,7 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
   const { data: kbRaw } = useQuery<Array<{ id: string; question: string; answer: string; tags: string[]; isActive: boolean }>>({
     queryKey: ['knowledgeBase'],
     queryFn: async () => {
-      const data = await getKnowledgeBase()
+      const data = await getKBFaqItems()
       return (data as Array<{ id: string; question: string; answer: string; tags: string[]; isActive: boolean }>) ?? []
     },
   })

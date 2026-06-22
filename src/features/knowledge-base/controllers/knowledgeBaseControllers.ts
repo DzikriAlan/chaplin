@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  getKnowledgeBase,
-  postKnowledgeBase,
-  deleteKnowledgeBase,
-  patchKnowledgeBase,
-} from '../services/knowledgeBaseServices'
+  getKBFaqItems,
+  postKBFaqItems,
+  deleteKBFaqItemsId,
+  patchKBFaqItemsId,
+} from '../services/knowledgeBaseFaqServices'
 import type { PayloadPostKnowledgeBase } from '../types/knowledgeBaseTypes'
 
 export const useKnowledgeBaseControllers = () => {
@@ -12,18 +12,18 @@ export const useKnowledgeBaseControllers = () => {
 
   const fetchKnowledgeBase = useQuery({
     queryKey: ['knowledgeBase'],
-    queryFn: getKnowledgeBase,
+    queryFn: getKBFaqItems,
   })
 
   const storeKnowledgeBase = useMutation({
-    mutationFn: (payload: PayloadPostKnowledgeBase) => postKnowledgeBase(payload),
+    mutationFn: (payload: PayloadPostKnowledgeBase) => postKBFaqItems(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeBase'] })
     },
   })
 
   const removeKnowledgeBase = useMutation({
-    mutationFn: (id: string) => deleteKnowledgeBase(id),
+    mutationFn: (id: string) => deleteKBFaqItemsId(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeBase'] })
     },
@@ -31,7 +31,7 @@ export const useKnowledgeBaseControllers = () => {
 
   const changeKnowledgeBase = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<PayloadPostKnowledgeBase> }) =>
-      patchKnowledgeBase(id, payload),
+      patchKBFaqItemsId(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeBase'] })
     },

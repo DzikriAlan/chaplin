@@ -2,7 +2,7 @@ import type { DataUploadFolder, PayloadPostUploadFolder, PayloadPostSignedUrl, D
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
-export const getUploadFolders = async (): Promise<DataUploadFolder[]> => {
+export const getKBMyDriveFolders = async (): Promise<DataUploadFolder[]> => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/folders`)
     if (!res.ok) throw new Error(res.statusText)
@@ -14,7 +14,7 @@ export const getUploadFolders = async (): Promise<DataUploadFolder[]> => {
   }
 }
 
-export const postUploadFolder = async (payload: PayloadPostUploadFolder) => {
+export const postKBMyDriveFolders = async (payload: PayloadPostUploadFolder) => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/folders`, {
       method: 'POST',
@@ -30,7 +30,7 @@ export const postUploadFolder = async (payload: PayloadPostUploadFolder) => {
   }
 }
 
-export const deleteUploadFolder = async (id: string) => {
+export const deleteKBMyDriveFolders = async (id: string) => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/folders?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
     if (!res.ok) throw new Error(res.statusText)
@@ -42,7 +42,7 @@ export const deleteUploadFolder = async (id: string) => {
   }
 }
 
-export const postSignedUrl = async (payload: PayloadPostSignedUrl): Promise<DataSignedUrl> => {
+export const postKBMyDriveSignedUrl = async (payload: PayloadPostSignedUrl): Promise<DataSignedUrl> => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/signed-url`, {
       method: 'POST',
@@ -58,7 +58,7 @@ export const postSignedUrl = async (payload: PayloadPostSignedUrl): Promise<Data
   }
 }
 
-export const deleteUploadFile = async (id: string) => {
+export const deleteKBMyDriveFiles = async (id: string) => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/files?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
     if (!res.ok) throw new Error(res.statusText)
