@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  getDocuments,
-  deleteDocuments,
-  deleteDocumentsBulk,
-  patchDocuments,
-  postDocumentsSync,
+  getKBGoogleDriveDocuments,
+  deleteKBGoogleDriveDocumentsId,
+  deleteKBGoogleDriveDocumentsBulk,
+  patchKBGoogleDriveDocuments,
+  postKBGoogleDriveSync,
 } from '../services/knowledgeBaseGoogleDriveServices'
 
 export const useDocumentsControllers = () => {
@@ -15,33 +15,33 @@ export const useDocumentsControllers = () => {
 
   const fetchDocuments = useQuery({
     queryKey: ['documents'],
-    queryFn: getDocuments,
+    queryFn: getKBGoogleDriveDocuments,
     refetchInterval: hasActive ? 5000 : false,
   })
 
   const changeDocuments = useMutation({
-    mutationFn: (payload: { id?: string; ids?: string[]; action: 'skip' | 'retry' }) => patchDocuments(payload),
+    mutationFn: (payload: { id?: string; ids?: string[]; action: 'skip' | 'retry' }) => patchKBGoogleDriveDocuments(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
     },
   })
 
   const removeDocuments = useMutation({
-    mutationFn: (id: string) => deleteDocuments(id),
+    mutationFn: (id: string) => deleteKBGoogleDriveDocumentsId(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
     },
   })
 
   const removeDocumentsBulk = useMutation({
-    mutationFn: (payload: { ids?: string[]; all?: boolean }) => deleteDocumentsBulk(payload),
+    mutationFn: (payload: { ids?: string[]; all?: boolean }) => deleteKBGoogleDriveDocumentsBulk(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
     },
   })
 
   const storeDocumentsSync = useMutation({
-    mutationFn: (payload: { action: string }) => postDocumentsSync(payload),
+    mutationFn: (payload: { action: string }) => postKBGoogleDriveSync(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
     },

@@ -2,7 +2,7 @@ import type { PayloadPostDriveFolders } from '../types/knowledgeBaseGoogleDriveH
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
-export const getDriveFolders = async () => {
+export const getKBGoogleDriveFolders = async () => {
   try {
     const res = await fetch(`${base}/knowledge-base/google-drive/folders`)
     if (!res.ok) throw new Error(res.statusText)
@@ -14,7 +14,7 @@ export const getDriveFolders = async () => {
   }
 }
 
-export const postDriveFolders = async (payload: PayloadPostDriveFolders) => {
+export const postKBGoogleDriveFolders = async (payload: PayloadPostDriveFolders) => {
   try {
     const res = await fetch(`${base}/knowledge-base/google-drive/folders`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     if (!res.ok) throw new Error(res.statusText)
@@ -26,7 +26,7 @@ export const postDriveFolders = async (payload: PayloadPostDriveFolders) => {
   }
 }
 
-export const getDriveConfig = async () => {
+export const getKBGoogleDriveConfig = async () => {
   try {
     const res = await fetch(`${base}/knowledge-base/google-drive/config`)
     if (!res.ok) throw new Error(res.statusText)
@@ -38,7 +38,7 @@ export const getDriveConfig = async () => {
   }
 }
 
-export const deleteDriveConfig = async () => {
+export const deleteKBGoogleDriveConfig = async () => {
   try {
     const res = await fetch(`${base}/knowledge-base/google-drive/config`, { method: 'DELETE' })
     if (!res.ok) throw new Error(res.statusText)

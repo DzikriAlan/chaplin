@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getDriveFolders, postDriveFolders, getDriveConfig, deleteDriveConfig } from '../services/knowledgeBaseGoogleDriveHelperServices'
+import { getKBGoogleDriveFolders, postKBGoogleDriveFolders, getKBGoogleDriveConfig, deleteKBGoogleDriveConfig } from '../services/knowledgeBaseGoogleDriveHelperServices'
 import type { PayloadPostDriveFolders } from '../types/knowledgeBaseGoogleDriveHelperTypes'
 
 export const useDriveControllers = (enabled = false) => {
@@ -7,17 +7,17 @@ export const useDriveControllers = (enabled = false) => {
 
   const fetchDriveFolders = useQuery({
     queryKey: ['driveFolders'],
-    queryFn: getDriveFolders,
+    queryFn: getKBGoogleDriveFolders,
     enabled,
   })
 
   const fetchDriveConfig = useQuery({
     queryKey: ['driveConfig'],
-    queryFn: getDriveConfig,
+    queryFn: getKBGoogleDriveConfig,
   })
 
   const storeDriveFolders = useMutation({
-    mutationFn: (payload: PayloadPostDriveFolders) => postDriveFolders(payload),
+    mutationFn: (payload: PayloadPostDriveFolders) => postKBGoogleDriveFolders(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
       queryClient.invalidateQueries({ queryKey: ['driveConfig'] })
@@ -25,7 +25,7 @@ export const useDriveControllers = (enabled = false) => {
   })
 
   const removeDriveConfig = useMutation({
-    mutationFn: deleteDriveConfig,
+    mutationFn: deleteKBGoogleDriveConfig,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
       queryClient.invalidateQueries({ queryKey: ['driveConfig'] })
