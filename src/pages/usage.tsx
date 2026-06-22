@@ -1,10 +1,10 @@
 import Layout from '@/shared/components/Layout'
-import UsageView from '@/features/usage/components/UsageView'
+import UsageSaldoView from '@/features/usage-saldo/components/UsageSaldoView'
 
 export default function UsagePage() {
   return (
     <Layout>
-      <UsageView />
+      <UsageSaldoView />
     </Layout>
   )
 }

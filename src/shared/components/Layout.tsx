@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { PanelLeft } from 'lucide-react'
 import Sidebar from './Sidebar'
-import ChatSearchModal from '@/features/chat/components/ChatSearchModal'
 import { useUIStates } from '@/shared/states/uiStates'
 
 interface Props {
@@ -18,7 +17,6 @@ export default function Layout({ title, noPadding, hideTitleMobile, headerRight,
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <ChatSearchModal />
 
       {sidebarOpen && (
         <div

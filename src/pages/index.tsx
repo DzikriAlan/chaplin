@@ -1,21 +1,9 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import { Toaster } from 'react-hot-toast'
-import Layout from '@/shared/components/Layout'
-import ChatView from '@/features/chat/components/ChatView'
+import type { GetServerSideProps } from 'next'
 
-const Home: NextPage = () => {
-  return (
-    <>
-      <Head>
-        <title>Chatbot — Chaplin</title>
-      </Head>
-      <Toaster position="top-right" />
-      <Layout noPadding>
-        <ChatView />
-      </Layout>
-    </>
-  )
+export const getServerSideProps: GetServerSideProps = async () => ({
+  redirect: { destination: '/agents', permanent: false },
+})
+
+export default function Home() {
+  return null
 }
-
-export default Home

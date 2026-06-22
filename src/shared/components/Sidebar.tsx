@@ -1,42 +1,19 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useState } from 'react'
 import Image from 'next/image'
 import {
-  MessageSquare,
-  Search,
   Database,
   PanelLeft,
   Bot,
   LogOut,
   Settings,
-  MessageCircle,
-  Pencil,
-  Trash2,
-  Check as CheckIcon,
-  X,
   Wallet,
 } from 'lucide-react'
 import chaplinLogo from '@/shared/assets/chaplin.png'
-import { getChatSessions, patchChatSession, deleteChatSession } from '@/features/chat/services/chatServices'
 import { useUIStates } from '@/shared/states/uiStates'
 import ThemeToggle from './ThemeToggle'
-
-interface SessionInfo {
-  sessionId: string
-  lastMessage: string
-  lastRole: string
-  messageCount: number
-  lastActivity: string
-  title: string | null
-}
-
-function truncateText(text: string, maxLen: number) {
-  if (!text) return 'New conversation'
-  return text.length > maxLen ? text.slice(0, maxLen) + '...' : text
-}
 
 interface NavItemProps {
   href?: string
@@ -74,68 +51,14 @@ const userInitials = userName.slice(0, 2).toUpperCase()
 
 export default function Sidebar() {
   const router = useRouter()
-  const queryClient = useQueryClient()
   const { data: session } = useSession()
-  const { sidebarOpen, toggleSidebar, chatSessionId, setChatSessionId, newChatSession, setSearchModalOpen } = useUIStates()
+  const { sidebarOpen, toggleSidebar } = useUIStates()
   const [showSettings, setShowSettings] = useState(false)
-  const [hoveredSession, setHoveredSession] = useState<string | null>(null)
-  const [editingSession, setEditingSession] = useState<string | null>(null)
-  const [editTitle, setEditTitle] = useState('')
   const displayName = session?.user?.name ?? userName
   const displayInitials = session?.user?.name
     ? session.user.name.slice(0, 2).toUpperCase()
     : userInitials
   const displayImage = session?.user?.image ?? null
-
-  const { data: sessionsRaw } = useQuery({
-    queryKey: ['chat-sessions'],
-    queryFn: async () => {
-      const data = await getChatSessions()
-      return (data ?? []) as SessionInfo[]
-    },
-    refetchInterval: 10_000,
-  })
-  const sessions = (sessionsRaw ?? []) as SessionInfo[]
-
-  function handleNewChat() {
-    newChatSession()
-    if (router.pathname !== '/chat' && router.pathname !== '/') {
-      router.push('/chat')
-    }
-  }
-
-  function handleSelectSession(sessionId: string) {
-    setChatSessionId(sessionId)
-    if (router.pathname !== '/chat' && router.pathname !== '/') {
-      router.push('/chat')
-    }
-  }
-
-  async function handleRenameSession(sessionId: string) {
-    if (!editTitle.trim()) return
-    await patchChatSession(sessionId, editTitle.trim())
-    queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
-    setEditingSession(null)
-  }
-
-  async function handleDeleteSession(sessionId: string) {
-    if (!confirm('Hapus percakapan ini?')) return
-    await deleteChatSession(sessionId)
-    queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
-    if (chatSessionId === sessionId) {
-      newChatSession()
-    }
-  }
-
-  function startRename(sessionId: string, currentTitle: string | null) {
-    setEditingSession(sessionId)
-    setEditTitle(currentTitle ?? '')
-  }
-
-  const isChatPage = router.pathname === '/chat' || router.pathname === '/'
-
-  const navActiveClass = 'bg-accent text-accent-foreground'
-  const navInactiveClass = 'text-muted-foreground hover:bg-muted hover:text-foreground'
 
   return (
     <aside
@@ -177,20 +100,6 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="px-2 py-3 space-y-0.5 shrink-0">
         <NavItem
-          icon={<MessageSquare className="h-4 w-4 shrink-0" />}
-          label="New Chat"
-          collapsed={!sidebarOpen}
-          isActive={isChatPage}
-          onClick={handleNewChat}
-        />
-        <NavItem
-          icon={<Search className="h-4 w-4 shrink-0" />}
-          label="Search"
-          collapsed={!sidebarOpen}
-          isActive={false}
-          onClick={() => setSearchModalOpen(true)}
-        />
-        <NavItem
           href="/agents"
           icon={<Bot className="h-4 w-4 shrink-0" />}
           label="Agents"
@@ -213,94 +122,7 @@ export default function Sidebar() {
         />
       </nav>
 
-      {/* Recent Chats — only when sidebar is open */}
-      {sidebarOpen && (
-        <div className="flex flex-col flex-1 overflow-hidden px-2 pb-2">
-          <div className="px-3 py-2 shrink-0 flex items-center justify-between">
-            <span className="text-rem-75 font-gudlak font-bold text-muted-foreground">Recent Chats</span>
-            <button
-              type="button"
-              onClick={() => setSearchModalOpen(true)}
-              title="Cari percakapan (⌘K)"
-              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Search className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <ul className="flex-1 overflow-y-auto space-y-0.5 list-none p-0">
-            {sessions.length === 0 && (
-              <li className="text-rem-75 text-muted-foreground px-3 py-2">No conversations yet</li>
-            )}
-            {sessions.map((s) => (
-              <li
-                key={s.sessionId}
-                className="relative group"
-                onMouseEnter={() => setHoveredSession(s.sessionId)}
-                onMouseLeave={() => setHoveredSession(null)}
-              >
-                {editingSession === s.sessionId ? (
-                  <div className="flex items-center gap-1 px-3 py-1.5">
-                    <input
-                      type="text"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleRenameSession(s.sessionId)
-                        if (e.key === 'Escape') setEditingSession(null)
-                      }}
-                      onBlur={() => setEditingSession(null)}
-                      autoFocus
-                      className="flex-1 bg-transparent text-rem-80 font-sans text-foreground focus:outline-none"
-                    />
-                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleRenameSession(s.sessionId)} className="p-1 text-muted-foreground hover:text-foreground"><CheckIcon className="h-3 w-3" /></button>
-                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingSession(null)} className="p-1 text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleSelectSession(s.sessionId)}
-                    className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                      s.sessionId === chatSessionId && isChatPage
-                        ? navActiveClass
-                        : navInactiveClass
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                      <p className="text-rem-80 font-sans font-medium truncate flex-1">
-                        {s.title ?? truncateText(s.lastMessage ?? '', 22)}
-                      </p>
-                      {hoveredSession === s.sessionId && (
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); startRename(s.sessionId, s.title) }}
-                            className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
-                            title="Ubah nama"
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); handleDeleteSession(s.sessionId) }}
-                            className="p-0.5 rounded text-muted-foreground hover:text-destructive hover:bg-muted"
-                            title="Hapus"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Spacer when collapsed */}
-      {!sidebarOpen && <div className="flex-1" />}
+      <div className="flex-1" />
 
       {/* User footer */}
       <div className="px-2 py-3 shrink-0">

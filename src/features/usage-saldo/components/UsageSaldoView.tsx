@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { TrendingDown, RefreshCw, MessageSquare, Download } from 'lucide-react'
-import { useBalanceControllers } from '@/features/balance/controllers/balanceControllers'
-import { useUsageControllers } from '../controllers/usageControllers'
-import { useUsageStates } from '../states/usageStates'
-import type { DataBalance } from '@/features/balance/types/balanceTypes'
-import type { DataUsage } from '../types/usageTypes'
+import { useUsageSaldoControllers } from '../controllers/usageSaldoControllers'
+import { useUsageSaldoStates } from '../states/usageSaldoStates'
+import type { DataUsageSaldoBalance, DataUsageSaldoLog, DataUsageSaldoLogList } from '../types/usageSaldoTypes'
 
 function formatRupiah(amount: number) {
   return `Rp ${Math.abs(amount).toLocaleString('id-ID')}`
@@ -37,7 +35,7 @@ function getMonthOptions() {
   return options
 }
 
-function aggregateDailyData(logs: DataUsage[], year: number, month: number) {
+function aggregateDailyData(logs: DataUsageSaldoLog[], year: number, month: number) {
   const daysInMonth = new Date(year, month, 0).getDate()
   const totals = new Array<number>(daysInMonth).fill(0)
   for (const log of logs) {
@@ -64,7 +62,7 @@ function StatCard({ title, value }: Readonly<StatCardProps>) {
 }
 
 interface LogRowProps {
-  log: DataUsage
+  log: DataUsageSaldoLog
 }
 
 function LogRow({ log }: Readonly<LogRowProps>) {
@@ -89,20 +87,19 @@ function LogRow({ log }: Readonly<LogRowProps>) {
   )
 }
 
-export default function UsageView() {
-  const { fetchBalance, storeBalance } = useBalanceControllers()
-  const { fetchUsage } = useUsageControllers()
-  const { payloadGetUsage, setGetUsage } = useUsageStates()
+export default function UsageSaldoView() {
+  const { fetchBalance, storeTopup, fetchLogs } = useUsageSaldoControllers()
+  const { payloadGetLogs, setGetLogs } = useUsageSaldoStates()
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => { setIsMounted(true) }, [])
 
-  const balanceData = fetchBalance.data as DataBalance | undefined
-  const usageData = fetchUsage.data as { logs: DataUsage[]; total: number } | undefined
-  const logs = usageData?.logs ?? []
+  const balanceData = fetchBalance.data as DataUsageSaldoBalance | undefined
+  const logsData = fetchLogs.data as DataUsageSaldoLogList | undefined
+  const logs = logsData?.logs ?? []
 
-  const selectedYear = Number.parseInt(payloadGetUsage.year ?? String(new Date().getFullYear()))
-  const selectedMonth = Number.parseInt(payloadGetUsage.month ?? String(new Date().getMonth() + 1))
+  const selectedYear = Number.parseInt(payloadGetLogs.year ?? String(new Date().getFullYear()))
+  const selectedMonth = Number.parseInt(payloadGetLogs.month ?? String(new Date().getMonth() + 1))
   const monthlyTotal = logs.reduce((sum, log) => sum + log.deduction, 0)
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate()
   const dailyData = aggregateDailyData(logs, selectedYear, selectedMonth)
@@ -110,14 +107,14 @@ export default function UsageView() {
 
   function handleMonthChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const [year, month] = e.target.value.split('-')
-    setGetUsage({ year, month })
+    setGetLogs({ year: String(year), month: String(month) })
   }
 
   function handleTopUp() {
     const amountStr = prompt('Masukkan jumlah top-up (Rp):')
     if (!amountStr) return
     const amount = Number.parseInt(amountStr.replaceAll('.', '').replaceAll(',', ''))
-    if (!Number.isNaN(amount) && amount > 0) storeBalance.mutate({ amount })
+    if (!Number.isNaN(amount) && amount > 0) storeTopup.mutate({ amount })
   }
 
   function handleExport() {
@@ -276,7 +273,7 @@ export default function UsageView() {
           <h2 className="text-rem-95 font-semibold text-foreground">Riwayat Penggunaan</h2>
         </div>
 
-        {fetchUsage.isLoading && (
+        {fetchLogs.isLoading && (
           <div className="p-6 space-y-3">
             {['r1', 'r2', 'r3'].map((k) => (
               <div key={k} className="h-4 bg-muted rounded animate-pulse" />
@@ -284,7 +281,7 @@ export default function UsageView() {
           </div>
         )}
 
-        {!fetchUsage.isLoading && logs.length === 0 && (
+        {!fetchLogs.isLoading && logs.length === 0 && (
           <div className="py-12 text-center">
             <TrendingDown className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-rem-90 font-medium text-foreground">Belum ada aktivitas</p>
@@ -292,7 +289,7 @@ export default function UsageView() {
           </div>
         )}
 
-        {!fetchUsage.isLoading && logs.length > 0 && (
+        {!fetchLogs.isLoading && logs.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
