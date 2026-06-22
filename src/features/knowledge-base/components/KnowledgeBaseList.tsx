@@ -1,12 +1,12 @@
 import toast from 'react-hot-toast'
-import type { DataKnowledgeBase } from '../types/knowledgeBaseTypes'
-import { useKnowledgeBaseControllers } from '../controllers/knowledgeBaseControllers'
+import type { DataKbFaq } from '../types/knowledgeBaseTypes'
+import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
 import LoadData from '@/shared/components/LoadData'
-import FAQItem from './FAQItem'
+import KBFaqItem from './KBFaqItem'
 
 export default function KnowledgeBaseList() {
-  const { fetchKnowledgeBase, removeKnowledgeBase } = useKnowledgeBaseControllers()
-  const items = (fetchKnowledgeBase.data as DataKnowledgeBase[]) ?? []
+  const { fetchKnowledgeBase, removeKnowledgeBase } = useKBFaqControllers()
+  const items = (fetchKnowledgeBase.data as DataKbFaq[]) ?? []
 
   const handleDeleteItem = (id: string) => {
     if (!confirm('Hapus FAQ ini?')) return
@@ -32,7 +32,7 @@ export default function KnowledgeBaseList() {
       <div className="space-y-3">
         <p className="text-rem-85 text-muted-foreground">{items.length} FAQ aktif</p>
         {items.map((item) => (
-          <FAQItem key={item.id} item={item} onDeleteItem={handleDeleteItem} />
+          <KBFaqItem key={item.id} item={item} onDeleteItem={handleDeleteItem} />
         ))}
       </div>
     </LoadData>

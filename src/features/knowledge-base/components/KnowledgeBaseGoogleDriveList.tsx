@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { CloudOff, Pause, Play, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import type { DataDocuments } from '../types/knowledgeBaseGoogleDriveTypes'
-import { useDocumentsControllers } from '../controllers/knowledgeBaseGoogleDriveControllers'
-import { useDriveControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
+import type { DataKbGoogleDrive } from '../types/knowledgeBaseGoogleDriveTypes'
+import { useKBGoogleDriveControllers } from '../controllers/knowledgeBaseGoogleDriveControllers'
+import { useKBGoogleDriveHelperControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
 import type { DataDriveFolders } from '../types/knowledgeBaseGoogleDriveHelperTypes'
 import KnowledgeBaseGoogleDriveFolderPicker from './KnowledgeBaseGoogleDriveFolderPicker'
 import KnowledgeBaseGoogleDriveRow from './KnowledgeBaseGoogleDriveRow'
@@ -31,11 +31,11 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
   const {
     fetchDocuments,
     changeDocuments, removeDocuments, removeDocumentsBulk,
-    storeDocumentsSync,
-  } = useDocumentsControllers()
-  const { fetchDriveFolders, storeDriveFolders } = useDriveControllers(showFolderPicker)
+    storeKbGoogleDriveSync,
+  } = useKBGoogleDriveControllers()
+  const { fetchDriveFolders, storeDriveFolders } = useKBGoogleDriveHelperControllers(showFolderPicker)
 
-  const docs = (fetchDocuments.data ?? []) as DataDocuments[]
+  const docs = (fetchDocuments.data ?? []) as DataKbGoogleDrive[]
   const folders = (fetchDriveFolders.data ?? []) as DataDriveFolders[]
 
   const pendingCount = docs.filter((d) => d.status === 'PENDING').length
@@ -85,7 +85,7 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
     changeDocuments.mutate({ id, action: 'retry' }, { onSuccess: () => toast.success('Dokumen akan diproses ulang') })
   }
   const handleSync = () => {
-    storeDocumentsSync.mutate({ action: 'sync' }, { onSuccess: () => toast.success('Sinkronisasi dimulai') })
+    storeKbGoogleDriveSync.mutate({ action: 'sync' }, { onSuccess: () => toast.success('Sinkronisasi dimulai') })
   }
   const handleTogglePause = () => setIsPaused((v) => !v)
   const handleFolderSelect = (folder: DataDriveFolders) => {

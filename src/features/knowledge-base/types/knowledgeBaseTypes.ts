@@ -1,10 +1,10 @@
-export interface PayloadPostKnowledgeBase {
+export interface PayloadPostKbFaq {
   question: string
   answer: string
   tags: string[]
 }
 
-export interface DataKnowledgeBase {
+export interface DataKbFaq {
   id: string
   question: string
   answer: string
@@ -14,16 +14,16 @@ export interface DataKnowledgeBase {
   updatedAt: string
 }
 
-export interface KnowledgeBase {
+export interface KbFaq {
   status: string
   statusTitle: string
   statusSubtitle: string
-  data: DataKnowledgeBase[] | null
+  data: DataKbFaq[] | null
 }
 
-export interface KnowledgeBaseCreate {
+export interface KbFaqCreate {
   status: string
   statusTitle: string
   statusSubtitle: string
-  data: DataKnowledgeBase | null
+  data: DataKbFaq | null
 }

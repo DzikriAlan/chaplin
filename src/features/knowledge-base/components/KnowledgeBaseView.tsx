@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, HelpCircle, FileText, Upload, ChevronDown, RefreshCw, Cloud, CloudOff, FolderPlus, FolderOpen, Unlink } from 'lucide-react'
-import type { DataKnowledgeBase } from '../types/knowledgeBaseTypes'
-import { useKnowledgeBaseControllers } from '../controllers/knowledgeBaseControllers'
-import { useDriveControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
+import type { DataKbFaq } from '../types/knowledgeBaseTypes'
+import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
+import { useKBGoogleDriveHelperControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
 import KnowledgeBaseModal from './KnowledgeBaseModal'
 import KnowledgeBaseGoogleDriveList from './KnowledgeBaseGoogleDriveList'
-import FAQTableSkeleton from './FAQTableSkeleton'
+import KBFaqTableSkeleton from './KBFaqTableSkeleton'
 import KnowledgeBaseMyDriveUploader from './KnowledgeBaseMyDriveUploader'
 import ListCardRow from '@/shared/components/ListCardRow'
 
@@ -27,15 +27,15 @@ function getTabStatus(isLoading: boolean, isError: boolean, isEmpty: boolean) {
 export default function KnowledgeBaseView() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('faq')
-  const [modalItem, setModalItem] = useState<DataKnowledgeBase | null | undefined>(undefined)
-  const [documentsSyncSignal, setDocumentsSyncSignal] = useState(0)
-  const [documentsFolderPickerSignal, setDocumentsFolderPickerSignal] = useState(0)
+  const [modalItem, setModalItem] = useState<DataKbFaq | null | undefined>(undefined)
+  const [kbGoogleDriveSyncSignal, setKbGoogleDriveSyncSignal] = useState(0)
+  const [kbGoogleDriveFolderPickerSignal, setKbGoogleDriveFolderPickerSignal] = useState(0)
   const [myDriveFolderSignal, setMyDriveFolderSignal] = useState(0)
   const [myDriveUploadSignal, setMyDriveUploadSignal] = useState(0)
 
   const { fetchKnowledgeBase, storeKnowledgeBase, removeKnowledgeBase, changeKnowledgeBase } =
-    useKnowledgeBaseControllers()
-  const { fetchDriveConfig, removeDriveConfig } = useDriveControllers(false)
+    useKBFaqControllers()
+  const { fetchDriveConfig, removeDriveConfig } = useKBGoogleDriveHelperControllers(false)
   const driveConfig = fetchDriveConfig.data as DriveConfig | undefined
 
   const handleDisconnectDrive = () => {
@@ -43,7 +43,7 @@ export default function KnowledgeBaseView() {
     removeDriveConfig.mutate(undefined, { onSuccess: () => toast.success('Koneksi diputus') })
   }
 
-  const items = (fetchKnowledgeBase.data as DataKnowledgeBase[] ?? [])
+  const items = (fetchKnowledgeBase.data as DataKbFaq[] ?? [])
   const tabStatus = getTabStatus(fetchKnowledgeBase.isLoading, fetchKnowledgeBase.isError, items.length === 0)
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function KnowledgeBaseView() {
   }, [router])
 
   const handleOpenAdd = () => setModalItem(null)
-  const handleOpenEdit = (item: DataKnowledgeBase) => setModalItem(item)
+  const handleOpenEdit = (item: DataKbFaq) => setModalItem(item)
   const handleCloseModal = () => setModalItem(undefined)
 
   const handleSave = (question: string, answer: string, tags: string[]) => {
@@ -115,7 +115,7 @@ export default function KnowledgeBaseView() {
               </span>
               <button
                 type="button"
-                onClick={() => setDocumentsFolderPickerSignal((v) => v + 1)}
+                onClick={() => setKbGoogleDriveFolderPickerSignal((v) => v + 1)}
                 className="flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0 sm:p-0 sm:gap-1 sm:text-rem-80 sm:font-medium sm:text-primary sm:hover:bg-transparent sm:hover:underline sm:hover:text-primary"
               >
                 <FolderOpen className="h-4 w-4 sm:hidden" />
@@ -134,7 +134,7 @@ export default function KnowledgeBaseView() {
           {driveConfig ? (
             <button
               type="button"
-              onClick={() => setDocumentsSyncSignal((v) => v + 1)}
+              onClick={() => setKbGoogleDriveSyncSignal((v) => v + 1)}
               className="flex items-center justify-center gap-2 rounded-lg bg-primary p-2 text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 sm:px-4 sm:py-2 sm:text-rem-85 sm:font-medium"
             >
               <RefreshCw className="h-4 w-4" /><span className="hidden sm:inline">Sync</span>
@@ -142,7 +142,7 @@ export default function KnowledgeBaseView() {
           ) : (
             <button
               type="button"
-              onClick={() => setDocumentsFolderPickerSignal((v) => v + 1)}
+              onClick={() => setKbGoogleDriveFolderPickerSignal((v) => v + 1)}
               className="flex items-center justify-center gap-2 rounded-lg bg-primary p-2 text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 sm:px-4 sm:py-2 sm:text-rem-85 sm:font-medium"
             >
               <CloudOff className="h-4 w-4" /><span className="hidden sm:inline">Hubungkan Drive</span>
@@ -226,7 +226,7 @@ export default function KnowledgeBaseView() {
           <div className="rounded-xl border bg-card shadow-card overflow-hidden">
             {activeTab === 'faq' && (
               <div>
-                {tabStatus === 'loading' && <FAQTableSkeleton />}
+                {tabStatus === 'loading' && <KBFaqTableSkeleton />}
 
                 {tabStatus === 'empty' && (
                   <div className="p-12 text-center">
@@ -280,8 +280,8 @@ export default function KnowledgeBaseView() {
 
             {activeTab === 'documents' && (
               <KnowledgeBaseGoogleDriveList
-                syncSignal={documentsSyncSignal}
-                openFolderPickerSignal={documentsFolderPickerSignal}
+                syncSignal={kbGoogleDriveSyncSignal}
+                openFolderPickerSignal={kbGoogleDriveFolderPickerSignal}
               />
             )}
           </div>

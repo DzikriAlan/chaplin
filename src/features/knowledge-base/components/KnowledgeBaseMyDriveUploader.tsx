@@ -13,9 +13,9 @@ import {
   X,
   CheckSquare,
 } from 'lucide-react'
-import { useFileUploadControllers } from '../controllers/knowledgeBaseMyDriveControllers'
-import { useFileUploadStates } from '../states/knowledgeBaseMyDriveStates'
-import type { DataUploadFolder, DataUploadFile } from '../types/knowledgeBaseMyDriveTypes'
+import { useKBMyDriveControllers } from '../controllers/knowledgeBaseMyDriveControllers'
+import { useKbMyDriveStates } from '../states/knowledgeBaseMyDriveStates'
+import type { DataKbMyDriveFolder, DataKbMyDriveFile } from '../types/knowledgeBaseMyDriveTypes'
 import { getSupabaseClient, isSupabaseConfigured, STORAGE_BUCKET } from '@/shared/lib/supabase'
 import ListCardRow from '@/shared/components/ListCardRow'
 import KnowledgeBaseGoogleDriveTableSkeleton from './KnowledgeBaseGoogleDriveTableSkeleton'
@@ -31,7 +31,7 @@ function formatBytes(bytes: number): string {
 }
 
 
-function collectFileIds(folder: DataUploadFolder): string[] {
+function collectFileIds(folder: DataKbMyDriveFolder): string[] {
   const ids = folder.files.map((f) => f.id)
   for (const child of folder.children) {
     ids.push(...collectFileIds(child))
@@ -72,10 +72,10 @@ function IndeterminateCheckbox({ checked, indeterminate, onChange, label }: Read
 // ── FolderNode ─────────────────────────────────────────────────────────────
 
 interface FolderNodeProps {
-  folder: DataUploadFolder
+  folder: DataKbMyDriveFolder
   depth: number
   selectedIds: Set<string>
-  onToggleFolder: (folder: DataUploadFolder) => void
+  onToggleFolder: (folder: DataKbMyDriveFolder) => void
   onToggleFile: (fileId: string) => void
   onDeleteFolder: (id: string) => void
   onDeleteFile: (id: string) => void
@@ -212,7 +212,7 @@ function FolderNode({
 // ── FileRow ────────────────────────────────────────────────────────────────
 
 interface FileRowProps {
-  file: DataUploadFile
+  file: DataKbMyDriveFile
   depth: number
   isSelected: boolean
   onToggle: () => void
@@ -259,8 +259,8 @@ interface FileUploaderViewProps {
 
 export default function FileUploaderView({ openFolderFormSignal, openUploadSignal }: Readonly<FileUploaderViewProps>) {
   const { fetchUploadFolders, storeUploadFolder, removeUploadFolder, storeSignedUrl, removeUploadFile } =
-    useFileUploadControllers()
-  const { selectedIds, setSelectedIds, toggleSelected, clearSelected } = useFileUploadStates()
+    useKBMyDriveControllers()
+  const { selectedIds, setSelectedIds, toggleSelected, clearSelected } = useKbMyDriveStates()
 
   const [newFolderName, setNewFolderName] = useState('')
   const [newFolderParentId, setNewFolderParentId] = useState<string | undefined>(undefined)
@@ -269,7 +269,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
   const [rootDragOver, setRootDragOver] = useState(false)
   const rootInputRef = useRef<HTMLInputElement>(null)
 
-  const folders = (fetchUploadFolders.data ?? []) as DataUploadFolder[]
+  const folders = (fetchUploadFolders.data ?? []) as DataKbMyDriveFolder[]
   const supabaseReady = isSupabaseConfigured()
 
   const prevFolderSignalRef = useRef(openFolderFormSignal ?? 0)
@@ -288,7 +288,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
     }
   }, [openUploadSignal])
 
-  const handleToggleFolder = useCallback((folder: DataUploadFolder) => {
+  const handleToggleFolder = useCallback((folder: DataKbMyDriveFolder) => {
     const allIds = collectFileIds(folder)
     const allSelected = allIds.every((id) => selectedIds.has(id))
     const next = new Set(selectedIds)
@@ -383,7 +383,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
     }
   }
 
-  function flattenFolders(list: DataUploadFolder[], depth = 0): { id: string; name: string; depth: number }[] {
+  function flattenFolders(list: DataKbMyDriveFolder[], depth = 0): { id: string; name: string; depth: number }[] {
     return list.flatMap((f) => [
       { id: f.id, name: f.name, depth },
       ...flattenFolders(f.children, depth + 1),

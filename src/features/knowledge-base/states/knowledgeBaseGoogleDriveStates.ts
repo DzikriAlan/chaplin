@@ -1,19 +1,19 @@
 import { create } from 'zustand'
-import type { Documents, DocumentsSync } from '../types/knowledgeBaseGoogleDriveTypes'
+import type { KbGoogleDrive, KbGoogleDriveSync } from '../types/knowledgeBaseGoogleDriveTypes'
 
-interface DocumentsStore {
-  documents: Documents
-  documentsSync: DocumentsSync
+interface KbGoogleDriveStore {
+  kbGoogleDrive: KbGoogleDrive
+  kbGoogleDriveSync: KbGoogleDriveSync
 }
 
-export const useDocumentsStates = create<DocumentsStore>(() => ({
-  documents: {
+export const useKbGoogleDriveStates = create<KbGoogleDriveStore>(() => ({
+  kbGoogleDrive: {
     status: 'loading',
     statusTitle: 'Memuat dokumen',
     statusSubtitle: 'Mohon tunggu...',
     data: null,
   },
-  documentsSync: {
+  kbGoogleDriveSync: {
     status: 'loading',
     statusTitle: 'Memproses',
     statusSubtitle: 'Mohon tunggu...',

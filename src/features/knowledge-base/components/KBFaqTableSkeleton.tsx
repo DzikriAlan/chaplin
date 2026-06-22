@@ -2,7 +2,7 @@ import Skeleton from '@/shared/components/Skeleton'
 
 interface FAQTableSkeletonProps { rows?: number }
 
-export default function FAQTableSkeleton({ rows = 5 }: Readonly<FAQTableSkeletonProps>) {
+export default function KBFaqTableSkeleton({ rows = 5 }: Readonly<FAQTableSkeletonProps>) {
   const keys = Array.from({ length: rows }, (_, i) => i)
   return (
     <div className="divide-y divide-border">

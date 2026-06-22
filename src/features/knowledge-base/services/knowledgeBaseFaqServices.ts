@@ -1,4 +1,4 @@
-import type { PayloadPostKnowledgeBase } from '../types/knowledgeBaseTypes'
+import type { PayloadPostKbFaq } from '../types/knowledgeBaseTypes'
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
@@ -14,7 +14,7 @@ export const getKBFaqItems = async () => {
   }
 }
 
-export const postKBFaqItems = async (payload: PayloadPostKnowledgeBase) => {
+export const postKBFaqItems = async (payload: PayloadPostKbFaq) => {
   try {
     const res = await fetch(`${base}/knowledge-base/faq/items`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     if (!res.ok) throw new Error(res.statusText)
@@ -38,7 +38,7 @@ export const deleteKBFaqItemsId = async (id: string) => {
   }
 }
 
-export const patchKBFaqItemsId = async (id: string, payload: Partial<PayloadPostKnowledgeBase>) => {
+export const patchKBFaqItemsId = async (id: string, payload: Partial<PayloadPostKbFaq>) => {
   try {
     const res = await fetch(`${base}/knowledge-base/faq/items?id=${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     if (!res.ok) throw new Error(res.statusText)

@@ -1,36 +1,36 @@
 import { create } from 'zustand'
-import type { PayloadPostKnowledgeBase, KnowledgeBase, KnowledgeBaseCreate } from '../types/knowledgeBaseTypes'
+import type { PayloadPostKbFaq, KbFaq, KbFaqCreate } from '../types/knowledgeBaseTypes'
 
-interface KnowledgeBaseStore {
-  payloadPostKnowledgeBase: PayloadPostKnowledgeBase
-  knowledgeBase: KnowledgeBase
-  knowledgeBaseCreate: KnowledgeBaseCreate
-  setPostKnowledgeBase: (payload: Partial<PayloadPostKnowledgeBase>) => void
+interface KbFaqStore {
+  payloadPostKbFaq: PayloadPostKbFaq
+  kbFaq: KbFaq
+  kbFaqCreate: KbFaqCreate
+  setPostKbFaq: (payload: Partial<PayloadPostKbFaq>) => void
 }
 
-export const useKnowledgeBaseStates = create<KnowledgeBaseStore>((set) => ({
-  payloadPostKnowledgeBase: {
+export const useKbFaqStates = create<KbFaqStore>((set) => ({
+  payloadPostKbFaq: {
     question: '',
     answer: '',
     tags: [],
   },
 
-  knowledgeBase: {
+  kbFaq: {
     status: 'loading',
     statusTitle: 'Memuat knowledge base',
     statusSubtitle: 'Mohon tunggu...',
     data: null,
   },
 
-  knowledgeBaseCreate: {
+  kbFaqCreate: {
     status: 'loading',
     statusTitle: 'Menyimpan',
     statusSubtitle: 'Mohon tunggu...',
     data: null,
   },
 
-  setPostKnowledgeBase: (payload) =>
+  setPostKbFaq: (payload) =>
     set((state) => ({
-      payloadPostKnowledgeBase: { ...state.payloadPostKnowledgeBase, ...payload },
+      payloadPostKbFaq: { ...state.payloadPostKbFaq, ...payload },
     })),
 }))

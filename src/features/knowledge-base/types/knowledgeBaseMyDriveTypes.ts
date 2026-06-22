@@ -1,4 +1,4 @@
-export interface DataUploadFile {
+export interface DataKbMyDriveFile {
   id: string
   name: string
   size: number
@@ -9,38 +9,38 @@ export interface DataUploadFile {
   updatedAt: string
 }
 
-export interface DataUploadFolder {
+export interface DataKbMyDriveFolder {
   id: string
   name: string
   parentId: string | null
-  children: DataUploadFolder[]
-  files: DataUploadFile[]
+  children: DataKbMyDriveFolder[]
+  files: DataKbMyDriveFile[]
   createdAt: string
   updatedAt: string
 }
 
-export interface PayloadPostUploadFolder {
+export interface PayloadPostKbMyDriveFolder {
   name: string
   parentId?: string
 }
 
-export interface PayloadPostSignedUrl {
+export interface PayloadPostKbMyDriveSignedUrl {
   fileName: string
   mimeType: string
   size: number
   folderId?: string
 }
 
-export interface DataSignedUrl {
+export interface DataKbMyDriveSignedUrl {
   signedUrl: string
   token: string
   path: string
   fileId: string
 }
 
-export interface UploadFolders {
+export interface KbMyDrive {
   status: string
   statusTitle: string
   statusSubtitle: string
-  data: DataUploadFolder[] | null
+  data: DataKbMyDriveFolder[] | null
 }

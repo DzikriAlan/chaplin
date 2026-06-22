@@ -1,5 +1,5 @@
 import { SkipForward, RotateCcw, ExternalLink, Trash2 } from 'lucide-react'
-import type { DataDocuments } from '../types/knowledgeBaseGoogleDriveTypes'
+import type { DataKbGoogleDrive } from '../types/knowledgeBaseGoogleDriveTypes'
 import KnowledgeBaseGoogleDriveCheckboxCell from './KnowledgeBaseGoogleDriveCheckboxCell'
 import ListCardRow from '@/shared/components/ListCardRow'
 
@@ -11,7 +11,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 }
 
 interface DocumentRowProps {
-  doc: DataDocuments
+  doc: DataKbGoogleDrive
   isSelected: boolean
   onToggleSelect: (id: string) => void
   onDeleteDocument: (id: string) => void

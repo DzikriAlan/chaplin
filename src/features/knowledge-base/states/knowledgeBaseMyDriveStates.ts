@@ -1,16 +1,16 @@
 import { create } from 'zustand'
-import type { UploadFolders } from '../types/knowledgeBaseMyDriveTypes'
+import type { KbMyDrive } from '../types/knowledgeBaseMyDriveTypes'
 
-interface FileUploadStore {
-  uploadFolders: UploadFolders
+interface KbMyDriveStore {
+  kbMyDrive: KbMyDrive
   selectedIds: Set<string>
   setSelectedIds: (ids: Set<string>) => void
   toggleSelected: (id: string) => void
   clearSelected: () => void
 }
 
-export const useFileUploadStates = create<FileUploadStore>((set) => ({
-  uploadFolders: {
+export const useKbMyDriveStates = create<KbMyDriveStore>((set) => ({
+  kbMyDrive: {
     status: 'loading',
     statusTitle: 'Memuat file...',
     statusSubtitle: 'Harap tunggu.',

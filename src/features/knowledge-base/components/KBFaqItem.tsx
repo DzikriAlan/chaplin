@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
-import type { DataKnowledgeBase } from '../types/knowledgeBaseTypes'
+import type { DataKbFaq } from '../types/knowledgeBaseTypes'
 
 interface FAQItemProps {
-  item: DataKnowledgeBase
+  item: DataKbFaq
   onDeleteItem: (id: string) => void
 }
 
-export default function FAQItem({ item, onDeleteItem }: Readonly<FAQItemProps>) {
+export default function KBFaqItem({ item, onDeleteItem }: Readonly<FAQItemProps>) {
   const [expanded, setExpanded] = useState(false)
 
   const handleToggle = () => setExpanded((v) => !v)

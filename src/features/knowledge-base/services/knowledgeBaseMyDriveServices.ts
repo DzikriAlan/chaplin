@@ -1,12 +1,12 @@
-import type { DataUploadFolder, PayloadPostUploadFolder, PayloadPostSignedUrl, DataSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
+import type { DataKbMyDriveFolder, PayloadPostKbMyDriveFolder, PayloadPostKbMyDriveSignedUrl, DataKbMyDriveSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
-export const getKBMyDriveFolders = async (): Promise<DataUploadFolder[]> => {
+export const getKBMyDriveFolders = async (): Promise<DataKbMyDriveFolder[]> => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/folders`)
     if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: DataUploadFolder[] }
+    const json = await res.json() as { data: DataKbMyDriveFolder[] }
     return json.data ?? []
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return []
@@ -14,7 +14,7 @@ export const getKBMyDriveFolders = async (): Promise<DataUploadFolder[]> => {
   }
 }
 
-export const postKBMyDriveFolders = async (payload: PayloadPostUploadFolder) => {
+export const postKBMyDriveFolders = async (payload: PayloadPostKbMyDriveFolder) => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/folders`, {
       method: 'POST',
@@ -42,7 +42,7 @@ export const deleteKBMyDriveFolders = async (id: string) => {
   }
 }
 
-export const postKBMyDriveSignedUrl = async (payload: PayloadPostSignedUrl): Promise<DataSignedUrl> => {
+export const postKBMyDriveSignedUrl = async (payload: PayloadPostKbMyDriveSignedUrl): Promise<DataKbMyDriveSignedUrl> => {
   try {
     const res = await fetch(`${base}/knowledge-base/my-drive/signed-url`, {
       method: 'POST',
@@ -50,10 +50,10 @@ export const postKBMyDriveSignedUrl = async (payload: PayloadPostSignedUrl): Pro
       body: JSON.stringify(payload),
     })
     if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: DataSignedUrl }
+    const json = await res.json() as { data: DataKbMyDriveSignedUrl }
     return json.data
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') return null as unknown as DataSignedUrl
+    if (error instanceof Error && error.name === 'AbortError') return null as unknown as DataKbMyDriveSignedUrl
     throw error
   }
 }

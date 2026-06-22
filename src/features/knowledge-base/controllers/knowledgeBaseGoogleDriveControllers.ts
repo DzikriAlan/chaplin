@@ -7,7 +7,7 @@ import {
   postKBGoogleDriveSync,
 } from '../services/knowledgeBaseGoogleDriveServices'
 
-export const useDocumentsControllers = () => {
+export const useKBGoogleDriveControllers = () => {
   const queryClient = useQueryClient()
 
   const docs = queryClient.getQueryData<{ status: string }[]>(['documents']) ?? []
@@ -40,7 +40,7 @@ export const useDocumentsControllers = () => {
     },
   })
 
-  const storeDocumentsSync = useMutation({
+  const storeKbGoogleDriveSync = useMutation({
     mutationFn: (payload: { action: string }) => postKBGoogleDriveSync(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
@@ -52,6 +52,6 @@ export const useDocumentsControllers = () => {
     changeDocuments,
     removeDocuments,
     removeDocumentsBulk,
-    storeDocumentsSync,
+    storeKbGoogleDriveSync,
   }
 }

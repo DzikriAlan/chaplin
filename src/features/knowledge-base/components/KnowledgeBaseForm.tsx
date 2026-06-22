@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useKnowledgeBaseControllers } from '../controllers/knowledgeBaseControllers'
+import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
 import Loader from '@/shared/components/Loader'
 
 const schema = z.object({
@@ -17,7 +17,7 @@ type FormValues = z.infer<typeof schema>
 export default function KnowledgeBaseForm() {
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
-  const { storeKnowledgeBase } = useKnowledgeBaseControllers()
+  const { storeKnowledgeBase } = useKBFaqControllers()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),

@@ -6,11 +6,11 @@ import {
   postKBMyDriveSignedUrl,
   deleteKBMyDriveFiles,
 } from '../services/knowledgeBaseMyDriveServices'
-import type { PayloadPostUploadFolder, PayloadPostSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
+import type { PayloadPostKbMyDriveFolder, PayloadPostKbMyDriveSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
 
 const QUERY_KEY = 'upload-folders'
 
-export const useFileUploadControllers = () => {
+export const useKBMyDriveControllers = () => {
   const queryClient = useQueryClient()
 
   const fetchUploadFolders = useQuery({
@@ -19,7 +19,7 @@ export const useFileUploadControllers = () => {
   })
 
   const storeUploadFolder = useMutation({
-    mutationFn: (payload: PayloadPostUploadFolder) => postKBMyDriveFolders(payload),
+    mutationFn: (payload: PayloadPostKbMyDriveFolder) => postKBMyDriveFolders(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
     },
@@ -33,7 +33,7 @@ export const useFileUploadControllers = () => {
   })
 
   const storeSignedUrl = useMutation({
-    mutationFn: (payload: PayloadPostSignedUrl) => postKBMyDriveSignedUrl(payload),
+    mutationFn: (payload: PayloadPostKbMyDriveSignedUrl) => postKBMyDriveSignedUrl(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
     },

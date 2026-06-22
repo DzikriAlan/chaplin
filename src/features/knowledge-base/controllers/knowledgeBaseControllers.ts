@@ -5,9 +5,9 @@ import {
   deleteKBFaqItemsId,
   patchKBFaqItemsId,
 } from '../services/knowledgeBaseFaqServices'
-import type { PayloadPostKnowledgeBase } from '../types/knowledgeBaseTypes'
+import type { PayloadPostKbFaq } from '../types/knowledgeBaseTypes'
 
-export const useKnowledgeBaseControllers = () => {
+export const useKBFaqControllers = () => {
   const queryClient = useQueryClient()
 
   const fetchKnowledgeBase = useQuery({
@@ -16,7 +16,7 @@ export const useKnowledgeBaseControllers = () => {
   })
 
   const storeKnowledgeBase = useMutation({
-    mutationFn: (payload: PayloadPostKnowledgeBase) => postKBFaqItems(payload),
+    mutationFn: (payload: PayloadPostKbFaq) => postKBFaqItems(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeBase'] })
     },
@@ -30,7 +30,7 @@ export const useKnowledgeBaseControllers = () => {
   })
 
   const changeKnowledgeBase = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<PayloadPostKnowledgeBase> }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<PayloadPostKbFaq> }) =>
       patchKBFaqItemsId(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeBase'] })

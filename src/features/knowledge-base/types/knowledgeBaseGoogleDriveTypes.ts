@@ -1,4 +1,4 @@
-export interface DataDocuments {
+export interface DataKbGoogleDrive {
   id: string
   title: string
   mimeType: string
@@ -9,14 +9,14 @@ export interface DataDocuments {
   _count: { chunks: number }
 }
 
-export interface Documents {
+export interface KbGoogleDrive {
   status: string
   statusTitle: string
   statusSubtitle: string
-  data: DataDocuments[] | null
+  data: DataKbGoogleDrive[] | null
 }
 
-export interface DataDocumentsSync {
+export interface DataKbGoogleDriveSync {
   added?: number
   total?: number
   processed?: string
@@ -26,9 +26,9 @@ export interface DataDocumentsSync {
   error?: string
 }
 
-export interface DocumentsSync {
+export interface KbGoogleDriveSync {
   status: string
   statusTitle: string
   statusSubtitle: string
-  data: DataDocumentsSync | null
+  data: DataKbGoogleDriveSync | null
 }

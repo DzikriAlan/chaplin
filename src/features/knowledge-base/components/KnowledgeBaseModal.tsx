@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X } from 'lucide-react'
-import type { DataKnowledgeBase } from '../types/knowledgeBaseTypes'
+import type { DataKbFaq } from '../types/knowledgeBaseTypes'
 
 const schema = z.object({
   question: z.string().min(3, 'Pertanyaan minimal 3 karakter'),
@@ -14,7 +14,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 interface Props {
-  item?: DataKnowledgeBase | null
+  item?: DataKbFaq | null
   isSaving: boolean
   onSave: (question: string, answer: string, tags: string[]) => void
   onClose: () => void
