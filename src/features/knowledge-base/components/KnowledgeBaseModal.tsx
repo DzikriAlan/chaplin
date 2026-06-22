@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X } from 'lucide-react'
-import type { DataKbFaq } from '../types/knowledgeBaseTypes'
+import type { DataKbFaq } from '../types/knowledgeBaseFaqTypes'
 
 const schema = z.object({
   question: z.string().min(3, 'Pertanyaan minimal 3 karakter'),

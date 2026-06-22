@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
-import type { DataKbFaq } from '../types/knowledgeBaseTypes'
+import type { DataKbFaq } from '../types/knowledgeBaseFaqTypes'
 
 interface FAQItemProps {
   item: DataKbFaq

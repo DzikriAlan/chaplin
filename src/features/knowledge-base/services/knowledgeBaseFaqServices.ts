@@ -1,4 +1,4 @@
-import type { PayloadPostKbFaq } from '../types/knowledgeBaseTypes'
+import type { PayloadPostKbFaq } from '../types/knowledgeBaseFaqTypes'
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 

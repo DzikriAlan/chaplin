@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { PayloadPostKbFaq, KbFaq, KbFaqCreate } from '../types/knowledgeBaseTypes'
+import type { PayloadPostKbFaq, KbFaq, KbFaqCreate } from '../types/knowledgeBaseFaqTypes'
 
 interface KbFaqStore {
   payloadPostKbFaq: PayloadPostKbFaq

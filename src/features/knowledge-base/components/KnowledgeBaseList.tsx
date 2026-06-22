@@ -1,8 +1,8 @@
 import toast from 'react-hot-toast'
-import type { DataKbFaq } from '../types/knowledgeBaseTypes'
+import type { DataKbFaq } from '../types/knowledgeBaseFaqTypes'
 import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
 import LoadData from '@/shared/components/LoadData'
-import KBFaqItem from './KBFaqItem'
+import KBFaqItem from './KnowledgeBaseFaqItem'
 
 export default function KnowledgeBaseList() {
   const { fetchKnowledgeBase, removeKnowledgeBase } = useKBFaqControllers()

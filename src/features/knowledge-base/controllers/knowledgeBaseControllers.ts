@@ -5,7 +5,7 @@ import {
   deleteKBFaqItemsId,
   patchKBFaqItemsId,
 } from '../services/knowledgeBaseFaqServices'
-import type { PayloadPostKbFaq } from '../types/knowledgeBaseTypes'
+import type { PayloadPostKbFaq } from '../types/knowledgeBaseFaqTypes'
 
 export const useKBFaqControllers = () => {
   const queryClient = useQueryClient()
