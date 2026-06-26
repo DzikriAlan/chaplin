@@ -22,32 +22,32 @@ const features = [
   {
     icon: <Bot className="h-5 w-5 text-primary" />,
     title: 'AI Agents',
-    description: 'Buat dan kelola AI agent yang dapat menjawab pertanyaan berdasarkan knowledge base Anda secara otomatis.',
+    description: 'Kurangi beban tim support hingga 70% — agent Anda menjawab pertanyaan pelanggan 24 jam sehari, tanpa hari libur.',
   },
   {
     icon: <Database className="h-5 w-5 text-primary" />,
     title: 'Knowledge Base',
-    description: 'Upload dokumen, FAQ, dan data dari Google Drive atau My Drive sebagai sumber pengetahuan agent.',
+    description: 'Jadikan ratusan dokumen, FAQ, dan kebijakan perusahaan sebagai sumber jawaban instan yang selalu akurat.',
   },
   {
     icon: <Wallet className="h-5 w-5 text-primary" />,
     title: 'Usage & Saldo',
-    description: 'Monitor penggunaan dan kelola kredit API dengan dashboard yang informatif dan transparan.',
+    description: 'Tidak ada tagihan mengejutkan — pantau biaya per agent dan proyeksikan pengeluaran bulanan sebelum membengkak.',
   },
   {
     icon: <Zap className="h-5 w-5 text-primary" />,
     title: 'Real-time Streaming',
-    description: 'Respons AI agent dikirim secara streaming, memberikan pengalaman percakapan yang cepat dan natural.',
+    description: 'Pelanggan mendapat jawaban sebelum kehilangan kesabaran — tanpa loading screen, tanpa menunggu, langsung terjawab.',
   },
   {
     icon: <Shield className="h-5 w-5 text-primary" />,
     title: 'Autentikasi Aman',
-    description: 'Login dengan Google Account yang terintegrasi dengan NextAuth, menjaga data Anda tetap aman.',
+    description: 'Seluruh tim Anda aktif dalam 1 klik — login Google tanpa setup password atau undangan manual ke setiap anggota.',
   },
   {
     icon: <Globe className="h-5 w-5 text-primary" />,
-    title: 'Teknologi Modern',
-    description: 'Dibangun di atas Next.js 14, TypeScript, TanStack Query, Zustand, dan Tailwind CSS untuk performa terbaik.',
+    title: 'Siap Skala',
+    description: 'Mulai dari puluhan hingga ribuan percakapan per hari tanpa perubahan infrastruktur atau konfigurasi ulang apapun.',
   },
 ]
 

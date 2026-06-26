@@ -10,6 +10,7 @@ import {
   LogOut,
   Settings,
   Wallet,
+  MessageSquarePlus,
 } from 'lucide-react'
 import chaplinLogo from '@/shared/assets/chaplin.png'
 import { useUIStates } from '@/shared/states/uiStates'
@@ -99,6 +100,13 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="px-2 py-3 space-y-0.5 shrink-0">
+        <NavItem
+          href="/home"
+          icon={<MessageSquarePlus className="h-4 w-4 shrink-0" />}
+          label="New Chat"
+          collapsed={!sidebarOpen}
+          isActive={router.pathname === '/home'}
+        />
         <NavItem
           href="/agents"
           icon={<Bot className="h-4 w-4 shrink-0" />}
