@@ -1,11 +1,10 @@
 import type { PayloadPostUsageSaldoTopup, PayloadGetUsageSaldoLogs } from '../types/usageSaldoTypes'
-import { backendGet, backendPost } from '@/shared/lib/backendClient'
-
-// ─── Balance Services ──────────────────────────────────────────────────────
+import { api } from '@/shared/lib/api'
+import { formattingQueryString } from '@/shared/lib/utils'
 
 export const getUsageSaldoBalance = async () => {
   try {
-    return await backendGet('/usage-saldo/balance')
+    return await api('GET', '/usage-saldo/balance')
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
@@ -14,19 +13,17 @@ export const getUsageSaldoBalance = async () => {
 
 export const postUsageSaldoTopup = async (payload: PayloadPostUsageSaldoTopup) => {
   try {
-    return await backendPost('/usage-saldo/topup', payload)
+    return await api('POST', '/usage-saldo/topup', payload)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
   }
 }
 
-// ─── Usage Services ────────────────────────────────────────────────────────
-
 export const getUsageSaldoLogs = async (payload?: PayloadGetUsageSaldoLogs) => {
   try {
-    const query = payload ? (payload as Record<string, string>) : undefined
-    return await backendGet('/usage-saldo/logs', query)
+    const queryString = formattingQueryString(payload ?? {})
+    return await api('GET', `/usage-saldo/logs${queryString}`)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error

@@ -1,13 +1,10 @@
 import type { DataKbMyDriveFolder, PayloadPostKbMyDriveFolder, PayloadPostKbMyDriveSignedUrl, DataKbMyDriveSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
-
-const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
+import { api } from '@/shared/lib/api'
 
 export const getKBMyDriveFolders = async (): Promise<DataKbMyDriveFolder[]> => {
   try {
-    const res = await fetch(`${base}/knowledge-base/my-drive/folders`)
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: DataKbMyDriveFolder[] }
-    return json.data ?? []
+    const data = await api<DataKbMyDriveFolder[]>('GET', '/knowledge-base/my-drive/folders')
+    return data ?? []
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return []
     throw error
@@ -16,14 +13,7 @@ export const getKBMyDriveFolders = async (): Promise<DataKbMyDriveFolder[]> => {
 
 export const postKBMyDriveFolders = async (payload: PayloadPostKbMyDriveFolder) => {
   try {
-    const res = await fetch(`${base}/knowledge-base/my-drive/folders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: unknown }
-    return json.data
+    return await api('POST', '/knowledge-base/my-drive/folders', payload)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
@@ -32,10 +22,7 @@ export const postKBMyDriveFolders = async (payload: PayloadPostKbMyDriveFolder) 
 
 export const deleteKBMyDriveFolders = async (id: string) => {
   try {
-    const res = await fetch(`${base}/knowledge-base/my-drive/folders?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: unknown }
-    return json.data
+    return await api('DELETE', '/knowledge-base/my-drive/folders', { id })
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
@@ -44,14 +31,7 @@ export const deleteKBMyDriveFolders = async (id: string) => {
 
 export const postKBMyDriveSignedUrl = async (payload: PayloadPostKbMyDriveSignedUrl): Promise<DataKbMyDriveSignedUrl> => {
   try {
-    const res = await fetch(`${base}/knowledge-base/my-drive/signed-url`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: DataKbMyDriveSignedUrl }
-    return json.data
+    return await api<DataKbMyDriveSignedUrl>('POST', '/knowledge-base/my-drive/signed-url', payload)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null as unknown as DataKbMyDriveSignedUrl
     throw error
@@ -60,10 +40,7 @@ export const postKBMyDriveSignedUrl = async (payload: PayloadPostKbMyDriveSigned
 
 export const deleteKBMyDriveFiles = async (id: string) => {
   try {
-    const res = await fetch(`${base}/knowledge-base/my-drive/files?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: unknown }
-    return json.data
+    return await api('DELETE', '/knowledge-base/my-drive/files', { id })
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error

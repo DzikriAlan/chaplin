@@ -1,13 +1,10 @@
 import type { PayloadPostKbFaq } from '../types/knowledgeBaseFaqTypes'
-
-const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
+import { api } from '@/shared/lib/api'
+import { formattingQueryString } from '@/shared/lib/utils'
 
 export const getKBFaqItems = async () => {
   try {
-    const res = await fetch(`${base}/knowledge-base/faq/items`, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: unknown }
-    return json.data
+    return await api('GET', '/knowledge-base/faq/items')
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
@@ -16,10 +13,7 @@ export const getKBFaqItems = async () => {
 
 export const postKBFaqItems = async (payload: PayloadPostKbFaq) => {
   try {
-    const res = await fetch(`${base}/knowledge-base/faq/items`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: unknown }
-    return json.data
+    return await api('POST', '/knowledge-base/faq/items', payload)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
@@ -28,10 +22,7 @@ export const postKBFaqItems = async (payload: PayloadPostKbFaq) => {
 
 export const deleteKBFaqItemsId = async (id: string) => {
   try {
-    const res = await fetch(`${base}/knowledge-base/faq/items?id=${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: unknown }
-    return json.data
+    return await api('DELETE', '/knowledge-base/faq/items', { id })
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
@@ -40,10 +31,8 @@ export const deleteKBFaqItemsId = async (id: string) => {
 
 export const patchKBFaqItemsId = async (id: string, payload: Partial<PayloadPostKbFaq>) => {
   try {
-    const res = await fetch(`${base}/knowledge-base/faq/items?id=${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-    if (!res.ok) throw new Error(res.statusText)
-    const json = await res.json() as { data: unknown }
-    return json.data
+    const queryString = formattingQueryString({ id })
+    return await api('PATCH', `/knowledge-base/faq/items${queryString}`, payload)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error

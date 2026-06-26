@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Bot, Send } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import type { DataAgent } from '../types/agentsTypes'
-import { backendFetch } from '@/shared/lib/backendClient'
+import { backendFetch } from '@/shared/lib/api'
 
 interface PreviewMessage {
   id: string
