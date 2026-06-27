@@ -22,7 +22,8 @@ export const postAgent = async (payload: PayloadPostAgent) => {
 
 export const deleteAgent = async (id: string) => {
   try {
-    return await api('DELETE', '/agent', { id })
+    const queryString = formattingQueryString({ id })
+    return await api('DELETE', `/agent${queryString}`)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error

@@ -1,103 +1,64 @@
 'use client'
 
 import { useState } from 'react'
-import { Bot, ArrowUp, Database, Wallet, Plus } from 'lucide-react'
-import Link from 'next/link'
+import { Plus, ArrowUp } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 
-interface QuickLinkProps {
-  href: string
-  icon: React.ReactNode
-  label: string
-  description: string
-}
-
-function QuickLink({ href, icon, label, description }: Readonly<QuickLinkProps>) {
-  return (
-    <Link
-      href={href}
-      className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 hover:border-foreground/20 hover:bg-muted/50 transition-colors"
-    >
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-        {icon}
-      </div>
-      <div>
-        <p className="text-rem-90 font-semibold text-foreground">{label}</p>
-        <p className="text-rem-80 text-muted-foreground mt-0.5">{description}</p>
-      </div>
-    </Link>
-  )
-}
+const defaultName = process.env.NEXT_PUBLIC_USER_NAME ?? 'Anda'
 
 export default function HomeChatView() {
+  const { data: session } = useSession()
   const [message, setMessage] = useState('')
+
+  const displayName = session?.user?.name?.split(' ')[0] ?? defaultName
 
   const handleSubmit = () => {
     if (!message.trim()) return
     setMessage('')
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
       e.preventDefault()
       handleSubmit()
     }
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center px-4 py-10">
+    <div className="flex h-full flex-col items-center justify-center px-4">
       <div className="w-full max-w-2xl">
-        {/* Greeting */}
-        <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-            <Bot className="h-6 w-6 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Apa yang bisa saya bantu?</h1>
-          <p className="mt-2 text-rem-90 text-muted-foreground">Mulai percakapan baru atau jelajahi fitur lainnya.</p>
-        </div>
+        <h1 className="mb-6 text-center text-2xl font-semibold text-foreground tracking-tight">
+          Senang bertemu dengan Anda, {displayName}.
+        </h1>
 
-        {/* Chat input */}
-        <div className="mb-6 rounded-2xl border border-border bg-card shadow-sm">
-          <textarea
+        <div className="flex items-center gap-3 rounded-full border border-border bg-muted/60 px-4 py-3">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            aria-label="Tambah"
+            className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+
+          <input
+            type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ketik pesan Anda..."
-            rows={3}
-            className="w-full resize-none rounded-t-2xl bg-transparent px-4 pt-4 pb-2 text-rem-90 text-foreground placeholder:text-muted-foreground outline-none"
+            placeholder="Tanyakan apa saja"
+            className="flex-1 bg-transparent text-rem-90 text-foreground placeholder:text-muted-foreground outline-none"
           />
-          <div className="flex items-center justify-end px-4 pb-3">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!message.trim()}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-40 hover:bg-primary/90 transition-colors"
-              aria-label="Kirim pesan"
-            >
-              <ArrowUp className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
 
-        {/* Quick links */}
-        <div className="grid gap-3 sm:grid-cols-3">
-          <QuickLink
-            href="/home"
-            icon={<Plus className="h-4 w-4 text-primary" />}
-            label="New Chat"
-            description="Mulai percakapan baru"
-          />
-          <QuickLink
-            href="/knowledge-base"
-            icon={<Database className="h-4 w-4 text-primary" />}
-            label="Knowledge Base"
-            description="Kelola dokumen & data"
-          />
-          <QuickLink
-            href="/usage"
-            icon={<Wallet className="h-4 w-4 text-primary" />}
-            label="Usage & Saldo"
-            description="Pantau kredit & penggunaan"
-          />
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!message.trim()}
+            aria-label="Kirim pesan"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background disabled:opacity-30 hover:opacity-80 transition-opacity"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { api } from '@/shared/lib/api'
+import { formattingQueryString } from '@/shared/lib/utils'
 
 export const getKBGoogleDriveDocuments = async () => {
   try {
@@ -11,7 +12,8 @@ export const getKBGoogleDriveDocuments = async () => {
 
 export const deleteKBGoogleDriveDocumentsId = async (id: string) => {
   try {
-    return await api('DELETE', '/knowledge-base/google-drive/documents', { id })
+    const queryString = formattingQueryString({ id })
+    return await api('DELETE', `/knowledge-base/google-drive/documents${queryString}`)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error

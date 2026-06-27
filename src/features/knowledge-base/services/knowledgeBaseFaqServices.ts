@@ -22,7 +22,8 @@ export const postKBFaqItems = async (payload: PayloadPostKbFaq) => {
 
 export const deleteKBFaqItemsId = async (id: string) => {
   try {
-    return await api('DELETE', '/knowledge-base/faq/items', { id })
+    const queryString = formattingQueryString({ id })
+    return await api('DELETE', `/knowledge-base/faq/items${queryString}`)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error

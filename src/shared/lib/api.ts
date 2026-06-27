@@ -1,11 +1,19 @@
+export interface ApiMeta {
+  timestamp: string
+  request_id: string
+  page?: number
+  limit?: number
+  total?: number
+  total_pages?: number
+}
+
 export interface ApiResponse<T = unknown> {
   success: boolean
-  data?: T | null
-  error?: {
-    code: string
-    message: string
-  }
-  message?: string
+  code: number
+  message: string
+  data: T | null
+  meta: ApiMeta
+  errors?: Array<{ field: string; message: string }>
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
@@ -40,9 +48,14 @@ export const api = async <T = unknown>(
   if (payload && method !== 'GET') options.body = JSON.stringify(payload)
 
   const res = await fetch(`${baseUrl}${endpoint}`, options)
-  if (!res.ok) throw new Error(res.statusText)
 
-  return res.json() as Promise<T>
+  const json = await res.json() as ApiResponse<T>
+
+  if (!res.ok) {
+    throw new Error(json?.message ?? res.statusText)
+  }
+
+  return json.data as T
 }
 
 export const backendFetch = async (
@@ -52,7 +65,7 @@ export const backendFetch = async (
   const token = await getAuthToken()
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...((options?.headers as Record<string, string>) ?? {}),
+    ...(options?.headers as Record<string, string>),
   }
   if (token) headers.Authorization = `Bearer ${token}`
 

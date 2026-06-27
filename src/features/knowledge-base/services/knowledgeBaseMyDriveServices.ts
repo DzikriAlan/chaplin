@@ -1,5 +1,6 @@
 import type { DataKbMyDriveFolder, PayloadPostKbMyDriveFolder, PayloadPostKbMyDriveSignedUrl, DataKbMyDriveSignedUrl } from '../types/knowledgeBaseMyDriveTypes'
 import { api } from '@/shared/lib/api'
+import { formattingQueryString } from '@/shared/lib/utils'
 
 export const getKBMyDriveFolders = async (): Promise<DataKbMyDriveFolder[]> => {
   try {
@@ -22,7 +23,8 @@ export const postKBMyDriveFolders = async (payload: PayloadPostKbMyDriveFolder) 
 
 export const deleteKBMyDriveFolders = async (id: string) => {
   try {
-    return await api('DELETE', '/knowledge-base/my-drive/folders', { id })
+    const queryString = formattingQueryString({ id })
+    return await api('DELETE', `/knowledge-base/my-drive/folders${queryString}`)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
@@ -40,7 +42,8 @@ export const postKBMyDriveSignedUrl = async (payload: PayloadPostKbMyDriveSigned
 
 export const deleteKBMyDriveFiles = async (id: string) => {
   try {
-    return await api('DELETE', '/knowledge-base/my-drive/files', { id })
+    const queryString = formattingQueryString({ id })
+    return await api('DELETE', `/knowledge-base/my-drive/files${queryString}`)
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return null
     throw error
