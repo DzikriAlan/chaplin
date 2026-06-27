@@ -69,6 +69,7 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
           <div className="h-full flex flex-col items-center justify-center px-4">
             <div className="flex justify-center mb-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {agent.image ? <img src={agent.image} alt={agent.name} className="h-full w-full object-cover" /> : <Bot className="h-8 w-8 text-primary" />}
               </div>
             </div>
@@ -87,6 +88,7 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
                 <div key={msg.id} className="flex gap-3">
                   <div className="flex flex-col items-center gap-1 shrink-0 mt-0.5">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       {agent.image ? <img src={agent.image} alt={agent.name} className="h-full w-full object-cover" /> : <Bot className="h-4 w-4 text-primary" />}
                     </div>
                     <span className="text-rem-65 font-medium text-muted-foreground leading-none">{agent.name}</span>
