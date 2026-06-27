@@ -1,49 +1,39 @@
-# Next Starter
+# Chaplin Frontend
+
+**Your knowledge, always ready**
+
+Turn your team's knowledge into AI agents that answer questions, handle support, and automate workflows — 24/7. Chaplin is a production-grade AI agent platform with a modern, responsive web interface built with Next.js.
+
+
+## What i do
+
+- Designed scalable frontend architecture using **Next.js**, **React**, **TypeScript**, and **Tailwind CSS**, enabling consistent and maintainable user interface development.
+- Implemented responsive design with **mobile marquee sliders** and **floating animations**, delivering seamless experiences across all devices and reducing time-to-interaction.
+- Automated state management using **TanStack Query** and **Zustand**, reducing boilerplate and enabling efficient server/client state synchronization.
+- Engineered real-time chat interfaces with **SSE streaming** and **WebSocket support**, delivering instant feedback and improved user engagement.
+- Built secure authentication flows with **NextAuth.js** and **JWT**, simplifying user onboarding and backend integration.
+- Established frontend standards through **TypeScript strictness**, **ESLint**, and responsive design testing, improving code quality and deployment consistency.
+- Maintained UI consistency across features through **Shadcn/UI component library** and design system documentation, accelerating feature development and reducing bugs.
 
 ---
 
-## Teknologi yang Digunakan
+## Tech Stack
 
-| Kategori | Teknologi |
-|----------|-----------|
-| Framework | Next.js 14 (Pages Router) + React 18 + TypeScript |
-| Styling | Tailwind CSS + Shadcn/UI |
-| Server State | TanStack Query (`@tanstack/react-query`) |
-| Client State | Zustand |
-| Form | React Hook Form + Zod |
-| Animation | Framer Motion |
-| ORM | Prisma |
-| Database | PostgreSQL (`pg`) |
-| i18n | i18next + react-i18next |
-| Icons | Lucide React |
-
----
-
-## Struktur Project
-
-```
-src/
-├── pages/                  # Next.js Pages Router
-│   ├── _app.tsx            # App wrapper (TanStack Query provider)
-│   ├── _document.tsx       # HTML document
-│   └── index.tsx           # Home page
-├── features/               # Modul fitur (feature-based)
-│   └── {feature-name}/
-│       ├── types/          # TypeScript interfaces
-│       ├── states/         # Zustand stores
-│       ├── services/       # API call functions
-│       ├── controllers/    # TanStack Query hooks
-│       └── components/     # React components
-└── shared/
-    ├── lib/
-    │   ├── prisma.ts       # Prisma client singleton
-    │   └── utils.ts        # cn() utility (clsx + tailwind-merge)
-    ├── styles/
-    │   └── globals.css     # Tailwind base + Shadcn CSS variables
-    └── locales/
-        ├── en.json
-        └── id.json
-```
+| Concern | Technology | Purpose |
+|---|---|---|
+| **Framework** | Next.js 14 | React framework with SSR & static generation |
+| **Language** | TypeScript | Type-safe frontend development |
+| **Styling** | Tailwind CSS | Utility-first CSS framework |
+| **UI Components** | Shadcn/UI | High-quality React components |
+| **State Management** | Zustand | Lightweight client state |
+| **Server State** | TanStack Query (React Query) | Server state synchronization |
+| **Forms** | React Hook Form | Efficient form handling & validation |
+| **Animations** | Tailwind CSS + Custom Keyframes | Smooth transitions & marquee effects |
+| **HTTP Client** | Fetch API | Built-in async request handling |
+| **Icons** | Lucide React | Consistent icon system |
+| **i18n** | next-i18next | Multi-language support |
+| **Auth** | NextAuth.js | JWT & OAuth authentication |
+| **Image Optimization** | Next.js Image | Automatic image optimization |
 
 ---
 
@@ -51,86 +41,114 @@ src/
 
 ### Prerequisites
 
-- Node.js v20+
-- PostgreSQL database (lokal atau cloud)
+- [Node.js](https://nodejs.org) v18+ (verify with `node --version`)
+- [npm](https://npmjs.com) v9+ or [pnpm](https://pnpm.io) v8+
+- **Chaplin Backend running** at `http://localhost:3001` (see chaplin-backend/README.md)
 
-### 1. Clone dan Install
+### 1. Clone & Install
 
 ```bash
 git clone <repo-url>
-cd next-starter
+cd chaplin
 npm install
 ```
 
-### 2. Setup Environment
+If installation fails, try:
+```bash
+npm ci
+```
+
+### 2. Setup Environment Variables
 
 ```bash
 cp .env.example .env.local
 ```
 
-Isi `.env.local` sesuai konfigurasi kamu:
+Edit `.env.local` and ensure these are set:
 
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/db_name"
-
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-here"
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-random-secret-key-min-32-chars
 ```
 
-> Generate `NEXTAUTH_SECRET` dengan: `openssl rand -base64 32`
+Generate NEXTAUTH_SECRET: `openssl rand -base64 32`
 
-### 3. Setup Database
+### 3. Verify Backend is Running
+
+Before starting frontend, ensure backend is running at http://localhost:3001
 
 ```bash
-npx prisma db push
-npx prisma generate
+curl http://localhost:3001/api/v1/health
 ```
 
-> `db:push` otomatis dijalankan saat `npm install` (via `postinstall` script).
+If failing, start backend from chaplin-backend/:
+```bash
+npm run start:dev
+```
 
-### 4. Jalankan Development Server
+### 4. Start Development
 
 ```bash
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000).
+Open http://localhost:3000 in your browser.
+
+---
+
+## Troubleshooting
+
+### Port 3000 already in use
+```bash
+npm run dev -- -p 3001
+```
+
+### Backend not accessible (http://localhost:3001)
+Ensure backend is running:
+```bash
+cd ../chaplin-backend
+npm run start:dev
+```
+
+### NEXTAUTH_SECRET error
+Generate new secret:
+```bash
+openssl rand -base64 32
+```
+Add to `.env.local`
+
+### Module not found errors
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Styling not applied
+Hard refresh browser: `Ctrl+Shift+R` (Windows/Linux) or `Cmd+Shift+R` (Mac)
 
 ---
 
 ## Scripts
 
-| Script | Deskripsi |
-|--------|-----------|
-| `npm run dev` | Jalankan development server |
-| `npm run build` | Build production |
-| `npm run start` | Jalankan production build |
-| `npm run lint` | Jalankan ESLint |
-| `npm run db:push` | Push schema Prisma ke database |
-| `npm run db:studio` | Buka Prisma Studio (GUI database) |
+```bash
+npm run dev           # Development with hot-reload
+npm run build         # Build for production
+npm run start         # Start production server
+npm run lint          # ESLint check & fix
+```
 
 ---
 
-## Panduan Arsitektur
+## Documentation
 
-Lihat [CLAUDE.md](./CLAUDE.md) untuk aturan lengkap mengenai:
-- Konvensi penamaan fungsi, file, dan folder
-- Struktur per file (Types, States, Services, Controllers, Components)
-- Aturan penggunaan TanStack Query dan Zustand
-- Aturan penulisan komponen React
-
----
-
-## Contributing
-
-1. Fork repository
-2. Buat feature branch: `git checkout -b feature/nama-fitur`
-3. Commit perubahan: `git commit -m 'feat: deskripsi singkat'`
-4. Push ke branch: `git push origin feature/nama-fitur`
-5. Buat Pull Request
+- **Backend API** — http://localhost:3001/api/docs (Swagger)
+- **Next.js Docs** — https://nextjs.org/docs
+- **Tailwind CSS** — https://tailwindcss.com/docs
+- **Shadcn/UI** — https://ui.shadcn.com
 
 ---
 
 ## License
 
-MIT License
+MIT
