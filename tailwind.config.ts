@@ -39,7 +39,7 @@ const config: Config = {
       },
 
       colors: {
-        // ─── Zimpan Brand Blue-Indigo (from logo) ───────────────────────────
+        // ─── chaplin Brand Blue-Indigo (from logo) ───────────────────────────
         brand: {
           50:  "#EEF2FF",
           100: "#E0E7FF",
