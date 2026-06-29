@@ -36,10 +36,10 @@ export function KnowledgeBaseMyDriveFolderNode({
   onDropFiles,
   uploadingFolderId,
 }: Readonly<FolderNodeProps>) {
+  // states / variable
   const [expanded, setExpanded] = useState(true)
   const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-
   const allFileIds = getCollectFileIds(folder)
   const selectedCount = allFileIds.filter((id) => selectedIds.has(id)).length
   const isChecked = allFileIds.length > 0 && selectedCount === allFileIds.length
@@ -48,7 +48,8 @@ export function KnowledgeBaseMyDriveFolderNode({
   const hasContent = folder.children.length > 0 || folder.files.length > 0
   const paddingLeft = depth * 16
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  // function / methode
+  const syncDropFiles = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
     if (e.dataTransfer.files.length > 0) {
@@ -56,7 +57,7 @@ export function KnowledgeBaseMyDriveFolderNode({
     }
   }, [folder.id, onDropFiles])
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const syncDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(true)
   }, [])
@@ -91,11 +92,12 @@ export function KnowledgeBaseMyDriveFolderNode({
     </div>
   )
 
+  // lifecycle react (implicit - no effects for this component)
   return (
     <div>
       <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
+        onDrop={syncDropFiles}
+        onDragOver={syncDragOver}
         onDragLeave={() => setDragOver(false)}
       >
         <ListCardRow

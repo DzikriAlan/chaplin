@@ -1,7 +1,7 @@
 'use client'
 
-import { Bot, ChevronDown, Star } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import { Bot, ChevronDown, Star } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
 import { useAgentsControllers } from '../controllers/agentsControllers'
 import { useAgentsStates } from '../states/agentsStates'
@@ -12,23 +12,27 @@ interface AgentsSwitchProps {
 }
 
 export default function AgentsSwitch({ selectedAgentId, onSelectAgent }: Readonly<AgentsSwitchProps>) {
+  // variable importer
+  useAgentsControllers()
+
+  // states / variable
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-
   const { agentsList } = useAgentsStates()
-  useAgentsControllers()
   const agents = (agentsList.data as DataAgent[]) ?? []
-
   const selectedAgent = agents.find((a) => a.id === selectedAgentId) ?? null
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+  // function / methode
+  const getClickOutsideHandler = (e: MouseEvent) => {
+    if (ref.current && !ref.current.contains(e.target as Node)) {
+      setOpen(false)
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }
+
+  // lifecycle react
+  useEffect(() => {
+    document.addEventListener('mousedown', getClickOutsideHandler)
+    return () => document.removeEventListener('mousedown', getClickOutsideHandler)
   }, [])
 
   return (

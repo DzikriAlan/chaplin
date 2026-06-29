@@ -8,15 +8,18 @@ interface FAQItemProps {
 }
 
 export default function KnowledgeBaseFaqItem({ item, onDeleteItem }: Readonly<FAQItemProps>) {
+  // states / variable
   const [expanded, setExpanded] = useState(false)
 
-  const handleToggle = () => setExpanded((v) => !v)
+  // function / methode
+  const syncExpanded = () => setExpanded((v) => !v)
 
+  // lifecycle react
   return (
     <div className="rounded-xl border bg-card shadow-card overflow-hidden">
       <button
         type="button"
-        onClick={handleToggle}
+        onClick={syncExpanded}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/30"
       >
         <span className="text-rem-90 font-medium text-foreground pr-4">{item.question}</span>

@@ -1,22 +1,24 @@
 'use client'
 
-import { Bot, Plus, Search, X, ArrowLeft, PanelLeft } from 'lucide-react'
 import { useState, useMemo, useRef } from 'react'
+import { Bot, Plus, Search, X, ArrowLeft, PanelLeft } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
 import { useAgentsControllers } from '../controllers/agentsControllers'
 import { useAgentsStates } from '../states/agentsStates'
+import { useUIStates } from '@/shared/states/uiStates'
 import AgentForm, { type AgentFormHandle } from './AgentForm'
 import AgentPreviewInline from './AgentPreviewInline'
 import AgentCard from './AgentCard'
-import { useUIStates } from '@/shared/states/uiStates'
 
 type ViewMode = 'list' | 'create' | 'preview'
 
 export default function AgentsList() {
+  // variable importer
   const { storeAgent, removeAgent, changeAgent } = useAgentsControllers()
-
   const { toggleSidebar } = useUIStates()
   const { agentsList } = useAgentsStates()
+
+  // states / variable
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [editAgent, setEditAgent] = useState<DataAgent | null>(null)
@@ -26,6 +28,8 @@ export default function AgentsList() {
   const isSaving = storeAgent.isPending || changeAgent.isPending
   const filtered = ((agentsList.data as DataAgent[]) ?? []).filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
   const skeletonIds = useMemo(() => ['sk-1', 'sk-2', 'sk-3', 'sk-4'], [])
+
+  // function / methode
 
   const saveAgent = async (data: {
     name: string; description: string; image: string; personalization: string
@@ -62,6 +66,7 @@ export default function AgentsList() {
     setViewMode('preview')
   }
 
+  // lifecycle react (implicit - no effects for this component)
   if (viewMode === 'create') {
     return (
       <div className="flex-1 max-w-3xl mx-auto w-full">

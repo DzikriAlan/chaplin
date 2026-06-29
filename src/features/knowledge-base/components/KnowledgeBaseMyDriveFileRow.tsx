@@ -19,6 +19,9 @@ function getFormatBytes(bytes: number): string {
 }
 
 export function KnowledgeBaseMyDriveFileRow({ file, depth, isSelected, onToggle, onDelete }: Readonly<FileRowProps>) {
+  // function / methode is defined at module level (getFormatBytes)
+
+  // lifecycle react (implicit - no effects)
   return (
     <ListCardRow
       selectionNode={

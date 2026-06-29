@@ -8,8 +8,10 @@ interface CheckboxProps {
 }
 
 export function KnowledgeBaseMyDriveCheckbox({ checked, indeterminate, onChange, label }: Readonly<CheckboxProps>) {
+  // states / variable
   const ref = useRef<HTMLInputElement>(null)
 
+  // lifecycle react
   useEffect(() => {
     if (ref.current) {
       ref.current.indeterminate = indeterminate

@@ -17,11 +17,13 @@ interface AgentPreviewInlineProps {
 }
 
 export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlineProps>) {
+  // states / variable
   const [messages, setMessages] = useState<PreviewMessage[]>([])
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
+  // function / methode
   const getPreviewStream = async (response: Response, assistantId: string) => {
     if (!response.body) throw new Error('No response body')
     const reader = response.body.getReader()
@@ -40,6 +42,7 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
     }
   }
 
+  // lifecycle react
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   const saveChatMessage = async () => {
@@ -62,6 +65,7 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
 
   const isDisabled = isStreaming || !input.trim()
 
+  // return / template
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       <div className="flex-1 overflow-y-auto min-h-0">

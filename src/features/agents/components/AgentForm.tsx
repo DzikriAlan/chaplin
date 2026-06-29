@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import Image from 'next/image'
 import { ImageIcon, Eye, Info, Copy, Check as CheckIcon } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
 import { useKbFaqStates } from '@/features/knowledge-base/states/knowledgeBaseFaqStates'
@@ -34,6 +34,10 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
   { agent, isSaving, onSave, onPreview }: Readonly<AgentFormProps>,
   ref,
 ) {
+  // variable importer
+  const { kbFaq } = useKbFaqStates()
+
+  // states / variable
   const isEdit = agent != null
   const [selectedKbIds, setSelectedKbIds] = useState<Set<string>>(new Set(agent?.knowledgeBaseIds ?? []))
   const [imagePreview, setImagePreview] = useState(agent?.image ?? '')
@@ -43,14 +47,13 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
   const [imageBoxSize, setImageBoxSize] = useState(160)
   const rightColRef = useRef<HTMLDivElement>(null)
 
-  const { kbFaq } = useKbFaqStates()
-
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<AgentFormValues>({
     resolver: zodResolver(agentSchema),
     defaultValues: { name: '', description: '', image: '', personalization: '', isDefault: false },
   })
   const formValues = watch()
 
+  // function / methode
   const getEmbedScript = () => {
     const baseUrl = globalThis.window?.location.origin ?? ''
     const id = agent?.id ?? 'AGENT_ID'
@@ -118,6 +121,7 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
     })
   }
 
+  // lifecycle react
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 640)
     checkDesktop()
