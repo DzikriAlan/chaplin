@@ -88,14 +88,14 @@ function LogRow({ log }: Readonly<LogRowProps>) {
 }
 
 export default function UsageSaldoView() {
-  const { fetchBalance, storeTopup, fetchLogs } = useUsageSaldoControllers()
-  const { payloadGetLogs, setGetLogs } = useUsageSaldoStates()
+  const { storeTopup } = useUsageSaldoControllers()
+  const { balance, usageLogs, payloadGetLogs, setGetLogs } = useUsageSaldoStates()
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => { setIsMounted(true) }, [])
 
-  const balanceData = fetchBalance.data as DataUsageSaldoBalance | undefined
-  const logsData = fetchLogs.data as DataUsageSaldoLogList | undefined
+  const balanceData = balance.data as DataUsageSaldoBalance | undefined
+  const logsData = usageLogs.data as DataUsageSaldoLogList | undefined
   const logs = logsData?.logs ?? []
 
   const selectedYear = Number.parseInt(payloadGetLogs.year ?? String(new Date().getFullYear()))
@@ -273,7 +273,7 @@ export default function UsageSaldoView() {
           <h2 className="text-rem-95 font-semibold text-foreground">Riwayat Penggunaan</h2>
         </div>
 
-        {fetchLogs.isLoading && (
+        {usageLogs.status === 'loading' && (
           <div className="p-6 space-y-3">
             {['r1', 'r2', 'r3'].map((k) => (
               <div key={k} className="h-4 bg-muted rounded animate-pulse" />
@@ -281,7 +281,7 @@ export default function UsageSaldoView() {
           </div>
         )}
 
-        {!fetchLogs.isLoading && logs.length === 0 && (
+        {usageLogs.status !== 'loading' && logs.length === 0 && (
           <div className="py-12 text-center">
             <TrendingDown className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-rem-90 font-medium text-foreground">Belum ada aktivitas</p>
@@ -289,7 +289,7 @@ export default function UsageSaldoView() {
           </div>
         )}
 
-        {!fetchLogs.isLoading && logs.length > 0 && (
+        {usageLogs.status !== 'loading' && logs.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>

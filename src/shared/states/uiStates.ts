@@ -11,7 +11,7 @@ interface UIStore {
 export const useUIStates = create<UIStore>((set) => ({
   sidebarOpen: true,
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
-  setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
   selectedAgentId: null,
-  setSelectedAgentId: (id) => set({ selectedAgentId: id }),
+  setSelectedAgentId: (id: string | null) => set({ selectedAgentId: id }),
 }))

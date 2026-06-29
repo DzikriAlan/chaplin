@@ -8,14 +8,16 @@ import type {
 } from '../types/usageSaldoTypes'
 
 interface UsageSaldoStore {
-  // Balance state
   balance: UsageSaldoBalance
   balanceTopup: UsageSaldoTopup
-  payloadPostTopup: PayloadPostUsageSaldoTopup
-  setPostTopup: (payload: Partial<PayloadPostUsageSaldoTopup>) => void
-  // Usage state
   usageLogs: UsageSaldoLogs
+  payloadPostTopup: PayloadPostUsageSaldoTopup
   payloadGetLogs: PayloadGetUsageSaldoLogs
+
+  setBalance: (payload: Partial<UsageSaldoBalance>) => void
+  setBalanceTopup: (payload: Partial<UsageSaldoTopup>) => void
+  setUsageLogs: (payload: Partial<UsageSaldoLogs>) => void
+  setPostTopup: (payload: Partial<PayloadPostUsageSaldoTopup>) => void
   setGetLogs: (payload: Partial<PayloadGetUsageSaldoLogs>) => void
 }
 
@@ -36,11 +38,6 @@ export const useUsageSaldoStates = create<UsageSaldoStore>((set) => ({
   payloadPostTopup: {
     amount: 0,
   },
-  setPostTopup: (payload) =>
-    set((state) => ({
-      payloadPostTopup: { ...state.payloadPostTopup, ...payload },
-    })),
-  // Usage state
   usageLogs: {
     status: 'loading',
     statusTitle: 'Memuat riwayat...',
@@ -53,7 +50,28 @@ export const useUsageSaldoStates = create<UsageSaldoStore>((set) => ({
     month: String(new Date().getMonth() + 1),
     year: String(new Date().getFullYear()),
   },
-  setGetLogs: (payload) =>
+
+  setBalance: (payload: Partial<UsageSaldoBalance>) =>
+    set((state) => ({
+      balance: { ...state.balance, ...payload },
+    })),
+
+  setBalanceTopup: (payload: Partial<UsageSaldoTopup>) =>
+    set((state) => ({
+      balanceTopup: { ...state.balanceTopup, ...payload },
+    })),
+
+  setUsageLogs: (payload: Partial<UsageSaldoLogs>) =>
+    set((state) => ({
+      usageLogs: { ...state.usageLogs, ...payload },
+    })),
+
+  setPostTopup: (payload: Partial<PayloadPostUsageSaldoTopup>) =>
+    set((state) => ({
+      payloadPostTopup: { ...state.payloadPostTopup, ...payload },
+    })),
+
+  setGetLogs: (payload: Partial<PayloadGetUsageSaldoLogs>) =>
     set((state) => ({
       payloadGetLogs: { ...state.payloadGetLogs, ...payload },
     })),

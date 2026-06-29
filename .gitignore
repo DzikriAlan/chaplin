@@ -33,9 +33,10 @@ yarn-error.log*
 .vercel
 
 # local tool configs
-.qodo/
-.blayer/
-.vscode/settings.local.json
+.qodo
+.blayer
+.claude
+.vscode
 
 # typescript
 *.tsbuildinfo

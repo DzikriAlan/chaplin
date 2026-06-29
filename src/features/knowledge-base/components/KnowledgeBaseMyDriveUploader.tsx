@@ -258,10 +258,10 @@ interface FileUploaderViewProps {
 }
 
 export default function FileUploaderView({ openFolderFormSignal, openUploadSignal }: Readonly<FileUploaderViewProps>) {
-  const { fetchUploadFolders, storeUploadFolder, removeUploadFolder, storeSignedUrl, removeUploadFile } =
-    useKBMyDriveControllers()
-  const { selectedIds, setSelectedIds, toggleSelected, clearSelected } = useKbMyDriveStates()
+  const { kbMyDrive } = useKbMyDriveStates()
+  const { storeUploadFolder, removeUploadFolder, storeSignedUrl, removeUploadFile } = useKBMyDriveControllers()
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [newFolderName, setNewFolderName] = useState('')
   const [newFolderParentId, setNewFolderParentId] = useState<string | undefined>(undefined)
   const [showFolderForm, setShowFolderForm] = useState(false)
@@ -269,7 +269,23 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
   const [rootDragOver, setRootDragOver] = useState(false)
   const rootInputRef = useRef<HTMLInputElement>(null)
 
-  const folders = (fetchUploadFolders.data ?? []) as DataKbMyDriveFolder[]
+  const toggleSelected = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  const clearSelected = useCallback(() => {
+    setSelectedIds(new Set())
+  }, [])
+
+  const folders = kbMyDrive.data ?? []
   const supabaseReady = isSupabaseConfigured()
 
   const prevFolderSignalRef = useRef(openFolderFormSignal ?? 0)
@@ -476,10 +492,10 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
       )}
 
       {/* Loading state */}
-      {fetchUploadFolders.isLoading && <KnowledgeBaseGoogleDriveTableSkeleton />}
+      {kbMyDrive.status === 'loading' && <KnowledgeBaseGoogleDriveTableSkeleton />}
 
       {/* Error state */}
-      {fetchUploadFolders.isError && !fetchUploadFolders.isLoading && (
+      {kbMyDrive.status === 'error' && (
         <div className="p-12 text-center">
           <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
           <p className="text-rem-85 text-muted-foreground mt-1">Silakan coba lagi.</p>
@@ -487,7 +503,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
       )}
 
       {/* Empty state — card with drop zone active */}
-      {!fetchUploadFolders.isLoading && !fetchUploadFolders.isError && folders.length === 0 && (
+      {kbMyDrive.status !== 'loading' && kbMyDrive.status !== 'error' && folders.length === 0 && (
         <div
           onDrop={handleRootDrop}
           onDragOver={(e) => { e.preventDefault(); setRootDragOver(true) }}
@@ -503,7 +519,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
       )}
 
       {/* File tree — shown only when data exists */}
-      {!fetchUploadFolders.isLoading && !fetchUploadFolders.isError && folders.length > 0 && (
+      {kbMyDrive.status !== 'loading' && kbMyDrive.status !== 'error' && folders.length > 0 && (
         <div className="overflow-hidden">
           {/* Header row */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">

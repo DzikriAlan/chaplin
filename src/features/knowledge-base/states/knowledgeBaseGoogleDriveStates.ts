@@ -4,9 +4,12 @@ import type { KbGoogleDrive, KbGoogleDriveSync } from '../types/knowledgeBaseGoo
 interface KbGoogleDriveStore {
   kbGoogleDrive: KbGoogleDrive
   kbGoogleDriveSync: KbGoogleDriveSync
+
+  setKbGoogleDrive: (payload: Partial<KbGoogleDrive>) => void
+  setKbGoogleDriveSync: (payload: Partial<KbGoogleDriveSync>) => void
 }
 
-export const useKbGoogleDriveStates = create<KbGoogleDriveStore>(() => ({
+export const useKbGoogleDriveStates = create<KbGoogleDriveStore>((set) => ({
   kbGoogleDrive: {
     status: 'loading',
     statusTitle: 'Memuat dokumen',
@@ -19,4 +22,14 @@ export const useKbGoogleDriveStates = create<KbGoogleDriveStore>(() => ({
     statusSubtitle: 'Mohon tunggu...',
     data: null,
   },
+
+  setKbGoogleDrive: (payload: Partial<KbGoogleDrive>) =>
+    set((state) => ({
+      kbGoogleDrive: { ...state.kbGoogleDrive, ...payload },
+    })),
+
+  setKbGoogleDriveSync: (payload: Partial<KbGoogleDriveSync>) =>
+    set((state) => ({
+      kbGoogleDriveSync: { ...state.kbGoogleDriveSync, ...payload },
+    })),
 }))

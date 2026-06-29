@@ -132,27 +132,42 @@ import type { Payload{Method}{ResourceName}, {ResourceName} } from '../types/{fi
 interface {Filename}Store {
   payload{Method}{ResourceName}: Payload{Method}{ResourceName}
   {camelResourceName}: {ResourceName}
-  set{Method}{ResourceName}: (payload: Partial<Payload{Method}{ResourceName}>) => void
+
+  setPayload{Method}{ResourceName}: (payload: Partial<Payload{Method}{ResourceName}>) => void
+  set{ResourceName}: (payload: Partial<{ResourceName}>) => void
 }
 
 export const use{Filename}States = create<{Filename}Store>((set) => ({
-  payload{Method}{ResourceName}: { /* empty defaults */ },
+  payload{Method}{ResourceName}: {
+    field: 'defaultValue',
+  },
 
   {camelResourceName}: {
     status: 'loading',
     statusTitle: 'Something went wrong',
     statusSubtitle: 'Please try again later.',
-    data: null, // hapus jika response void
+    data: null
   },
 
-  set{Method}{ResourceName}: (payload) =>
+  setPayload{Method}{ResourceName}: (payload: Partial<Payload{Method}{ResourceName}>) =>
     set((state) => ({
       payload{Method}{ResourceName}: { ...state.payload{Method}{ResourceName}, ...payload },
+    })),
+
+  set{ResourceName}: (payload: Partial<{ResourceName}>) =>
+    set((state) => ({
+      {camelResourceName}: { ...state.{camelResourceName}, ...payload },
     })),
 }))
 ```
 
-**Aturan**: Hanya state dan setter, tidak ada async logic. Payload hanya untuk GET & POST, tidak untuk PATCH/PUT/DELETE.
+**Aturan**:
+- Setiap setter harus punya explicit type annotation pada parameter
+- Hanya state dan setter, tidak ada async logic
+- **Data dari React Query harus di-assign ke Zustand** — gunakan setter saat fetch/mutation success
+- Zustand jadi single source of truth: status + data semuanya di store
+- Payload hanya untuk GET & POST, tidak untuk PATCH/PUT/DELETE
+- Import `Partial<T>` dari TypeScript untuk partial updates
 
 ---
 
@@ -190,65 +205,109 @@ export const {get|post|put|delete}{ResourceName} = async (payload): Promise<Data
 
 ### Controllers (`{filename}Controllers.ts`)
 
-Gunakan **TanStack Query** untuk server state management.
+Gunakan **TanStack Query** untuk server state management. Sync status ke Zustand store hanya untuk server state yang perlu di-update dari controller.
 
 ```typescript
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { use{Filename}States } from '../states/{filename}States'
-import { {method}{ResourceName} } from '../services/{filename}Services'
+import {
+  get{ResourceName},
+  post{ResourceName},
+  patch{ResourceName},
+  delete{ResourceName},
+} from '../services/{filename}Services'
 import type { Payload{Method}{ResourceName} } from '../types/{filename}Types'
 
-// GET → useQuery
-export const use{Filename}Controllers = () => {
-  const { {camelResourceName}, payload{Method}{ResourceName} } = use{Filename}States()
-
-  const fetch{ResourceName} = useQuery({
-    queryKey: ['{resourceName}', payload{Method}{ResourceName}],
-    queryFn: () => get{ResourceName}(payload{Method}{ResourceName}),
-    onSuccess: (data) => {
-      {camelResourceName}.data = data ?? null
-      {camelResourceName}.status = data ? 'success' : 'empty'
-    },
-    onError: () => {
-      {camelResourceName}.status = 'error'
-    },
-  })
-
-  return { fetch{ResourceName} }
-}
-
-// POST/PUT/PATCH/DELETE → useMutation
 export const use{Filename}Controllers = () => {
   const queryClient = useQueryClient()
-  const { {camelResourceName} } = use{Filename}States()
+  const { set{ResourceName} } = use{Filename}States()
+
+  const fetch{ResourceName} = useQuery({
+    queryKey: ['{resourceName}'],
+    queryFn: async () => {
+      set{ResourceName}({ status: 'loading' })
+      try {
+        const data = await get{ResourceName}()
+        set{ResourceName}({ status: 'success', statusTitle: 'Success', data })
+        return data
+      } catch (error) {
+        const err = error instanceof Error ? error.message : 'Failed to fetch'
+        set{ResourceName}({ status: 'error', statusTitle: 'Error', statusSubtitle: err })
+        throw error
+      }
+    },
+  })
 
   const store{ResourceName} = useMutation({
     mutationFn: (payload: Payload{Method}{ResourceName}) => post{ResourceName}(payload),
     onMutate: () => {
-      {camelResourceName}.status = 'loading'
+      set{ResourceName}({ status: 'loading', statusTitle: 'Saving...' })
     },
-    onSuccess: (data) => {
-      {camelResourceName}.data = data ?? null
-      {camelResourceName}.status = data ? 'success' : 'empty'
+    onSuccess: () => {
+      set{ResourceName}({ status: 'success', statusTitle: 'Saved' })
       queryClient.invalidateQueries({ queryKey: ['{resourceName}'] })
     },
-    onError: () => {
-      {camelResourceName}.status = 'error'
+    onError: (error) => {
+      const err = error instanceof Error ? error.message : 'Failed to create'
+      set{ResourceName}({ status: 'error', statusTitle: 'Error', statusSubtitle: err })
     },
   })
 
-  return { store{ResourceName} }
+  const change{ResourceName} = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<Payload{Method}{ResourceName}> }) =>
+      patch{ResourceName}(id, payload),
+    onMutate: () => {
+      set{ResourceName}({ status: 'loading', statusTitle: 'Updating...' })
+    },
+    onSuccess: () => {
+      set{ResourceName}({ status: 'success', statusTitle: 'Updated' })
+      queryClient.invalidateQueries({ queryKey: ['{resourceName}'] })
+    },
+    onError: (error) => {
+      const err = error instanceof Error ? error.message : 'Failed to update'
+      set{ResourceName}({ status: 'error', statusTitle: 'Error', statusSubtitle: err })
+    },
+  })
+
+  const remove{ResourceName} = useMutation({
+    mutationFn: (id: string) => delete{ResourceName}(id),
+    onMutate: () => {
+      set{ResourceName}({ status: 'loading', statusTitle: 'Deleting...' })
+    },
+    onSuccess: () => {
+      set{ResourceName}({ status: 'success', statusTitle: 'Deleted' })
+      queryClient.invalidateQueries({ queryKey: ['{resourceName}'] })
+    },
+    onError: (error) => {
+      const err = error instanceof Error ? error.message : 'Failed to delete'
+      set{ResourceName}({ status: 'error', statusTitle: 'Error', statusSubtitle: err })
+    },
+  })
+
+  return {
+    fetch{ResourceName},
+    store{ResourceName},
+    change{ResourceName},
+    remove{ResourceName},
+  }
 }
 ```
 
+**Aturan:**
+- **Only server state:** Zustand store hanya untuk state yang di-update dari controller (server state), bukan untuk UI selections atau temporary states
+- **Data assignment:** Assign data dari React Query ke Zustand store saat success: `set{ResourceName}({ data })`
+- **Status sync:** Update status (loading, success, error) menggunakan setter ketika query/mutation state berubah
+- **Error handling:** Extract error message dengan `error instanceof Error ? error.message : fallback` dan tampilkan di `statusSubtitle`
+- **Cache invalidation:** Invalidate cache setelah mutation berhasil agar refetch otomatis
+
 **Prefix method controller:**
 
-| HTTP | Prefix | Contoh |
-|------|--------|--------|
-| GET | `fetch` | `fetchUsersProfile()` |
-| POST | `store` | `storeRegisterFile()` |
-| PUT/PATCH | `change` | `changeUsersProfile()` |
-| DELETE | `remove` | `removeUsersProfile()` |
+| HTTP | Prefix | Contoh | Hook |
+|------|--------|--------|------|
+| GET | `fetch` | `fetchUsersProfile()` | `useQuery` |
+| POST | `store` | `storeRegisterFile()` | `useMutation` |
+| PUT/PATCH | `change` | `changeUsersProfile()` | `useMutation` |
+| DELETE | `remove` | `removeUsersProfile()` | `useMutation` |
 
 ---
 

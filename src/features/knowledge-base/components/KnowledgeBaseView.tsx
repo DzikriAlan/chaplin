@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, HelpCircle, FileText, Upload, ChevronDown, RefreshCw, Cloud, CloudOff, FolderPlus, FolderOpen, Unlink } from 'lucide-react'
 import type { DataKbFaq } from '../types/knowledgeBaseFaqTypes'
 import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
+import { useKbFaqStates } from '../states/knowledgeBaseFaqStates'
 import { useKBGoogleDriveHelperControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
 import KnowledgeBaseModal from './KnowledgeBaseModal'
 import KnowledgeBaseGoogleDriveList from './KnowledgeBaseGoogleDriveList'
@@ -33,8 +34,8 @@ export default function KnowledgeBaseView() {
   const [myDriveFolderSignal, setMyDriveFolderSignal] = useState(0)
   const [myDriveUploadSignal, setMyDriveUploadSignal] = useState(0)
 
-  const { fetchKnowledgeBase, storeKnowledgeBase, removeKnowledgeBase, changeKnowledgeBase } =
-    useKBFaqControllers()
+  const { kbFaq } = useKbFaqStates()
+  const { storeKnowledgeBase, removeKnowledgeBase, changeKnowledgeBase } = useKBFaqControllers()
   const { fetchDriveConfig, removeDriveConfig } = useKBGoogleDriveHelperControllers(false)
   const driveConfig = fetchDriveConfig.data as DriveConfig | undefined
 
@@ -43,8 +44,8 @@ export default function KnowledgeBaseView() {
     removeDriveConfig.mutate(undefined, { onSuccess: () => toast.success('Koneksi diputus') })
   }
 
-  const items = (fetchKnowledgeBase.data as DataKbFaq[] ?? [])
-  const tabStatus = getTabStatus(fetchKnowledgeBase.isLoading, fetchKnowledgeBase.isError, items.length === 0)
+  const items = (kbFaq.data as DataKbFaq[] ?? [])
+  const tabStatus = getTabStatus(kbFaq.status === 'loading', kbFaq.status === 'error', items.length === 0)
 
   useEffect(() => {
     if (router.query.connected === 'true') {

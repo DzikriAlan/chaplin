@@ -4,6 +4,7 @@ import { Bot, ChevronDown, Star } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import type { DataAgent } from '../types/agentsTypes'
 import { useAgentsControllers } from '../controllers/agentsControllers'
+import { useAgentsStates } from '../states/agentsStates'
 
 interface AgentsSwitchProps {
   selectedAgentId: string | null
@@ -14,8 +15,9 @@ export default function AgentsSwitch({ selectedAgentId, onSelectAgent }: Readonl
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  const { fetchAgents } = useAgentsControllers()
-  const agents = (fetchAgents.data as DataAgent[]) ?? []
+  const { agentsList } = useAgentsStates()
+  useAgentsControllers()
+  const agents = (agentsList.data as DataAgent[]) ?? []
 
   const selectedAgent = agents.find((a) => a.id === selectedAgentId) ?? null
 

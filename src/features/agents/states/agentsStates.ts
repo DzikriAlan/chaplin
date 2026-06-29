@@ -5,7 +5,10 @@ interface AgentsStore {
   payloadPostAgent: PayloadPostAgent
   agentsList: AgentsList
   agentCreate: AgentCreate
+
   setPostAgent: (payload: Partial<PayloadPostAgent>) => void
+  setAgentsList: (payload: Partial<AgentsList>) => void
+  setAgentCreate: (payload: Partial<AgentCreate>) => void
 }
 
 export const useAgentsStates = create<AgentsStore>((set) => ({
@@ -31,8 +34,18 @@ export const useAgentsStates = create<AgentsStore>((set) => ({
     data: null,
   },
 
-  setPostAgent: (payload) =>
+  setPostAgent: (payload: Partial<PayloadPostAgent>) =>
     set((state) => ({
       payloadPostAgent: { ...state.payloadPostAgent, ...payload },
+    })),
+
+  setAgentsList: (payload: Partial<AgentsList>) =>
+    set((state) => ({
+      agentsList: { ...state.agentsList, ...payload },
+    })),
+
+  setAgentCreate: (payload: Partial<AgentCreate>) =>
+    set((state) => ({
+      agentCreate: { ...state.agentCreate, ...payload },
     })),
 }))

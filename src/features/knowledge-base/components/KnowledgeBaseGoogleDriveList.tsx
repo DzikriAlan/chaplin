@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { CloudOff, Pause, Play, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import type { DataKbGoogleDrive } from '../types/knowledgeBaseGoogleDriveTypes'
 import { useKBGoogleDriveControllers } from '../controllers/knowledgeBaseGoogleDriveControllers'
+import { useKbGoogleDriveStates } from '../states/knowledgeBaseGoogleDriveStates'
 import { useKBGoogleDriveHelperControllers } from '../controllers/knowledgeBaseGoogleDriveHelperControllers'
 import type { DataDriveFolders } from '../types/knowledgeBaseGoogleDriveHelperTypes'
 import KnowledgeBaseGoogleDriveFolderPicker from './KnowledgeBaseGoogleDriveFolderPicker'
@@ -28,14 +28,14 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
   const [isPaused, setIsPaused] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
+  const { kbGoogleDrive } = useKbGoogleDriveStates()
   const {
-    fetchDocuments,
     changeDocuments, removeDocuments, removeDocumentsBulk,
     storeKbGoogleDriveSync,
   } = useKBGoogleDriveControllers()
   const { fetchDriveFolders, storeDriveFolders } = useKBGoogleDriveHelperControllers(showFolderPicker)
 
-  const docs = (fetchDocuments.data ?? []) as DataKbGoogleDrive[]
+  const docs = kbGoogleDrive.data ?? []
   const folders = (fetchDriveFolders.data ?? []) as DataDriveFolders[]
 
   const pendingCount = docs.filter((d) => d.status === 'PENDING').length
@@ -94,7 +94,7 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
       { onSuccess: () => { toast.success('Folder dipilih'); setShowFolderPicker(false) } },
     )
   }
-  const loadStatus = getDocsStatus(fetchDocuments.isLoading, fetchDocuments.isError, docs.length === 0)
+  const loadStatus = getDocsStatus(kbGoogleDrive.status === 'loading', kbGoogleDrive.status === 'error', docs.length === 0)
 
   useEffect(() => { if (router.query.folder === 'picker') { setShowFolderPicker(true); router.replace('/documents', undefined, { shallow: true }) } }, [router])
 

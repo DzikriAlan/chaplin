@@ -4,6 +4,7 @@ import { Bot, Plus, Search, X, ArrowLeft, PanelLeft } from 'lucide-react'
 import { useState, useMemo, useRef } from 'react'
 import type { DataAgent } from '../types/agentsTypes'
 import { useAgentsControllers } from '../controllers/agentsControllers'
+import { useAgentsStates } from '../states/agentsStates'
 import AgentForm, { type AgentFormHandle } from './AgentForm'
 import AgentPreviewInline from './AgentPreviewInline'
 import AgentCard from './AgentCard'
@@ -19,9 +20,9 @@ export default function AgentsList() {
   const [prevMode, setPrevMode] = useState<ViewMode>('list')
   const agentFormRef = useRef<AgentFormHandle>(null)
   const { toggleSidebar } = useUIStates()
-  const { fetchAgents, storeAgent, removeAgent, changeAgent } = useAgentsControllers()
-  const agents = (fetchAgents.data as DataAgent[]) ?? []
-  const filtered = agents.filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
+  const { agentsList } = useAgentsStates()
+  const { storeAgent, removeAgent, changeAgent } = useAgentsControllers()
+  const filtered = (agentsList.data as DataAgent[]).filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
   const isSaving = storeAgent.isPending || changeAgent.isPending
   const skeletonIds = useMemo(() => ['sk-1', 'sk-2', 'sk-3', 'sk-4'], [])
 
@@ -141,7 +142,7 @@ export default function AgentsList() {
         </button>
       </div>
 
-      {fetchAgents.isLoading && (
+      {agentsList.status === 'loading' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {skeletonIds.map((id) => (
             <div key={id} className="rounded-xl border bg-card p-5 animate-pulse">
@@ -152,7 +153,7 @@ export default function AgentsList() {
         </div>
       )}
 
-      {!fetchAgents.isLoading && filtered.length === 0 && !search && (
+      {agentsList.status !== 'loading' && filtered.length === 0 && !search && (
         <div className="py-16 text-center">
           <Bot className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
           <p className="text-rem-110 font-semibold text-foreground">Belum ada agent</p>
@@ -160,7 +161,7 @@ export default function AgentsList() {
         </div>
       )}
 
-      {!fetchAgents.isLoading && filtered.length === 0 && search && (
+      {agentsList.status !== 'loading' && filtered.length === 0 && search && (
         <div className="py-12 text-center">
           <Search className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />
           <p className="text-rem-100 font-semibold text-foreground">Tidak ditemukan</p>
@@ -168,7 +169,7 @@ export default function AgentsList() {
         </div>
       )}
 
-      {!fetchAgents.isLoading && filtered.length > 0 && (
+      {agentsList.status !== 'loading' && filtered.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {filtered.map((agent) => (
             <AgentCard

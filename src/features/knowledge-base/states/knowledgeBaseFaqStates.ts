@@ -5,7 +5,8 @@ interface KbFaqStore {
   payloadPostKbFaq: PayloadPostKbFaq
   kbFaq: KbFaq
   kbFaqCreate: KbFaqCreate
-  setPostKbFaq: (payload: Partial<PayloadPostKbFaq>) => void
+  setPayloadPostKbFaq: (payload: Partial<PayloadPostKbFaq>) => void
+  setKbFaq: (payload: Partial<KbFaq>) => void
 }
 
 export const useKbFaqStates = create<KbFaqStore>((set) => ({
@@ -29,8 +30,13 @@ export const useKbFaqStates = create<KbFaqStore>((set) => ({
     data: null,
   },
 
-  setPostKbFaq: (payload) =>
+  setPayloadPostKbFaq: (payload: Partial<PayloadPostKbFaq>) =>
     set((state) => ({
       payloadPostKbFaq: { ...state.payloadPostKbFaq, ...payload },
+    })),
+
+  setKbFaq: (payload: Partial<KbFaq>) =>
+    set((state) => ({
+      kbFaq: { ...state.kbFaq, ...payload },
     })),
 }))

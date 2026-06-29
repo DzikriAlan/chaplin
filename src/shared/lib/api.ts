@@ -20,7 +20,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
 let cachedToken: string | null = null
 
-async function getAuthToken(): Promise<string | null> {
+export async function getAuthToken(): Promise<string | null> {
   if (cachedToken) return cachedToken
   try {
     const res = await fetch('/api/auth/backend-token')
@@ -58,16 +58,11 @@ export const api = async <T = unknown>(
   return json.data as T
 }
 
-export const backendFetch = async (
-  endpoint: string,
-  options?: RequestInit
-): Promise<Response> => {
+export const backendFetch = async (endpoint: string, options?: RequestInit): Promise<Response> => {
   const token = await getAuthToken()
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options?.headers as Record<string, string>),
-  }
+  const headers: Record<string, string> = { ...options?.headers as Record<string, string> }
   if (token) headers.Authorization = `Bearer ${token}`
 
   return fetch(`${baseUrl}${endpoint}`, { ...options, headers })
 }
+

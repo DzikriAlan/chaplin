@@ -1,12 +1,14 @@
 import toast from 'react-hot-toast'
 import type { DataKbFaq } from '../types/knowledgeBaseFaqTypes'
 import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
+import { useKbFaqStates } from '../states/knowledgeBaseFaqStates'
 import LoadData from '@/shared/components/LoadData'
 import KBFaqItem from './KnowledgeBaseFaqItem'
 
 export default function KnowledgeBaseList() {
-  const { fetchKnowledgeBase, removeKnowledgeBase } = useKBFaqControllers()
-  const items = (fetchKnowledgeBase.data as DataKbFaq[]) ?? []
+  const { kbFaq } = useKbFaqStates()
+  const { removeKnowledgeBase } = useKBFaqControllers()
+  const items = (kbFaq.data as DataKbFaq[]) ?? []
 
   const handleDeleteItem = (id: string) => {
     if (!confirm('Hapus FAQ ini?')) return
@@ -17,8 +19,8 @@ export default function KnowledgeBaseList() {
   }
 
   function getListStatus() {
-    if (fetchKnowledgeBase.isLoading) return 'loading'
-    if (fetchKnowledgeBase.isError) return 'error'
+    if (kbFaq.status === 'loading') return 'loading'
+    if (kbFaq.status === 'error') return 'error'
     return items.length === 0 ? 'empty' : 'success'
   }
   const listStatus = getListStatus()
