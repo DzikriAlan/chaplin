@@ -10,7 +10,7 @@ interface Props {
   onClose: () => void
 }
 
-export default function DriveFolderPicker({ folders, isLoading, isSaving, onSelectFolder, onClose }: Readonly<Props>) {
+export default function KnowledgeBaseGoogleDriveFolderPicker({ folders, isLoading, isSaving, onSelectFolder, onClose }: Readonly<Props>) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-xl bg-card border shadow-card p-6">

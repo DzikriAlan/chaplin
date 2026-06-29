@@ -22,6 +22,7 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const isDisabled = isStreaming || !input.trim()
 
   // function / methode
   const getPreviewStream = async (response: Response, assistantId: string) => {
@@ -42,9 +43,6 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
     }
   }
 
-  // lifecycle react
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
-
   const saveChatMessage = async () => {
     const text = input.trim()
     if (!text || isStreaming) return
@@ -63,9 +61,9 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
 
   const getKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveChatMessage() } }
 
-  const isDisabled = isStreaming || !input.trim()
+  // lifecycle react
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  // return / template
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       <div className="flex-1 overflow-y-auto min-h-0">

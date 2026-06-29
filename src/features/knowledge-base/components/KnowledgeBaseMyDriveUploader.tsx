@@ -10,22 +10,17 @@ import KnowledgeBaseGoogleDriveTableSkeleton from './KnowledgeBaseGoogleDriveTab
 import { KnowledgeBaseMyDriveFolderNode } from './KnowledgeBaseMyDriveFolderNode'
 import { KnowledgeBaseMyDriveCheckbox } from './KnowledgeBaseMyDriveCheckbox'
 
-function getCollectFileIds(folder: DataKbMyDriveFolder): string[] {
-  const ids = folder.files.map((f) => f.id)
-  for (const child of folder.children) {
-    ids.push(...getCollectFileIds(child))
-  }
-  return ids
-}
-
 interface FileUploaderViewProps {
   openFolderFormSignal?: number
   openUploadSignal?: number
 }
 
-export default function FileUploaderView({ openFolderFormSignal, openUploadSignal }: Readonly<FileUploaderViewProps>) {
+export default function KnowledgeBaseMyDriveUploader({ openFolderFormSignal, openUploadSignal }: Readonly<FileUploaderViewProps>) {
+  // variable importer
   const { kbMyDrive } = useKbMyDriveStates()
   const { storeUploadFolder, removeUploadFolder, storeSignedUrl, removeUploadFile } = useKBMyDriveControllers()
+
+  // states / variable
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [newFolderName, setNewFolderName] = useState('')
@@ -34,8 +29,33 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
   const [uploadingFolderId, setUploadingFolderId] = useState<string | null>(null)
   const [rootDragOver, setRootDragOver] = useState(false)
   const rootInputRef = useRef<HTMLInputElement>(null)
+  const prevFolderSignalRef = useRef(openFolderFormSignal ?? 0)
+  const prevUploadSignalRef = useRef(openUploadSignal ?? 0)
 
-  const toggleSelected = useCallback((id: string) => {
+  // function / methode
+  const getCollectFileIds = (folder: DataKbMyDriveFolder): string[] => {
+    const ids = folder.files.map((f) => f.id)
+    for (const child of folder.children) {
+      ids.push(...getCollectFileIds(child))
+    }
+    return ids
+  }
+
+  const getFlatFolders = (list: DataKbMyDriveFolder[], depth = 0): { id: string; name: string; depth: number }[] =>
+    list.flatMap((f) => [
+      { id: f.id, name: f.name, depth },
+      ...getFlatFolders(f.children, depth + 1),
+    ])
+
+  const folders = kbMyDrive.data ?? []
+  const supabaseReady = isSupabaseConfigured()
+  const allFolderFileIds = folders.flatMap((f) => getCollectFileIds(f))
+  const allSelected = allFolderFileIds.length > 0 && allFolderFileIds.every((id) => selectedIds.has(id))
+  const someSelected = allFolderFileIds.some((id) => selectedIds.has(id))
+  const flatFolders = getFlatFolders(folders)
+
+  const syncSelected = useCallback((id: string) => {
+
     setSelectedIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) {
@@ -47,46 +67,27 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
     })
   }, [])
 
-  const clearSelected = useCallback(() => {
+  const destroySelected = useCallback(() => {
     setSelectedIds(new Set())
   }, [])
 
-  const folders = kbMyDrive.data ?? []
-  const supabaseReady = isSupabaseConfigured()
-
-  const prevFolderSignalRef = useRef(openFolderFormSignal ?? 0)
-  useEffect(() => {
-    if (openFolderFormSignal && openFolderFormSignal !== prevFolderSignalRef.current) {
-      setShowFolderForm(true)
-      prevFolderSignalRef.current = openFolderFormSignal
-    }
-  }, [openFolderFormSignal])
-
-  const prevUploadSignalRef = useRef(openUploadSignal ?? 0)
-  useEffect(() => {
-    if (openUploadSignal && openUploadSignal !== prevUploadSignalRef.current) {
-      rootInputRef.current?.click()
-      prevUploadSignalRef.current = openUploadSignal
-    }
-  }, [openUploadSignal])
-
-  const handleToggleFolder = useCallback((folder: DataKbMyDriveFolder) => {
+  const syncFolder = useCallback((folder: DataKbMyDriveFolder) => {
     const allIds = getCollectFileIds(folder)
-    const allSelected = allIds.every((id) => selectedIds.has(id))
+    const allFolderSelected = allIds.every((id) => selectedIds.has(id))
     const next = new Set(selectedIds)
-    if (allSelected) {
+    if (allFolderSelected) {
       allIds.forEach((id) => next.delete(id))
     } else {
       allIds.forEach((id) => next.add(id))
     }
     setSelectedIds(next)
-  }, [selectedIds, setSelectedIds])
+  }, [selectedIds]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleToggleFile = useCallback((fileId: string) => {
-    toggleSelected(fileId)
-  }, [toggleSelected])
+  const syncFile = useCallback((fileId: string) => {
+    syncSelected(fileId)
+  }, [syncSelected])
 
-  const handleCreateFolder = () => {
+  const saveFolder = () => {
     if (!newFolderName.trim()) return
     storeUploadFolder.mutate(
       { name: newFolderName.trim(), parentId: newFolderParentId },
@@ -100,14 +101,14 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
     )
   }
 
-  const handleDeleteFolder = (id: string) => {
+  const destroyFolder = (id: string) => {
     if (!confirm('Hapus folder beserta semua isinya?')) return
     removeUploadFolder.mutate(id)
     const next = new Set(selectedIds)
     setSelectedIds(next)
   }
 
-  const handleDeleteFile = (id: string) => {
+  const destroyFile = (id: string) => {
     if (!confirm('Hapus file ini?')) return
     removeUploadFile.mutate(id)
     const next = new Set(selectedIds)
@@ -115,15 +116,15 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
     setSelectedIds(next)
   }
 
-  const handleDeleteSelected = () => {
+  const destroyBulkFiles = () => {
     if (selectedIds.size === 0) return
     if (!confirm(`Hapus ${selectedIds.size} file yang dipilih?`)) return
     const ids = Array.from(selectedIds)
     ids.forEach((id) => removeUploadFile.mutate(id))
-    clearSelected()
+    destroySelected()
   }
 
-  const uploadFiles = useCallback(async (files: FileList, folderId?: string) => {
+  const saveFiles = useCallback(async (files: FileList, folderId?: string) => {
     setUploadingFolderId(folderId ?? 'root')
     for (const file of Array.from(files)) {
       try {
@@ -141,37 +142,40 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
     setUploadingFolderId(null)
   }, [storeSignedUrl])
 
-  const handleRootDrop = useCallback((e: React.DragEvent) => {
+  const syncRootDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setRootDragOver(false)
     if (e.dataTransfer.files.length > 0) {
-      uploadFiles(e.dataTransfer.files, undefined)
+      saveFiles(e.dataTransfer.files)
     }
-  }, [uploadFiles])
+  }, [saveFiles])
 
-  const handleFolderFiles = useCallback((files: FileList, folderId: string) => {
-    uploadFiles(files, folderId)
-  }, [uploadFiles])
+  const syncFolderFiles = useCallback((files: FileList, folderId: string) => {
+    saveFiles(files, folderId)
+  }, [saveFiles])
 
-  const allFolderFileIds = folders.flatMap((f) => getCollectFileIds(f))
-  const allSelected = allFolderFileIds.length > 0 && allFolderFileIds.every((id) => selectedIds.has(id))
-  const someSelected = allFolderFileIds.some((id) => selectedIds.has(id))
-
-  const handleSelectAll = () => {
+  const syncSelectAll = () => {
     if (allSelected) {
-      clearSelected()
+      destroySelected()
     } else {
       setSelectedIds(new Set(allFolderFileIds))
     }
   }
 
-  function flattenFolders(list: DataKbMyDriveFolder[], depth = 0): { id: string; name: string; depth: number }[] {
-    return list.flatMap((f) => [
-      { id: f.id, name: f.name, depth },
-      ...flattenFolders(f.children, depth + 1),
-    ])
-  }
-  const flatFolders = flattenFolders(folders)
+  // lifecycle react
+  useEffect(() => {
+    if (openFolderFormSignal && openFolderFormSignal !== prevFolderSignalRef.current) {
+      setShowFolderForm(true)
+      prevFolderSignalRef.current = openFolderFormSignal
+    }
+  }, [openFolderFormSignal])
+
+  useEffect(() => {
+    if (openUploadSignal && openUploadSignal !== prevUploadSignalRef.current) {
+      rootInputRef.current?.click()
+      prevUploadSignalRef.current = openUploadSignal
+    }
+  }, [openUploadSignal])
 
   return (
     <div className="px-4">
@@ -187,7 +191,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
         type="file"
         multiple
         className="hidden"
-        onChange={(e) => e.target.files && uploadFiles(e.target.files)}
+        onChange={(e) => e.target.files && saveFiles(e.target.files)}
       />
 
       {/* Selection toolbar — desktop only, shown when items are selected */}
@@ -195,7 +199,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
         <div className="hidden sm:flex items-center gap-2 pt-4">
           <button
             type="button"
-            onClick={handleDeleteSelected}
+            onClick={destroyBulkFiles}
             className="flex items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-rem-85 font-medium text-destructive hover:bg-destructive/10 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
@@ -203,7 +207,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
           </button>
           <button
             type="button"
-            onClick={clearSelected}
+            onClick={destroySelected}
             className="flex items-center gap-1 text-rem-80 text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-3.5 w-3.5" />
@@ -220,7 +224,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
             type="text"
             value={newFolderName}
             onChange={(e) => setNewFolderName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleCreateFolder() }}
+            onKeyDown={(e) => { if (e.key === 'Enter') saveFolder() }}
             placeholder="Nama folder baru..."
             autoFocus
             className="flex-1 rounded-lg border bg-background px-3 py-1.5 text-rem-85 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -241,7 +245,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
           )}
           <button
             type="button"
-            onClick={handleCreateFolder}
+            onClick={saveFolder}
             disabled={storeUploadFolder.isPending || !newFolderName.trim()}
             className="rounded-lg bg-primary px-3 py-1.5 text-rem-85 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
@@ -257,10 +261,8 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
         </div>
       )}
 
-      {/* Loading state */}
       {kbMyDrive.status === 'loading' && <KnowledgeBaseGoogleDriveTableSkeleton />}
 
-      {/* Error state */}
       {kbMyDrive.status === 'error' && (
         <div className="p-12 text-center">
           <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
@@ -268,10 +270,10 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
         </div>
       )}
 
-      {/* Empty state — card with drop zone active */}
       {kbMyDrive.status !== 'loading' && kbMyDrive.status !== 'error' && folders.length === 0 && (
-        <div
-          onDrop={handleRootDrop}
+        <section
+          aria-label="Area upload file"
+          onDrop={syncRootDrop}
           onDragOver={(e) => { e.preventDefault(); setRootDragOver(true) }}
           onDragLeave={() => setRootDragOver(false)}
           className={`p-12 text-center transition-colors ${rootDragOver ? 'bg-primary/5' : ''}`}
@@ -281,18 +283,16 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
           <p className="text-rem-85 text-muted-foreground mt-1">
             Drag & drop file ke sini, atau buat folder dulu
           </p>
-        </div>
+        </section>
       )}
 
-      {/* File tree — shown only when data exists */}
       {kbMyDrive.status !== 'loading' && kbMyDrive.status !== 'error' && folders.length > 0 && (
         <div className="overflow-hidden">
-          {/* Header row */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">
             <KnowledgeBaseMyDriveCheckbox
               checked={allSelected}
               indeterminate={someSelected && !allSelected}
-              onChange={handleSelectAll}
+              onChange={syncSelectAll}
               label="Pilih semua"
             />
             {someSelected && (
@@ -307,7 +307,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
                 <button
                   type="button"
                   title="Hapus dipilih"
-                  onClick={handleDeleteSelected}
+                  onClick={destroyBulkFiles}
                   className="sm:hidden p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -335,9 +335,9 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
             </div>
           </div>
 
-          {/* Folder list with root drop zone */}
-          <div
-            onDrop={handleRootDrop}
+          <section
+            aria-label="Daftar folder"
+            onDrop={syncRootDrop}
             onDragOver={(e) => { e.preventDefault(); setRootDragOver(true) }}
             onDragLeave={() => setRootDragOver(false)}
             className={`transition-colors ${rootDragOver ? 'bg-primary/5' : ''}`}
@@ -349,11 +349,11 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
                   folder={folder}
                   depth={0}
                   selectedIds={selectedIds}
-                  onToggleFolder={handleToggleFolder}
-                  onToggleFile={handleToggleFile}
-                  onDeleteFolder={handleDeleteFolder}
-                  onDeleteFile={handleDeleteFile}
-                  onDropFiles={handleFolderFiles}
+                  onToggleFolder={syncFolder}
+                  onToggleFile={syncFile}
+                  onDeleteFolder={destroyFolder}
+                  onDeleteFile={destroyFile}
+                  onDropFiles={syncFolderFiles}
                   uploadingFolderId={uploadingFolderId}
                 />
               ))}
@@ -365,9 +365,8 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
                 </div>
               </div>
             )}
-          </div>
+          </section>
 
-          {/* Root upload progress */}
           {uploadingFolderId === 'root' && (
             <div className="flex items-center gap-2 px-4 py-2.5 border-t border-border bg-primary/5">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />

@@ -1,16 +1,16 @@
 import toast from 'react-hot-toast'
-import type { DataKbFaq } from '../types/knowledgeBaseFaqTypes'
 import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
 import { useKbFaqStates } from '../states/knowledgeBaseFaqStates'
 import LoadData from '@/shared/components/LoadData'
 import KBFaqItem from './KnowledgeBaseFaqItem'
 
 export default function KnowledgeBaseList() {
+  // variable importer
   const { kbFaq } = useKbFaqStates()
   const { removeKnowledgeBase } = useKBFaqControllers()
-  const items = (kbFaq.data as DataKbFaq[]) ?? []
 
-  const handleDeleteItem = (id: string) => {
+  // function / methode
+  const destroyItem = (id: string) => {
     if (!confirm('Hapus FAQ ini?')) return
     removeKnowledgeBase.mutate(id, {
       onSuccess: () => toast.success('FAQ berhasil dihapus'),
@@ -18,13 +18,14 @@ export default function KnowledgeBaseList() {
     })
   }
 
-  function getListStatus() {
+  const getListStatus = () => {
     if (kbFaq.status === 'loading') return 'loading'
     if (kbFaq.status === 'error') return 'error'
-    return items.length === 0 ? 'empty' : 'success'
+    return kbFaq.data?.length ? 'success' : 'empty'
   }
   const listStatus = getListStatus()
 
+  // lifecycle react
   return (
     <LoadData
       status={listStatus}
@@ -32,9 +33,9 @@ export default function KnowledgeBaseList() {
       statusSubtitle="Tambah FAQ baru menggunakan form di atas"
     >
       <div className="space-y-3">
-        <p className="text-rem-85 text-muted-foreground">{items.length} FAQ aktif</p>
-        {items.map((item) => (
-          <KBFaqItem key={item.id} item={item} onDeleteItem={handleDeleteItem} />
+        <p className="text-rem-85 text-muted-foreground">{kbFaq.data?.length ?? 0} FAQ aktif</p>
+        {kbFaq.data?.map((item) => (
+          <KBFaqItem key={item.id} item={item} onDeleteItem={destroyItem} />
         ))}
       </div>
     </LoadData>

@@ -3,13 +3,6 @@ import type { DataKbGoogleDrive } from '../types/knowledgeBaseGoogleDriveTypes'
 import KnowledgeBaseGoogleDriveCheckboxCell from './KnowledgeBaseGoogleDriveCheckboxCell'
 import ListCardRow from '@/shared/components/ListCardRow'
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PENDING:    { label: 'Menunggu',  color: 'bg-amber-50   text-amber-700  ring-1 ring-amber-200' },
-  PROCESSING: { label: 'Diproses', color: 'bg-blue-50    text-blue-700   ring-1 ring-blue-200'  },
-  READY:      { label: 'Siap',     color: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
-  ERROR:      { label: 'Error',    color: 'bg-red-50     text-red-700    ring-1 ring-red-200'   },
-}
-
 interface DocumentRowProps {
   doc: DataKbGoogleDrive
   isSelected: boolean
@@ -19,7 +12,14 @@ interface DocumentRowProps {
   onRetryDocument: (id: string) => void
 }
 
-export default function DocumentRow({ doc, isSelected, onToggleSelect, onDeleteDocument, onSkipDocument, onRetryDocument }: Readonly<DocumentRowProps>) {
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  PENDING:    { label: 'Menunggu',  color: 'bg-amber-50   text-amber-700  ring-1 ring-amber-200' },
+  PROCESSING: { label: 'Diproses', color: 'bg-blue-50    text-blue-700   ring-1 ring-blue-200'  },
+  READY:      { label: 'Siap',     color: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
+  ERROR:      { label: 'Error',    color: 'bg-red-50     text-red-700    ring-1 ring-red-200'   },
+}
+
+export default function KnowledgeBaseGoogleDriveRow({ doc, isSelected, onToggleSelect, onDeleteDocument, onSkipDocument, onRetryDocument }: Readonly<DocumentRowProps>) {
   const badge = STATUS_LABELS[doc.status] ?? STATUS_LABELS.PENDING
   const isActive = doc.status === 'PENDING' || doc.status === 'PROCESSING'
   const isError = doc.status === 'ERROR'

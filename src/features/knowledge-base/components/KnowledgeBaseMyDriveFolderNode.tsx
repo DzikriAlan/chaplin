@@ -17,14 +17,6 @@ interface FolderNodeProps {
   uploadingFolderId: string | null
 }
 
-function getCollectFileIds(folder: DataKbMyDriveFolder): string[] {
-  const ids = folder.files.map((f) => f.id)
-  for (const child of folder.children) {
-    ids.push(...getCollectFileIds(child))
-  }
-  return ids
-}
-
 export function KnowledgeBaseMyDriveFolderNode({
   folder,
   depth,
@@ -40,6 +32,15 @@ export function KnowledgeBaseMyDriveFolderNode({
   const [expanded, setExpanded] = useState(true)
   const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const getCollectFileIds = (f: DataKbMyDriveFolder): string[] => {
+    const ids = f.files.map((file) => file.id)
+    for (const child of f.children) {
+      ids.push(...getCollectFileIds(child))
+    }
+    return ids
+  }
+
   const allFileIds = getCollectFileIds(folder)
   const selectedCount = allFileIds.filter((id) => selectedIds.has(id)).length
   const isChecked = allFileIds.length > 0 && selectedCount === allFileIds.length
@@ -92,10 +93,11 @@ export function KnowledgeBaseMyDriveFolderNode({
     </div>
   )
 
-  // lifecycle react (implicit - no effects for this component)
+  // lifecycle react
   return (
     <div>
-      <div
+      <section
+        aria-label={`Folder ${folder.name}`}
         onDrop={syncDropFiles}
         onDragOver={syncDragOver}
         onDragLeave={() => setDragOver(false)}
@@ -118,7 +120,7 @@ export function KnowledgeBaseMyDriveFolderNode({
           dragOver={dragOver}
           style={{ paddingLeft: `${paddingLeft + 16}px` }}
         />
-      </div>
+      </section>
 
       {expanded && (
         <div className="divide-y divide-border">

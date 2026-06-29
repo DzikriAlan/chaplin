@@ -5,12 +5,6 @@ import { z } from 'zod'
 import { X } from 'lucide-react'
 import type { DataKbFaq } from '../types/knowledgeBaseFaqTypes'
 
-const schema = z.object({
-  question: z.string().min(3, 'Pertanyaan minimal 3 karakter'),
-  answer: z.string().min(5, 'Jawaban minimal 5 karakter'),
-  tags: z.string(),
-})
-
 type FormValues = z.infer<typeof schema>
 
 interface Props {
@@ -20,14 +14,34 @@ interface Props {
   onClose: () => void
 }
 
-export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: Readonly<Props>) {
-  const isEdit = item != null
+const schema = z.object({
+  question: z.string().min(3, 'Pertanyaan minimal 3 karakter'),
+  answer: z.string().min(5, 'Jawaban minimal 5 karakter'),
+  tags: z.string(),
+})
 
+export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: Readonly<Props>) {
+  // variable importer
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { question: '', answer: '', tags: '' },
   })
 
+  // states / variable
+  const isEdit = item != null
+
+  // function / methode
+  const getSubmitLabel = () => {
+    if (isSaving) return 'Menyimpan...'
+    return isEdit ? 'Simpan Perubahan' : 'Tambah FAQ'
+  }
+
+  const saveFaq = (values: FormValues) => {
+    const tags = values.tags.split(',').map((t) => t.trim()).filter(Boolean)
+    onSave(values.question, values.answer, tags)
+  }
+
+  // lifecycle react
   useEffect(() => {
     if (item) {
       reset({ question: item.question, answer: item.answer, tags: item.tags.join(', ') })
@@ -35,11 +49,6 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
       reset({ question: '', answer: '', tags: '' })
     }
   }, [item, reset])
-
-  const handleFormSubmit = (values: FormValues) => {
-    const tags = values.tags.split(',').map((t) => t.trim()).filter(Boolean)
-    onSave(values.question, values.answer, tags)
-  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -57,7 +66,7 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit(saveFaq)} className="p-5 space-y-4">
           <div className="space-y-1.5">
             <label htmlFor="question" className="text-rem-85 font-medium text-foreground">Pertanyaan</label>
             <input
@@ -106,7 +115,7 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
               disabled={isSaving}
               className="rounded-lg bg-primary px-4 py-2 text-rem-85 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
-              {isSaving ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Tambah FAQ'}
+              {getSubmitLabel()}
             </button>
           </div>
         </form>

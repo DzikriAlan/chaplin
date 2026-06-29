@@ -10,18 +10,17 @@ interface FileRowProps {
   onDelete: () => void
 }
 
-function getFormatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
-
 export function KnowledgeBaseMyDriveFileRow({ file, depth, isSelected, onToggle, onDelete }: Readonly<FileRowProps>) {
-  // function / methode is defined at module level (getFormatBytes)
+  // function / methode
+  const getFormatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
+  }
 
-  // lifecycle react (implicit - no effects)
+  // lifecycle react
   return (
     <ListCardRow
       selectionNode={

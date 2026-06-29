@@ -1,65 +1,33 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingDown, RefreshCw, MessageSquare, Download } from 'lucide-react'
+import { TrendingDown, Download } from 'lucide-react'
 import { useUsageSaldoControllers } from '../controllers/usageSaldoControllers'
 import { useUsageSaldoStates } from '../states/usageSaldoStates'
 import type { DataUsageSaldoBalance, DataUsageSaldoLog, DataUsageSaldoLogList } from '../types/usageSaldoTypes'
-
-interface StatCardProps {
-  title: string
-  value: string
-}
-
-function StatCard({ title, value }: Readonly<StatCardProps>) {
-  return (
-    <div className="rounded-xl border bg-card p-5">
-      <p className="text-rem-85 text-muted-foreground mb-2">{title}</p>
-      <p className="text-rem-200 font-bold text-foreground leading-none">{value}</p>
-    </div>
-  )
-}
-
-interface LogRowProps {
-  log: DataUsageSaldoLog
-  formatDate: (iso: string) => string
-  formatRupiah: (amount: number) => string
-}
-
-function LogRow({ log, formatDate, formatRupiah }: Readonly<LogRowProps>) {
-  const isChat = log.activityType === 'chat'
-  const icon = isChat ? <MessageSquare className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />
-  const chatLabel = log.senderName ? `Chat — ${log.senderName}` : 'Chat masuk'
-  const label = isChat ? chatLabel : 'Sync dokumen'
-
-  return (
-    <tr className="border-b last:border-0">
-      <td className="py-3 pl-4 text-rem-85 text-muted-foreground">{formatDate(log.createdAt)}</td>
-      <td className="py-3 px-3">
-        <span className="inline-flex items-center gap-1.5 text-rem-85 text-foreground">{icon} {label}</span>
-      </td>
-      <td className="py-3 px-3 text-rem-85 font-medium text-destructive">
-        <span className="inline-flex items-center gap-0.5">
-          <TrendingDown className="h-3 w-3" /> -{formatRupiah(log.deduction)}
-        </span>
-      </td>
-      <td className="py-3 pr-4 text-rem-85 text-foreground font-medium text-right">{formatRupiah(log.balanceAfter)}</td>
-    </tr>
-  )
-}
+import UsageSaldoStatCard from './UsageSaldoStatCard'
+import UsageSaldoLogRow from './UsageSaldoLogRow'
+import UsageSaldoChart from './UsageSaldoChart'
 
 export default function UsageSaldoView() {
+  // variable importer
   const { storeTopup } = useUsageSaldoControllers()
   const { balance, usageLogs, payloadGetLogs, setGetLogs } = useUsageSaldoStates()
+
+  // states / variable
   const [isMounted, setIsMounted] = useState(false)
 
-  const formatRupiah = (amount: number) => `Rp ${Math.abs(amount).toLocaleString('id-ID')}`
+  const balanceData = balance.data as DataUsageSaldoBalance | undefined
+  const logsData = usageLogs.data as DataUsageSaldoLogList | undefined
+  const logs = logsData?.logs ?? []
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString('id-ID', {
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    })
+  const selectedYear = Number.parseInt(payloadGetLogs.year ?? String(new Date().getFullYear()))
+  const selectedMonth = Number.parseInt(payloadGetLogs.month ?? String(new Date().getMonth() + 1))
+  const monthlyTotal = logs.reduce((sum, log) => sum + log.deduction, 0)
+  const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate()
+
+  // function / methode
+  const getFormatRupiah = (amount: number) => `Rp ${Math.abs(amount).toLocaleString('id-ID')}`
 
   const getMonthLabel = (year: number, month: number) =>
     `${year} - ${new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'short' })}`
@@ -78,10 +46,10 @@ export default function UsageSaldoView() {
     return options
   }
 
-  const aggregateDailyData = (logs: DataUsageSaldoLog[], year: number, month: number) => {
-    const daysInMonth = new Date(year, month, 0).getDate()
-    const totals = new Array<number>(daysInMonth).fill(0)
-    for (const log of logs) {
+  const getAggregateDailyData = (logList: DataUsageSaldoLog[], year: number, month: number) => {
+    const total = new Date(year, month, 0).getDate()
+    const totals = new Array<number>(total).fill(0)
+    for (const log of logList) {
       const d = new Date(log.createdAt)
       if (d.getFullYear() === year && d.getMonth() + 1 === month) {
         totals[d.getDate() - 1] += log.deduction
@@ -89,19 +57,6 @@ export default function UsageSaldoView() {
     }
     return totals
   }
-
-  useEffect(() => { setIsMounted(true) }, [])
-
-  const balanceData = balance.data as DataUsageSaldoBalance | undefined
-  const logsData = usageLogs.data as DataUsageSaldoLogList | undefined
-  const logs = logsData?.logs ?? []
-
-  const selectedYear = Number.parseInt(payloadGetLogs.year ?? String(new Date().getFullYear()))
-  const selectedMonth = Number.parseInt(payloadGetLogs.month ?? String(new Date().getMonth() + 1))
-  const monthlyTotal = logs.reduce((sum, log) => sum + log.deduction, 0)
-  const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate()
-  const dailyData = aggregateDailyData(logs, selectedYear, selectedMonth)
-  const monthOptions = getMonthOptions()
 
   const syncMonth = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const [year, month] = e.target.value.split('-')
@@ -135,62 +90,11 @@ export default function UsageSaldoView() {
     URL.revokeObjectURL(url)
   }
 
-  const loadChart = () => {
-    if (!isMounted) {
-      return <div className="h-[200px] bg-muted/20 rounded animate-pulse" />
-    }
+  const dailyData = getAggregateDailyData(logs, selectedYear, selectedMonth)
+  const monthOptions = getMonthOptions()
 
-    // Dynamic require needed for client-side hydration compatibility with SSR
-    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-    const Highcharts = require('highcharts') as typeof import('highcharts')
-    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-    const HighchartsReact = (require('highcharts-react-official') as { default: typeof import('highcharts-react-official').default }).default
-
-    const allDayCategories = Array.from(
-      { length: daysInMonth },
-      (_, i) => `${selectedMonth}-${i + 1}`,
-    )
-
-    const chartOptions = {
-      chart: { type: 'column', backgroundColor: 'transparent', height: 200, margin: [20, 0, 30, 55] },
-      title: { text: '' },
-      xAxis: {
-        categories: allDayCategories,
-        labels: { step: 5, style: { color: '#6B7280', fontSize: '10px' } },
-        lineColor: '#374151',
-        tickColor: 'transparent',
-      },
-      yAxis: {
-        title: { text: '' },
-        labels: {
-          format: 'Rp {value}',
-          style: { color: '#6B7280', fontSize: '10px' },
-        },
-        gridLineColor: '#374151',
-      },
-      series: [{
-        type: 'column',
-        name: 'Pengeluaran',
-        data: dailyData,
-        color: '#F59E0B',
-        borderWidth: 0,
-        borderRadius: 2,
-        pointPadding: 0.05,
-        groupPadding: 0,
-      }],
-      legend: { enabled: false },
-      tooltip: {
-        backgroundColor: '#1F2937',
-        style: { color: '#F9FAFB', fontSize: '12px' },
-        headerFormat: '',
-        pointFormat: '{point.category}: <b>Rp {point.y}</b>',
-      },
-      credits: { enabled: false },
-      plotOptions: { column: { borderWidth: 0 } },
-    }
-
-    return <HighchartsReact highcharts={Highcharts} options={chartOptions} />
-  }
+  // lifecycle react
+  useEffect(() => { setIsMounted(true) }, [])
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -201,19 +105,17 @@ export default function UsageSaldoView() {
         </p>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard
+        <UsageSaldoStatCard
           title="Topped-up balance"
-          value={balanceData ? formatRupiah(balanceData.balance) : '—'}
+          value={balanceData ? getFormatRupiah(balanceData.balance) : '—'}
         />
-        <StatCard
+        <UsageSaldoStatCard
           title={`Pengeluaran ${getMonthLabel(selectedYear, selectedMonth)}`}
-          value={formatRupiah(monthlyTotal)}
+          value={getFormatRupiah(monthlyTotal)}
         />
       </div>
 
-      {/* Top Up + Alert */}
       <div className="flex items-center gap-3 flex-wrap">
         <button
           type="button"
@@ -227,7 +129,6 @@ export default function UsageSaldoView() {
         </div>
       </div>
 
-      {/* Monthly Usage */}
       <div className="rounded-xl border bg-card overflow-hidden">
         <div className="px-4 py-4 border-b flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-rem-100 font-semibold text-foreground">Monthly usage</h2>
@@ -257,16 +158,20 @@ export default function UsageSaldoView() {
         <div className="px-5 pt-4 pb-1">
           <p className="text-rem-85 text-muted-foreground">
             Pengeluaran{' '}
-            <span className="font-semibold text-foreground">{formatRupiah(monthlyTotal)}</span>
+            <span className="font-semibold text-foreground">{getFormatRupiah(monthlyTotal)}</span>
           </p>
         </div>
 
         <div className="px-4 pb-4">
-          {loadChart()}
+          <UsageSaldoChart
+            isMounted={isMounted}
+            daysInMonth={daysInMonth}
+            selectedMonth={selectedMonth}
+            dailyData={dailyData}
+          />
         </div>
       </div>
 
-      {/* Usage Logs */}
       <div className="rounded-xl border bg-card overflow-hidden">
         <div className="px-4 py-3 border-b">
           <h2 className="text-rem-95 font-semibold text-foreground">Riwayat Penggunaan</h2>
@@ -300,7 +205,7 @@ export default function UsageSaldoView() {
                 </tr>
               </thead>
               <tbody>
-                {logs.map((log) => <LogRow key={log.id} log={log} formatDate={formatDate} formatRupiah={formatRupiah} />)}
+                {logs.map((log) => <UsageSaldoLogRow key={log.id} log={log} />)}
               </tbody>
             </table>
           </div>

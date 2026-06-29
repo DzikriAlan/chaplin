@@ -36,6 +36,8 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
   const processingCount = docs.filter((d) => d.status === 'PROCESSING').length
   const isAutoProcessing = pendingCount > 0 || processingCount > 0
   const selectedCount = selectedIds.size
+  const prevPickerSignalRef = useRef(openFolderPickerSignal ?? 0)
+  const hasAuxiliary = selectedCount > 0 || isAutoProcessing
 
   // function / methode
   const getDocsStatus = (isLoading: boolean, isError: boolean, isEmpty: boolean) => {
@@ -44,6 +46,7 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
     if (isEmpty) return 'empty'
     return 'success'
   }
+  const loadStatus = getDocsStatus(kbGoogleDrive.status === 'loading', kbGoogleDrive.status === 'error', docs.length === 0)
 
   const getProcessingLabel = () => {
     if (isPaused) return `Dijeda — ${pendingCount} dokumen menunggu`
@@ -104,21 +107,16 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
     )
   }
 
-  const loadStatus = getDocsStatus(kbGoogleDrive.status === 'loading', kbGoogleDrive.status === 'error', docs.length === 0)
-
   // lifecycle react
   useEffect(() => { if (router.query.folder === 'picker') { setShowFolderPicker(true); router.replace('/documents', undefined, { shallow: true }) } }, [router])
 
   useEffect(() => { if (syncSignal) syncGoogleDrive() }, [syncSignal]) // syncGoogleDrive is intentionally omitted: sync triggered by signal change only
-  const prevPickerSignalRef = useRef(openFolderPickerSignal ?? 0)
   useEffect(() => {
     if (openFolderPickerSignal && openFolderPickerSignal !== prevPickerSignalRef.current) {
       setShowFolderPicker(true)
       prevPickerSignalRef.current = openFolderPickerSignal
     }
   }, [openFolderPickerSignal])
-
-  const hasAuxiliary = selectedCount > 0 || isAutoProcessing
 
   return (
     <div>

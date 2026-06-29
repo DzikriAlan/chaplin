@@ -15,16 +15,20 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export default function KnowledgeBaseForm() {
-  const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
+  // variable importer
   const { storeKnowledgeBase } = useKBFaqControllers()
-
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { question: '', answer: '' },
   })
 
-  const handleAddTag = () => {
+  // states / variable
+  const [tags, setTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState('')
+  const isLoading = storeKnowledgeBase.isPending
+
+  // function / methode
+  const syncTag = () => {
     const tag = tagInput.trim()
     if (tag && !tags.includes(tag)) {
       setTags((prev) => [...prev, tag])
@@ -32,18 +36,18 @@ export default function KnowledgeBaseForm() {
     setTagInput('')
   }
 
-  const handleRemoveTag = (tag: string) => {
+  const destroyTag = (tag: string) => {
     setTags((prev) => prev.filter((t) => t !== tag))
   }
 
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const syncTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleAddTag()
+      syncTag()
     }
   }
 
-  const handleSubmit = async (values: FormValues) => {
+  const saveKnowledgeBase = async (values: FormValues) => {
     try {
       await storeKnowledgeBase.mutateAsync({ ...values, tags })
       toast.success('FAQ berhasil ditambahkan')
@@ -54,8 +58,7 @@ export default function KnowledgeBaseForm() {
     }
   }
 
-  const isLoading = storeKnowledgeBase.isPending
-
+  // lifecycle react
   return (
     <div className="rounded-xl border bg-card p-6 shadow-card">
       <h2 className="text-rem-110 font-semibold text-dark-text mb-4 flex items-center gap-2">
@@ -63,7 +66,7 @@ export default function KnowledgeBaseForm() {
         Tambah FAQ Baru
       </h2>
 
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(saveKnowledgeBase)} className="space-y-4">
         <div>
           <label htmlFor="kb-question" className="block text-rem-85 font-medium text-dark-text mb-1">Pertanyaan</label>
           <input
@@ -98,13 +101,13 @@ export default function KnowledgeBaseForm() {
               id="kb-tag"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
+              onKeyDown={syncTagKeyDown}
               placeholder="Tambah tag, tekan Enter"
               className="flex-1 rounded-lg border bg-background px-3 py-2 text-rem-90 text-dark-text placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button
               type="button"
-              onClick={handleAddTag}
+              onClick={syncTag}
               className="rounded-lg border px-4 py-2 text-rem-85 font-medium text-dark-text hover:bg-muted"
             >
               Tambah
@@ -115,7 +118,7 @@ export default function KnowledgeBaseForm() {
               {tags.map((tag) => (
                 <span key={tag} className="flex items-center gap-1 rounded-full bg-secondary/10 px-2.5 py-0.5 text-rem-80 text-secondary font-medium">
                   {tag}
-                  <button type="button" onClick={() => handleRemoveTag(tag)}>
+                  <button type="button" onClick={() => destroyTag(tag)}>
                     <X className="h-3 w-3" />
                   </button>
                 </span>
