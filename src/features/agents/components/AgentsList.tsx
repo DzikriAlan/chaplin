@@ -13,20 +13,21 @@ import { useUIStates } from '@/shared/states/uiStates'
 type ViewMode = 'list' | 'create' | 'preview'
 
 export default function AgentsList() {
+  const { storeAgent, removeAgent, changeAgent } = useAgentsControllers()
+
+  const { toggleSidebar } = useUIStates()
+  const { agentsList } = useAgentsStates()
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [editAgent, setEditAgent] = useState<DataAgent | null>(null)
   const [previewAgent, setPreviewAgent] = useState<DataAgent | null>(null)
   const [prevMode, setPrevMode] = useState<ViewMode>('list')
   const agentFormRef = useRef<AgentFormHandle>(null)
-  const { toggleSidebar } = useUIStates()
-  const { agentsList } = useAgentsStates()
-  const { storeAgent, removeAgent, changeAgent } = useAgentsControllers()
-  const filtered = (agentsList.data as DataAgent[]).filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
   const isSaving = storeAgent.isPending || changeAgent.isPending
+  const filtered = ((agentsList.data as DataAgent[]) ?? []).filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
   const skeletonIds = useMemo(() => ['sk-1', 'sk-2', 'sk-3', 'sk-4'], [])
 
-  const handleSave = async (data: {
+  const saveAgent = async (data: {
     name: string; description: string; image: string; personalization: string
     knowledgeBaseIds: string[]; isDefault: boolean
   }) => {
@@ -39,12 +40,12 @@ export default function AgentsList() {
     setEditAgent(null)
   }
 
-  const handleDelete = async (id: string) => {
+  const destroyAgent = async (id: string) => {
     if (!confirm('Hapus agent ini?')) return
     await removeAgent.mutateAsync(id)
   }
 
-  const handleBack = () => {
+  const syncViewMode = () => {
     if (viewMode === 'preview' && prevMode === 'create') {
       setViewMode('create')
       setPrevMode('list')
@@ -55,7 +56,7 @@ export default function AgentsList() {
     }
   }
 
-  const goToPreview = (a: DataAgent) => {
+  const loadPreview = (a: DataAgent) => {
     setPrevMode(viewMode)
     setPreviewAgent(a)
     setViewMode('preview')
@@ -75,17 +76,17 @@ export default function AgentsList() {
           </button>
           <button
             type="button"
-            onClick={handleBack}
+            onClick={syncViewMode}
             className="flex items-center gap-1.5 text-rem-90 font-medium text-foreground hover:text-muted-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> Kembali
           </button>
         </div>
         {/* Desktop back button */}
-        <button type="button" onClick={handleBack} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
+        <button type="button" onClick={syncViewMode} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
           <ArrowLeft className="h-4 w-4" /> Kembali ke daftar agent
         </button>
-        <AgentForm ref={agentFormRef} agent={editAgent} isSaving={isSaving} onSave={handleSave} onPreview={goToPreview} />
+        <AgentForm ref={agentFormRef} agent={editAgent} isSaving={isSaving} onSave={saveAgent} onPreview={loadPreview} />
       </div>
     )
   }
@@ -104,14 +105,14 @@ export default function AgentsList() {
           </button>
           <button
             type="button"
-            onClick={handleBack}
+            onClick={syncViewMode}
             className="flex items-center gap-1.5 text-rem-90 font-medium text-foreground hover:text-muted-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> {prevMode === 'create' ? 'Kembali ke buat agent' : 'Kembali'}
           </button>
         </div>
         {/* Desktop back button */}
-        <button type="button" onClick={handleBack} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4 shrink-0">
+        <button type="button" onClick={syncViewMode} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4 shrink-0">
           <ArrowLeft className="h-4 w-4" /> {prevMode === 'create' ? 'Kembali ke buat agent' : 'Kembali ke daftar agent'}
         </button>
         <AgentPreviewInline agent={previewAgent} />
@@ -176,8 +177,8 @@ export default function AgentsList() {
               key={agent.id}
               agent={agent}
               onEdit={(a) => { setEditAgent(a); setViewMode('create') }}
-              onPreview={goToPreview}
-              onDelete={handleDelete}
+              onPreview={loadPreview}
+              onDelete={destroyAgent}
             />
           ))}
         </div>

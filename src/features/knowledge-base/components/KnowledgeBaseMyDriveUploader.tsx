@@ -1,256 +1,22 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import {
-  FolderOpen,
-  FolderPlus,
-  Trash2,
-  Upload,
-  File,
-  ChevronRight,
-  ChevronDown,
-  Loader2,
-  X,
-  CheckSquare,
-} from 'lucide-react'
+import { FolderPlus, X, CheckSquare, Trash2, Upload, FolderOpen, Loader2 } from 'lucide-react'
 import { useKBMyDriveControllers } from '../controllers/knowledgeBaseMyDriveControllers'
 import { useKbMyDriveStates } from '../states/knowledgeBaseMyDriveStates'
-import type { DataKbMyDriveFolder, DataKbMyDriveFile } from '../types/knowledgeBaseMyDriveTypes'
+import type { DataKbMyDriveFolder } from '../types/knowledgeBaseMyDriveTypes'
 import { getSupabaseClient, isSupabaseConfigured, STORAGE_BUCKET } from '@/shared/lib/supabase'
-import ListCardRow from '@/shared/components/ListCardRow'
 import KnowledgeBaseGoogleDriveTableSkeleton from './KnowledgeBaseGoogleDriveTableSkeleton'
+import { KnowledgeBaseMyDriveFolderNode } from './KnowledgeBaseMyDriveFolderNode'
+import { KnowledgeBaseMyDriveCheckbox } from './KnowledgeBaseMyDriveCheckbox'
 
-// ── helpers ────────────────────────────────────────────────────────────────
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
-
-
-function collectFileIds(folder: DataKbMyDriveFolder): string[] {
+function getCollectFileIds(folder: DataKbMyDriveFolder): string[] {
   const ids = folder.files.map((f) => f.id)
   for (const child of folder.children) {
-    ids.push(...collectFileIds(child))
+    ids.push(...getCollectFileIds(child))
   }
   return ids
 }
-
-// ── IndeterminateCheckbox ──────────────────────────────────────────────────
-
-interface CheckboxProps {
-  checked: boolean
-  indeterminate: boolean
-  onChange: () => void
-  label?: string
-}
-
-function IndeterminateCheckbox({ checked, indeterminate, onChange, label }: Readonly<CheckboxProps>) {
-  const ref = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.indeterminate = indeterminate
-    }
-  }, [indeterminate])
-
-  return (
-    <input
-      ref={ref}
-      type="checkbox"
-      aria-label={label}
-      checked={checked}
-      onChange={onChange}
-      className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0"
-    />
-  )
-}
-
-// ── FolderNode ─────────────────────────────────────────────────────────────
-
-interface FolderNodeProps {
-  folder: DataKbMyDriveFolder
-  depth: number
-  selectedIds: Set<string>
-  onToggleFolder: (folder: DataKbMyDriveFolder) => void
-  onToggleFile: (fileId: string) => void
-  onDeleteFolder: (id: string) => void
-  onDeleteFile: (id: string) => void
-  onDropFiles: (files: FileList, folderId: string) => void
-  uploadingFolderId: string | null
-}
-
-function FolderNode({
-  folder,
-  depth,
-  selectedIds,
-  onToggleFolder,
-  onToggleFile,
-  onDeleteFolder,
-  onDeleteFile,
-  onDropFiles,
-  uploadingFolderId,
-}: Readonly<FolderNodeProps>) {
-  const [expanded, setExpanded] = useState(true)
-  const [dragOver, setDragOver] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const allFileIds = collectFileIds(folder)
-  const selectedCount = allFileIds.filter((id) => selectedIds.has(id)).length
-  const isChecked = allFileIds.length > 0 && selectedCount === allFileIds.length
-  const isIndeterminate = selectedCount > 0 && selectedCount < allFileIds.length
-  const isUploading = uploadingFolderId === folder.id
-  const hasContent = folder.children.length > 0 || folder.files.length > 0
-  const paddingLeft = depth * 16
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setDragOver(false)
-    if (e.dataTransfer.files.length > 0) {
-      onDropFiles(e.dataTransfer.files, folder.id)
-    }
-  }, [folder.id, onDropFiles])
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setDragOver(true)
-  }, [])
-
-  const chevronIcon = expanded
-    ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-    : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-  const folderPrefixIcon = hasContent ? chevronIcon : <span className="w-3.5 shrink-0" />
-
-  const folderActions = (
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-      {isUploading
-        ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-        : (
-          <>
-            <input
-              ref={inputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => e.target.files && onDropFiles(e.target.files, folder.id)}
-            />
-            <button type="button" title="Upload ke folder ini" onClick={() => inputRef.current?.click()} className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-muted">
-              <Upload className="h-3.5 w-3.5" />
-            </button>
-          </>
-        )
-      }
-      <button type="button" title="Hapus folder" onClick={() => onDeleteFolder(folder.id)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted">
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  )
-
-  return (
-    <div>
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={() => setDragOver(false)}
-      >
-        <ListCardRow
-          selectionNode={
-            <IndeterminateCheckbox
-              checked={isChecked}
-              indeterminate={isIndeterminate}
-              onChange={() => onToggleFolder(folder)}
-              label={`Pilih folder ${folder.name}`}
-            />
-          }
-          prefixNode={<>{folderPrefixIcon}<FolderOpen className="h-4 w-4 shrink-0 text-primary" /></>}
-          title={folder.name}
-          subtitle={`${folder.files.length + folder.children.length} item`}
-          inlineSubtitle
-          onClickContent={hasContent ? () => setExpanded(!expanded) : undefined}
-          actions={folderActions}
-          dragOver={dragOver}
-          style={{ paddingLeft: `${paddingLeft + 16}px` }}
-        />
-      </div>
-
-      {expanded && (
-        <div className="divide-y divide-border">
-          {folder.children.map((child) => (
-            <FolderNode
-              key={child.id}
-              folder={child}
-              depth={depth + 1}
-              selectedIds={selectedIds}
-              onToggleFolder={onToggleFolder}
-              onToggleFile={onToggleFile}
-              onDeleteFolder={onDeleteFolder}
-              onDeleteFile={onDeleteFile}
-              onDropFiles={onDropFiles}
-              uploadingFolderId={uploadingFolderId}
-            />
-          ))}
-
-          {folder.files.map((file) => (
-            <FileRow
-              key={file.id}
-              file={file}
-              depth={depth + 1}
-              isSelected={selectedIds.has(file.id)}
-              onToggle={() => onToggleFile(file.id)}
-              onDelete={() => onDeleteFile(file.id)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── FileRow ────────────────────────────────────────────────────────────────
-
-interface FileRowProps {
-  file: DataKbMyDriveFile
-  depth: number
-  isSelected: boolean
-  onToggle: () => void
-  onDelete: () => void
-}
-
-function FileRow({ file, depth, isSelected, onToggle, onDelete }: Readonly<FileRowProps>) {
-  return (
-    <ListCardRow
-      selectionNode={
-        <input
-          type="checkbox"
-          aria-label={`Pilih ${file.name}`}
-          checked={isSelected}
-          onChange={onToggle}
-          className="h-4 w-4 rounded border-border accent-primary cursor-pointer"
-        />
-      }
-      prefixNode={<File className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
-      title={file.name}
-      subtitle={formatBytes(file.size)}
-      inlineSubtitle
-      actions={
-        <button
-          type="button"
-          title="Hapus file"
-          onClick={onDelete}
-          className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      }
-      style={{ paddingLeft: `${depth * 16 + 32}px` }}
-    />
-  )
-}
-
-// ── FileUploaderView ───────────────────────────────────────────────────────
 
 interface FileUploaderViewProps {
   openFolderFormSignal?: number
@@ -305,7 +71,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
   }, [openUploadSignal])
 
   const handleToggleFolder = useCallback((folder: DataKbMyDriveFolder) => {
-    const allIds = collectFileIds(folder)
+    const allIds = getCollectFileIds(folder)
     const allSelected = allIds.every((id) => selectedIds.has(id))
     const next = new Set(selectedIds)
     if (allSelected) {
@@ -387,7 +153,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
     uploadFiles(files, folderId)
   }, [uploadFiles])
 
-  const allFolderFileIds = folders.flatMap((f) => collectFileIds(f))
+  const allFolderFileIds = folders.flatMap((f) => getCollectFileIds(f))
   const allSelected = allFolderFileIds.length > 0 && allFolderFileIds.every((id) => selectedIds.has(id))
   const someSelected = allFolderFileIds.some((id) => selectedIds.has(id))
 
@@ -523,7 +289,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
         <div className="overflow-hidden">
           {/* Header row */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">
-            <IndeterminateCheckbox
+            <KnowledgeBaseMyDriveCheckbox
               checked={allSelected}
               indeterminate={someSelected && !allSelected}
               onChange={handleSelectAll}
@@ -578,7 +344,7 @@ export default function FileUploaderView({ openFolderFormSignal, openUploadSigna
           >
             <div className="divide-y divide-border">
               {folders.map((folder) => (
-                <FolderNode
+                <KnowledgeBaseMyDriveFolderNode
                   key={folder.id}
                   folder={folder}
                   depth={0}

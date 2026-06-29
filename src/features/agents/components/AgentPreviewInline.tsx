@@ -12,24 +12,6 @@ interface PreviewMessage {
   content: string
 }
 
-export async function streamPreviewSSE(response: Response, assistantId: string, setMessages: React.Dispatch<React.SetStateAction<PreviewMessage[]>>) {
-  if (!response.body) throw new Error('No response body')
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n')
-    buffer = lines.pop() ?? ''
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue
-      try { const data = JSON.parse(line.slice(6)); if (data.text) { setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + data.text } : m))) } } catch { /* ignore */ }
-    }
-  }
-}
-
 interface AgentPreviewInlineProps {
   agent: DataAgent
 }
@@ -40,9 +22,27 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
   const [isStreaming, setIsStreaming] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
+  const getPreviewStream = async (response: Response, assistantId: string) => {
+    if (!response.body) throw new Error('No response body')
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        try { const data = JSON.parse(line.slice(6)); if (data.text) { setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + data.text } : m))) } } catch { /* ignore */ }
+      }
+    }
+  }
+
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  const handleSend = async () => {
+  const saveChatMessage = async () => {
     const text = input.trim()
     if (!text || isStreaming) return
     setInput('')
@@ -53,12 +53,12 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
     try {
       const response = await backendFetch('/chat', { method: 'POST', body: JSON.stringify({ message: text, sessionId: 'preview_' + agent.id + '_' + Date.now(), agentId: agent.id }) })
       if (!response.ok || !response.body) throw new Error('Request failed')
-      await streamPreviewSSE(response, assistantId, setMessages)
+      await getPreviewStream(response, assistantId)
     } catch { setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: m.content || 'Gagal memuat respons.' } : m))) }
     finally { setIsStreaming(false) }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }
+  const getKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveChatMessage() } }
 
   const isDisabled = isStreaming || !input.trim()
 
@@ -110,8 +110,8 @@ export default function AgentPreviewInline({ agent }: Readonly<AgentPreviewInlin
       <div className="pt-4 shrink-0">
         <div className="rounded-2xl border bg-card">
           <div className="flex items-center gap-3 px-4 py-3">
-            <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Ketik pesan untuk test agent..." rows={1} className="flex-1 resize-none bg-transparent text-rem-90 text-foreground placeholder:text-muted-foreground focus:outline-none leading-relaxed max-h-32 overflow-y-auto" />
-            <button type="button" onClick={handleSend} disabled={isDisabled} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
+            <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={getKeyDownHandler} placeholder="Ketik pesan untuk test agent..." rows={1} className="flex-1 resize-none bg-transparent text-rem-90 text-foreground placeholder:text-muted-foreground focus:outline-none leading-relaxed max-h-32 overflow-y-auto" />
+            <button type="button" onClick={saveChatMessage} disabled={isDisabled} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
               <Send className="h-4 w-4" />
             </button>
           </div>

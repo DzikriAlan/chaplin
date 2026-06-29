@@ -4,11 +4,10 @@ import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 're
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
 import { ImageIcon, Eye, Info, Copy, Check as CheckIcon } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
-import { getKBFaqItems } from '@/features/knowledge-base/services/knowledgeBaseFaqServices'
+import { useKbFaqStates } from '@/features/knowledge-base/states/knowledgeBaseFaqStates'
 
 export const agentSchema = z.object({
   name: z.string().min(2, 'Nama minimal 2 karakter'),
@@ -41,8 +40,83 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
   const [embedCopied, setEmbedCopied] = useState(false)
   const [waCopied, setWaCopied] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
-  const rightColRef = useRef<HTMLDivElement>(null)
   const [imageBoxSize, setImageBoxSize] = useState(160)
+  const rightColRef = useRef<HTMLDivElement>(null)
+
+  const { kbFaq } = useKbFaqStates()
+
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<AgentFormValues>({
+    resolver: zodResolver(agentSchema),
+    defaultValues: { name: '', description: '', image: '', personalization: '', isDefault: false },
+  })
+  const formValues = watch()
+
+  const getEmbedScript = () => {
+    const baseUrl = globalThis.window?.location.origin ?? ''
+    const id = agent?.id ?? 'AGENT_ID'
+    return `<iframe
+  src="${baseUrl}/embed/chat?agent=${id}"
+  width="100%"
+  height="600"
+  style="border:none;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.12);"
+  allow="clipboard-write"
+></iframe>`
+  }
+
+  const getWhatsAppLink = () => {
+    const num = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '6281234567890'
+    return `https://wa.me/${num}?text=Halo%20AI%20Agent`
+  }
+
+  const getSubmitLabel = () => {
+    if (isSaving) return 'Menyimpan...'
+    if (isEdit) return 'Simpan Perubahan'
+    return 'Buat Agent'
+  }
+
+  const saveAgent = (values: AgentFormValues) => {
+    onSave({ ...values, knowledgeBaseIds: Array.from(selectedKbIds) })
+  }
+
+  const syncKbIds = (id: string) => {
+    setSelectedKbIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const syncEmbedCopied = async () => {
+    await navigator.clipboard.writeText(getEmbedScript())
+    setEmbedCopied(true)
+    setTimeout(() => setEmbedCopied(false), 2000)
+  }
+
+  const syncWaCopied = async () => {
+    await navigator.clipboard.writeText(getWhatsAppLink())
+    setWaCopied(true)
+    setTimeout(() => setWaCopied(false), 2000)
+  }
+
+  const loadPreview = () => {
+    onPreview({
+      id: agent?.id ?? 'preview',
+      name: formValues.name || 'Preview Agent',
+      description: formValues.description || null,
+      image: formValues.image || null,
+      personalization: formValues.personalization || null,
+      knowledgeBaseIds: Array.from(selectedKbIds),
+      isDefault: formValues.isDefault,
+      embedScript: null,
+      whatsappScript: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+  }
 
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 640)
@@ -59,21 +133,6 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
     return () => observer.disconnect()
   }, [isDesktop])
 
-  const { data: kbRaw } = useQuery<Array<{ id: string; question: string; answer: string; tags: string[]; isActive: boolean }>>({
-    queryKey: ['knowledgeBase'],
-    queryFn: async () => {
-      const data = await getKBFaqItems()
-      return (data as Array<{ id: string; question: string; answer: string; tags: string[]; isActive: boolean }>) ?? []
-    },
-  })
-  const kbItems = kbRaw ?? []
-
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<AgentFormValues>({
-    resolver: zodResolver(agentSchema),
-    defaultValues: { name: '', description: '', image: '', personalization: '', isDefault: false },
-  })
-  const formValues = watch()
-
   useEffect(() => {
     if (agent) {
       reset({ name: agent.name, description: agent.description ?? '', image: agent.image ?? '', personalization: agent.personalization ?? '', isDefault: agent.isDefault })
@@ -86,26 +145,7 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
     }
   }, [agent, reset])
 
-  const handleFormSubmit = (values: AgentFormValues) => { onSave({ ...values, knowledgeBaseIds: Array.from(selectedKbIds) }) }
-
-  const toggleKb = (id: string) => { setSelectedKbIds((prev) => { const next = new Set(prev); if (next.has(id)) { next.delete(id) } else { next.add(id) }; return next }) }
-
-  const getEmbedScript = () => { const baseUrl = globalThis.window?.location.origin ?? ''; const id = agent?.id ?? 'AGENT_ID'; return '<iframe\n  src="' + baseUrl + '/embed/chat?agent=' + id + '"\n  width="100%"\n  height="600"\n  style="border:none;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.12);"\n  allow="clipboard-write"\n></iframe>' }
-
-  const getWhatsAppLink = () => { const num = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '6281234567890'; return 'https://wa.me/' + num + '?text=Halo%20AI%20Agent' }
-
-  const handleCopyEmbed = async () => { await navigator.clipboard.writeText(getEmbedScript()); setEmbedCopied(true); setTimeout(() => setEmbedCopied(false), 2000) }
-  const handleCopyWA = async () => { await navigator.clipboard.writeText(getWhatsAppLink()); setWaCopied(true); setTimeout(() => setWaCopied(false), 2000) }
-
-  const handlePreviewClick = () => { onPreview({ id: agent?.id ?? 'preview', name: formValues.name || 'Preview Agent', description: formValues.description || null, image: formValues.image || null, personalization: formValues.personalization || null, knowledgeBaseIds: Array.from(selectedKbIds), isDefault: formValues.isDefault, embedScript: null, whatsappScript: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }) }
-
-  useImperativeHandle(ref, () => ({ triggerPreview: handlePreviewClick }))
-
-  const getSubmitLabel = () => {
-    if (isSaving) return 'Menyimpan...'
-    if (isEdit) return 'Simpan Perubahan'
-    return 'Buat Agent'
-  }
+  useImperativeHandle(ref, () => ({ triggerPreview: loadPreview }))
 
   return (
     <div>
@@ -113,7 +153,7 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
         <h2 className="text-rem-130 font-bold text-foreground tracking-tight">{isEdit ? 'Edit Agent' : 'Buat Agent Baru'}</h2>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(saveAgent)} className="space-y-4">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-4">
           <div
             className="shrink-0 w-24 h-24"
@@ -158,15 +198,15 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-rem-85 font-medium text-foreground mb-1.5">Pilih Knowledge Base</p>
-            {kbItems.length === 0 ? (
+            {(kbFaq.data?.length ?? 0) === 0 ? (
               <p className="text-rem-85 text-muted-foreground italic">Belum ada knowledge base tersedia.</p>
             ) : (
               <div className="max-h-32 overflow-y-auto rounded-lg border divide-y">
-                {kbItems.map((kb) => {
+                {(kbFaq.data as Array<{ id: string; question: string; answer: string; tags: string[]; isActive: boolean }>).map((kb) => {
                   const checked = selectedKbIds.has(kb.id)
                   return (
                     <label key={kb.id} className={'flex items-center gap-2 px-2.5 py-2 cursor-pointer transition-colors ' + (checked ? 'bg-primary/[0.08]' : 'hover:bg-muted/40')}>
-                      <input type="checkbox" checked={checked} onChange={() => toggleKb(kb.id)} className="peer sr-only" />
+                      <input type="checkbox" checked={checked} onChange={() => syncKbIds(kb.id)} className="peer sr-only" />
                       <span className={'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ' + (checked ? 'border-primary bg-primary' : 'border-border bg-background')}>
                         {checked && <CheckIcon className="h-2.5 w-2.5 text-primary-foreground stroke-[3]" />}
                       </span>
@@ -199,7 +239,7 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
             <pre className="overflow-x-auto rounded-lg border bg-muted/30 px-4 py-3 text-rem-70 font-mono leading-relaxed whitespace-pre-wrap text-foreground">
               {getEmbedScript()}
             </pre>
-            <button type="button" onClick={handleCopyEmbed} className="absolute right-2 top-2 flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-rem-70 font-medium text-foreground hover:bg-muted transition-colors">
+            <button type="button" onClick={syncEmbedCopied} className="absolute right-2 top-2 flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-rem-70 font-medium text-foreground hover:bg-muted transition-colors">
               {embedCopied ? <><CheckIcon className="h-3 w-3" />Tersalin!</> : <><Copy className="h-3 w-3" />Salin</>}
             </button>
           </div>
@@ -214,14 +254,14 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
             <pre className="overflow-x-auto rounded-lg border bg-muted/30 px-4 py-3 text-rem-70 font-mono leading-relaxed whitespace-pre-wrap text-foreground">
               {getWhatsAppLink()}
             </pre>
-            <button type="button" onClick={handleCopyWA} className="absolute right-2 top-2 flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-rem-70 font-medium text-foreground hover:bg-muted transition-colors">
+            <button type="button" onClick={syncWaCopied} className="absolute right-2 top-2 flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-rem-70 font-medium text-foreground hover:bg-muted transition-colors">
               {waCopied ? <><CheckIcon className="h-3 w-3" />Tersalin!</> : <><Copy className="h-3 w-3" />Salin</>}
             </button>
           </div>
         </div>
 
         <div className="flex justify-between pt-1">
-          <button type="button" onClick={handlePreviewClick} className="flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-rem-90 font-medium text-foreground hover:bg-muted transition-colors">
+          <button type="button" onClick={loadPreview} className="flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-rem-90 font-medium text-foreground hover:bg-muted transition-colors">
             <Eye className="h-4 w-4" /> Preview Agent
           </button>
           <button type="submit" disabled={isSaving} className="rounded-lg bg-primary px-5 py-2.5 text-rem-90 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">

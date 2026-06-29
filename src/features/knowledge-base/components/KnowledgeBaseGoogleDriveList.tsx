@@ -10,19 +10,18 @@ import KnowledgeBaseGoogleDriveFolderPicker from './KnowledgeBaseGoogleDriveFold
 import KnowledgeBaseGoogleDriveRow from './KnowledgeBaseGoogleDriveRow'
 import KnowledgeBaseGoogleDriveTableSkeleton from './KnowledgeBaseGoogleDriveTableSkeleton'
 
-function getDocsStatus(isLoading: boolean, isError: boolean, isEmpty: boolean) {
-  if (isLoading) return 'loading'
-  if (isError) return 'error'
-  if (isEmpty) return 'empty'
-  return 'success'
-}
-
 interface DocumentsListProps {
   syncSignal?: number
   openFolderPickerSignal?: number
 }
 
 export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Readonly<DocumentsListProps>) {
+  const getDocsStatus = (isLoading: boolean, isError: boolean, isEmpty: boolean) => {
+    if (isLoading) return 'loading'
+    if (isError) return 'error'
+    if (isEmpty) return 'empty'
+    return 'success'
+  }
   const router = useRouter()
   const [showFolderPicker, setShowFolderPicker] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
@@ -98,8 +97,7 @@ export default function DocumentsList({ syncSignal, openFolderPickerSignal }: Re
 
   useEffect(() => { if (router.query.folder === 'picker') { setShowFolderPicker(true); router.replace('/documents', undefined, { shallow: true }) } }, [router])
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (syncSignal) handleSync() }, [syncSignal])
+  useEffect(() => { if (syncSignal) handleSync() }, [syncSignal]) // handleSync is intentionally omitted: sync triggered by signal change only
   const prevPickerSignalRef = useRef(openFolderPickerSignal ?? 0)
   useEffect(() => {
     if (openFolderPickerSignal && openFolderPickerSignal !== prevPickerSignalRef.current) {

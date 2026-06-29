@@ -334,9 +334,10 @@ interface Props {
 }
 
 export default function UsersList({ userId }: Props) {
+  const { fetchUsersProfile } = useUsersControllers()
+
   const [loading, setLoading] = useState(false)
   const { usersProfile } = useUsersStates()
-  const { fetchUsersProfile } = useUsersControllers()
   const isEmptyData = !usersProfile.data
 
   const handleSubmit = () => {}
@@ -350,6 +351,8 @@ export default function UsersList({ userId }: Props) {
   )
 }
 ```
+**Aturan**:
+- variable importer, states / variable, function / methode, lifeycle react (useEffect, useMemo, etc)
 
 ---
 

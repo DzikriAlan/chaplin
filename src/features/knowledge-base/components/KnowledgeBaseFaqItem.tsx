@@ -7,7 +7,7 @@ interface FAQItemProps {
   onDeleteItem: (id: string) => void
 }
 
-export default function KBFaqItem({ item, onDeleteItem }: Readonly<FAQItemProps>) {
+export default function KnowledgeBaseFaqItem({ item, onDeleteItem }: Readonly<FAQItemProps>) {
   const [expanded, setExpanded] = useState(false)
 
   const handleToggle = () => setExpanded((v) => !v)
@@ -19,13 +19,13 @@ export default function KBFaqItem({ item, onDeleteItem }: Readonly<FAQItemProps>
         onClick={handleToggle}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/30"
       >
-        <span className="text-rem-90 font-medium text-dark-text pr-4">{item.question}</span>
+        <span className="text-rem-90 font-medium text-foreground pr-4">{item.question}</span>
         {expanded ? <ChevronUp className="h-4 w-4 flex-shrink-0 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 flex-shrink-0 text-muted-foreground" />}
       </button>
 
       {expanded && (
         <div className="px-5 pb-4 pt-0 border-t">
-          <p className="text-rem-90 text-dark-text leading-relaxed mt-3">{item.answer}</p>
+          <p className="text-rem-90 text-foreground leading-relaxed mt-3">{item.answer}</p>
 
           {item.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">

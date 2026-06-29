@@ -6,47 +6,6 @@ import { useUsageSaldoControllers } from '../controllers/usageSaldoControllers'
 import { useUsageSaldoStates } from '../states/usageSaldoStates'
 import type { DataUsageSaldoBalance, DataUsageSaldoLog, DataUsageSaldoLogList } from '../types/usageSaldoTypes'
 
-function formatRupiah(amount: number) {
-  return `Rp ${Math.abs(amount).toLocaleString('id-ID')}`
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('id-ID', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
-
-function getMonthLabel(year: number, month: number) {
-  return `${year} - ${new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'short' })}`
-}
-
-function getMonthOptions() {
-  const now = new Date()
-  const options = []
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    options.push({
-      year: d.getFullYear(),
-      month: d.getMonth() + 1,
-      label: getMonthLabel(d.getFullYear(), d.getMonth() + 1),
-    })
-  }
-  return options
-}
-
-function aggregateDailyData(logs: DataUsageSaldoLog[], year: number, month: number) {
-  const daysInMonth = new Date(year, month, 0).getDate()
-  const totals = new Array<number>(daysInMonth).fill(0)
-  for (const log of logs) {
-    const d = new Date(log.createdAt)
-    if (d.getFullYear() === year && d.getMonth() + 1 === month) {
-      totals[d.getDate() - 1] += log.deduction
-    }
-  }
-  return totals
-}
-
 interface StatCardProps {
   title: string
   value: string
@@ -63,9 +22,11 @@ function StatCard({ title, value }: Readonly<StatCardProps>) {
 
 interface LogRowProps {
   log: DataUsageSaldoLog
+  formatDate: (iso: string) => string
+  formatRupiah: (amount: number) => string
 }
 
-function LogRow({ log }: Readonly<LogRowProps>) {
+function LogRow({ log, formatDate, formatRupiah }: Readonly<LogRowProps>) {
   const isChat = log.activityType === 'chat'
   const icon = isChat ? <MessageSquare className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />
   const chatLabel = log.senderName ? `Chat — ${log.senderName}` : 'Chat masuk'
@@ -92,6 +53,43 @@ export default function UsageSaldoView() {
   const { balance, usageLogs, payloadGetLogs, setGetLogs } = useUsageSaldoStates()
   const [isMounted, setIsMounted] = useState(false)
 
+  const formatRupiah = (amount: number) => `Rp ${Math.abs(amount).toLocaleString('id-ID')}`
+
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString('id-ID', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
+
+  const getMonthLabel = (year: number, month: number) =>
+    `${year} - ${new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'short' })}`
+
+  const getMonthOptions = () => {
+    const now = new Date()
+    const options = []
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      options.push({
+        year: d.getFullYear(),
+        month: d.getMonth() + 1,
+        label: getMonthLabel(d.getFullYear(), d.getMonth() + 1),
+      })
+    }
+    return options
+  }
+
+  const aggregateDailyData = (logs: DataUsageSaldoLog[], year: number, month: number) => {
+    const daysInMonth = new Date(year, month, 0).getDate()
+    const totals = new Array<number>(daysInMonth).fill(0)
+    for (const log of logs) {
+      const d = new Date(log.createdAt)
+      if (d.getFullYear() === year && d.getMonth() + 1 === month) {
+        totals[d.getDate() - 1] += log.deduction
+      }
+    }
+    return totals
+  }
+
   useEffect(() => { setIsMounted(true) }, [])
 
   const balanceData = balance.data as DataUsageSaldoBalance | undefined
@@ -105,19 +103,19 @@ export default function UsageSaldoView() {
   const dailyData = aggregateDailyData(logs, selectedYear, selectedMonth)
   const monthOptions = getMonthOptions()
 
-  function handleMonthChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  const syncMonth = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const [year, month] = e.target.value.split('-')
     setGetLogs({ year: String(year), month: String(month) })
   }
 
-  function handleTopUp() {
+  const saveTopUp = () => {
     const amountStr = prompt('Masukkan jumlah top-up (Rp):')
     if (!amountStr) return
     const amount = Number.parseInt(amountStr.replaceAll('.', '').replaceAll(',', ''))
     if (!Number.isNaN(amount) && amount > 0) storeTopup.mutate({ amount })
   }
 
-  function handleExport() {
+  const syncExport = () => {
     const csvRows = [
       ['Tanggal', 'Aktivitas', 'Potongan', 'Sisa Saldo'],
       ...logs.map((log) => [
@@ -137,15 +135,16 @@ export default function UsageSaldoView() {
     URL.revokeObjectURL(url)
   }
 
-  function renderChart() {
+  const loadChart = () => {
     if (!isMounted) {
       return <div className="h-[200px] bg-muted/20 rounded animate-pulse" />
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Highcharts = require('highcharts')
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const HighchartsReact = require('highcharts-react-official').default
+    // Dynamic require needed for client-side hydration compatibility with SSR
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+    const Highcharts = require('highcharts') as typeof import('highcharts')
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+    const HighchartsReact = (require('highcharts-react-official') as { default: typeof import('highcharts-react-official').default }).default
 
     const allDayCategories = Array.from(
       { length: daysInMonth },
@@ -218,7 +217,7 @@ export default function UsageSaldoView() {
       <div className="flex items-center gap-3 flex-wrap">
         <button
           type="button"
-          onClick={handleTopUp}
+          onClick={saveTopUp}
           className="rounded-lg border bg-foreground text-background px-4 py-2 text-rem-90 font-semibold hover:opacity-90 transition-opacity"
         >
           Top up
@@ -235,7 +234,7 @@ export default function UsageSaldoView() {
           <div className="flex items-center gap-2 flex-wrap">
             <select
               value={`${selectedYear}-${selectedMonth}`}
-              onChange={handleMonthChange}
+              onChange={syncMonth}
               className="rounded-lg border bg-muted text-foreground text-rem-85 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
             >
               {monthOptions.map((opt) => (
@@ -246,7 +245,7 @@ export default function UsageSaldoView() {
             </select>
             <button
               type="button"
-              onClick={handleExport}
+              onClick={syncExport}
               className="flex items-center gap-1.5 rounded-lg border bg-foreground text-background px-3 py-1.5 text-rem-85 font-semibold hover:opacity-90 transition-opacity"
             >
               <Download className="h-3.5 w-3.5" />
@@ -263,7 +262,7 @@ export default function UsageSaldoView() {
         </div>
 
         <div className="px-4 pb-4">
-          {renderChart()}
+          {loadChart()}
         </div>
       </div>
 
@@ -301,7 +300,7 @@ export default function UsageSaldoView() {
                 </tr>
               </thead>
               <tbody>
-                {logs.map((log) => <LogRow key={log.id} log={log} />)}
+                {logs.map((log) => <LogRow key={log.id} log={log} formatDate={formatDate} formatRupiah={formatRupiah} />)}
               </tbody>
             </table>
           </div>
