@@ -25,8 +25,8 @@ export default function AgentCard({ agent, onEdit, onPreview, onDelete }: Readon
         </div>
       </div>
       <div className="flex items-center gap-1.5 mt-3 pt-3 border-t">
-        <button type="button" onClick={() => onEdit(agent)} className="text-rem-85 font-medium text-muted-foreground hover:text-foreground rounded-lg px-2.5 py-1.5 transition-colors">Edit</button>
-        <button type="button" onClick={() => onPreview(agent)} className="text-rem-85 font-medium text-muted-foreground hover:text-foreground rounded-lg px-2.5 py-1.5 transition-colors"><Eye className="h-3.5 w-3.5 inline mr-1" />Preview</button>
+        <button type="button" onClick={() => onEdit(agent)} className="text-rem-85 font-medium text-muted-foreground hover:text-foreground rounded-lg px-2.5 py-1.5 transition-colors">Ubah</button>
+        <button type="button" onClick={() => onPreview(agent)} className="text-rem-85 font-medium text-muted-foreground hover:text-foreground rounded-lg px-2.5 py-1.5 transition-colors"><Eye className="h-3.5 w-3.5 inline mr-1" />Cek Agent</button>
         <button type="button" onClick={() => onDelete(agent.id)} className="text-rem-85 font-medium text-destructive hover:opacity-70 rounded-lg px-2.5 py-1.5 transition-colors ml-auto"><Trash2 className="h-3.5 w-3.5" /></button>
       </div>
     </div>

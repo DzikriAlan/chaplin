@@ -41,11 +41,11 @@ Turn your team's knowledge into AI agents that answer questions, handle support,
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) v18+ (verify with `node --version`)
+- [Node.js](https://nodejs.org) v18+
 - [npm](https://npmjs.com) v9+ or [pnpm](https://pnpm.io) v8+
-- **Chaplin Backend running** at `http://localhost:3001` (see chaplin-backend/README.md)
+- Backend running at `http://localhost:3001`
 
-### 1. Clone & Install
+### Clone & Install
 
 ```bash
 git clone <repo-url>
@@ -53,79 +53,49 @@ cd chaplin
 npm install
 ```
 
-If installation fails, try:
-```bash
-npm ci
-```
-
-### 2. Setup Environment Variables
+### Setup Environment Variables
 
 ```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local` and ensure these are set:
+Configure `.env.local` with your credentials:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-random-secret-key-min-32-chars
+# Database
+DATABASE_URL="hire-me"
+SUPABASE_URL="hire-me"
+SUPABASE_ANON_KEY="hire-me"
+SUPABASE_KEY="hire-me"
+
+# APIs
+DEEPSEEK_API_KEY="hire-me"
+JINA_API_KEY="hire-me"
+
+# Google OAuth
+GOOGLE_CLIENT_ID="hire-me"
+GOOGLE_CLIENT_SECRET="hire-me"
+GOOGLE_REDIRECT_URI="hire-me"
+
+# NextAuth
+NEXTAUTH_SECRET="hire-me"
+NEXTAUTH_URL="hire-me"
+
+# Public URLs
+NEXT_PUBLIC_API_BASE_URL="hire-me"
+NEXT_PUBLIC_SUPABASE_URL="hire-me"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="hire-me"
 ```
 
 Generate NEXTAUTH_SECRET: `openssl rand -base64 32`
 
-### 3. Verify Backend is Running
-
-Before starting frontend, ensure backend is running at http://localhost:3001
-
-```bash
-curl http://localhost:3001/api/v1/health
-```
-
-If failing, start backend from chaplin-backend/:
-```bash
-npm run start:dev
-```
-
-### 4. Start Development
+### Start Development
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser.
-
----
-
-## Troubleshooting
-
-### Port 3000 already in use
-```bash
-npm run dev -- -p 3001
-```
-
-### Backend not accessible (http://localhost:3001)
-Ensure backend is running:
-```bash
-cd ../chaplin-backend
-npm run start:dev
-```
-
-### NEXTAUTH_SECRET error
-Generate new secret:
-```bash
-openssl rand -base64 32
-```
-Add to `.env.local`
-
-### Module not found errors
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Styling not applied
-Hard refresh browser: `Ctrl+Shift+R` (Windows/Linux) or `Cmd+Shift+R` (Mac)
+Open http://localhost:3000
 
 ---
 
@@ -142,10 +112,7 @@ npm run lint          # ESLint check & fix
 
 ## Documentation
 
-- **Backend API** — http://localhost:3001/api/docs (Swagger)
-- **Next.js Docs** — https://nextjs.org/docs
-- **Tailwind CSS** — https://tailwindcss.com/docs
-- **Shadcn/UI** — https://ui.shadcn.com
+See [CODE.md](./CODE.md) for detailed architecture, naming conventions, and development guidelines.
 
 ---
 

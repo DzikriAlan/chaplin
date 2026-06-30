@@ -196,7 +196,7 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
 
         <div>
           <label htmlFor="agent-pers" className="text-rem-85 font-medium text-foreground">Personalisasi (System Prompt)</label>
-          <textarea id="agent-pers" {...register('personalization')} rows={2} placeholder="Kamu adalah asisten AI yang membantu..." className="w-full resize-none rounded-lg border bg-background px-3 py-2.5 text-rem-95 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mt-1.5" />
+          <textarea id="agent-pers" {...register('personalization')} rows={2} placeholder="Kamu asisten AI yang bantu..." className="w-full resize-none rounded-lg border bg-background px-3 py-2.5 text-rem-95 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mt-1.5" />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

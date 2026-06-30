@@ -8,10 +8,6 @@ import {
 } from '../services/agentsServices'
 import type { PayloadPostAgent, PayloadPatchAgent, DataAgent } from '../types/agentsTypes'
 
-/**
- * Agents Controllers
- * Handles React Query logic and syncs status to Zustand store
- */
 export const useAgentsControllers = () => {
   const queryClient = useQueryClient()
   const { setAgentsList } = useAgentsStates()

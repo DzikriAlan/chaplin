@@ -26,16 +26,40 @@ export default function HomeChatView() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-4">
-      <div className="w-full max-w-2xl">
+      <div className="relative isolate w-full max-w-xl">
         <h1 className="mb-6 text-center text-2xl font-semibold text-foreground tracking-tight">
-          Senang bertemu dengan Anda, {displayName}.
+          Hello {displayName}, this is chaplin!
         </h1>
 
-        <div className="flex items-center gap-3 rounded-full border border-border bg-muted/60 px-4 py-3">
+        {/* Red glow — light mode */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 dark:hidden"
+          style={{
+            width: '1100px',
+            height: '420px',
+            background:
+              'radial-gradient(ellipse at center, rgba(251, 113, 133, 0.45) 0%, rgba(244, 63, 94, 0.22) 40%, transparent 70%)',
+            filter: 'blur(52px)',
+          }}
+        />
+
+        {/* Red glow — dark mode */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 hidden dark:block"
+          style={{
+            width: '1100px',
+            height: '420px',
+            background:
+              'radial-gradient(ellipse at center, rgba(220, 38, 38, 0.30) 0%, rgba(185, 28, 28, 0.14) 45%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+
+        <div className="flex items-center gap-3 rounded-full border border-border bg-background px-4 py-3">
           <button
             type="button"
             onClick={handleSubmit}
-            aria-label="Tambah"
+            aria-label="Add"
             className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
           >
             <Plus className="h-5 w-5" />
@@ -46,7 +70,7 @@ export default function HomeChatView() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Tanyakan apa saja"
+            placeholder="Ask anything"
             className="flex-1 bg-transparent text-rem-90 text-foreground placeholder:text-muted-foreground outline-none"
           />
 
@@ -54,7 +78,7 @@ export default function HomeChatView() {
             type="button"
             onClick={handleSubmit}
             disabled={!message.trim()}
-            aria-label="Kirim pesan"
+            aria-label="Send message"
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background disabled:opacity-30 hover:opacity-80 transition-opacity"
           >
             <ArrowUp className="h-4 w-4" />

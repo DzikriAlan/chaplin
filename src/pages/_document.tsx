@@ -2,8 +2,11 @@ import { Html, Head, Main, NextScript } from "next/document";
 
 export default function Document() {
   return (
-    <Html lang="id">
-      <Head />
+    <Html lang="en">
+      <Head>
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
+      </Head>
       <body>
         {/* Runs before React hydration to prevent flash of wrong theme */}
         <script

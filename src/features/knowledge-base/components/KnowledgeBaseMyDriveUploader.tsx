@@ -102,14 +102,14 @@ export default function KnowledgeBaseMyDriveUploader({ openFolderFormSignal, ope
   }
 
   const destroyFolder = (id: string) => {
-    if (!confirm('Hapus folder beserta semua isinya?')) return
+    if (!confirm('Delete folder and all its contents?')) return
     removeUploadFolder.mutate(id)
     const next = new Set(selectedIds)
     setSelectedIds(next)
   }
 
   const destroyFile = (id: string) => {
-    if (!confirm('Hapus file ini?')) return
+    if (!confirm('Delete this file?')) return
     removeUploadFile.mutate(id)
     const next = new Set(selectedIds)
     next.delete(id)
@@ -118,7 +118,7 @@ export default function KnowledgeBaseMyDriveUploader({ openFolderFormSignal, ope
 
   const destroyBulkFiles = () => {
     if (selectedIds.size === 0) return
-    if (!confirm(`Hapus ${selectedIds.size} file yang dipilih?`)) return
+    if (!confirm(`Delete ${selectedIds.size} selected files?`)) return
     const ids = Array.from(selectedIds)
     ids.forEach((id) => removeUploadFile.mutate(id))
     destroySelected()
@@ -182,7 +182,7 @@ export default function KnowledgeBaseMyDriveUploader({ openFolderFormSignal, ope
       {!supabaseReady && (
         <div className="flex items-start gap-3 rounded-xl border border-amber-400/40 bg-amber-50 px-4 py-3 mt-4 dark:bg-amber-950/30 dark:border-amber-400/20">
           <span className="text-rem-85 text-amber-800 dark:text-amber-300">
-            <strong>Supabase belum dikonfigurasi.</strong> Tambahkan <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">NEXT_PUBLIC_SUPABASE_URL</code> dan <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> ke <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">.env.local</code> untuk mengaktifkan upload file.
+            <strong>Supabase is not configured.</strong> Add <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to <code className="rounded bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 font-mono text-rem-80">.env.local</code> to enable file upload.
           </span>
         </div>
       )}

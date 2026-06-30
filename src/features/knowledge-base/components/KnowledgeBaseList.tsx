@@ -11,10 +11,10 @@ export default function KnowledgeBaseList() {
 
   // function / methode
   const destroyItem = (id: string) => {
-    if (!confirm('Hapus FAQ ini?')) return
+    if (!confirm('Delete this FAQ?')) return
     removeKnowledgeBase.mutate(id, {
-      onSuccess: () => toast.success('FAQ berhasil dihapus'),
-      onError: () => toast.error('Gagal menghapus FAQ'),
+      onSuccess: () => toast.success('FAQ deleted successfully'),
+      onError: () => toast.error('Failed to delete FAQ'),
     })
   }
 
@@ -29,11 +29,11 @@ export default function KnowledgeBaseList() {
   return (
     <LoadData
       status={listStatus}
-      statusTitle="Belum ada FAQ"
-      statusSubtitle="Tambah FAQ baru menggunakan form di atas"
+      statusTitle="No FAQs yet"
+      statusSubtitle="Add new FAQ using the form above"
     >
       <div className="space-y-3">
-        <p className="text-rem-85 text-muted-foreground">{kbFaq.data?.length ?? 0} FAQ aktif</p>
+        <p className="text-rem-85 text-muted-foreground">{kbFaq.data?.length ?? 0} active FAQs</p>
         {kbFaq.data?.map((item) => (
           <KBFaqItem key={item.id} item={item} onDeleteItem={destroyItem} />
         ))}

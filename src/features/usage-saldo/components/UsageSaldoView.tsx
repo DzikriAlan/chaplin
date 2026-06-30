@@ -188,7 +188,7 @@ export default function UsageSaldoView() {
         {usageLogs.status !== 'loading' && logs.length === 0 && (
           <div className="py-12 text-center">
             <TrendingDown className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-rem-90 font-medium text-foreground">Belum ada aktivitas</p>
+            <p className="text-rem-90 font-medium text-foreground">Gada aktivitas nih</p>
             <p className="text-rem-80 text-muted-foreground mt-1">Riwayat chat akan muncul di sini</p>
           </div>
         )}

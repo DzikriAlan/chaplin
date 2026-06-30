@@ -15,8 +15,8 @@ interface Props {
 }
 
 const schema = z.object({
-  question: z.string().min(3, 'Pertanyaan minimal 3 karakter'),
-  answer: z.string().min(5, 'Jawaban minimal 5 karakter'),
+  question: z.string().min(3, 'Question must be at least 3 characters'),
+  answer: z.string().min(5, 'Answer must be at least 5 characters'),
   tags: z.string(),
 })
 
@@ -32,8 +32,8 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
 
   // function / methode
   const getSubmitLabel = () => {
-    if (isSaving) return 'Menyimpan...'
-    return isEdit ? 'Simpan Perubahan' : 'Tambah FAQ'
+    if (isSaving) return 'Saving...'
+    return isEdit ? 'Save Changes' : 'Add FAQ'
   }
 
   const saveFaq = (values: FormValues) => {
@@ -55,7 +55,7 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
       <div className="w-full max-w-lg rounded-xl border bg-card shadow-xl">
         <div className="flex items-center justify-between border-b px-5 py-4">
           <h2 className="text-rem-100 font-semibold text-foreground">
-            {isEdit ? 'Edit FAQ' : 'Tambah FAQ'}
+            {isEdit ? 'Edit FAQ' : 'Add FAQ'}
           </h2>
           <button
             type="button"
@@ -68,23 +68,23 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
 
         <form onSubmit={handleSubmit(saveFaq)} className="p-5 space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="question" className="text-rem-85 font-medium text-foreground">Pertanyaan</label>
+            <label htmlFor="question" className="text-rem-85 font-medium text-foreground">Question</label>
             <input
               id="question"
               {...register('question')}
-              placeholder="Tulis pertanyaan di sini..."
+              placeholder="Type your question here..."
               className="w-full rounded-lg border bg-background px-3 py-2 text-rem-90 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {errors.question && <p className="text-rem-75 text-destructive">{errors.question.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="answer" className="text-rem-85 font-medium text-foreground">Jawaban</label>
+            <label htmlFor="answer" className="text-rem-85 font-medium text-foreground">Answer</label>
             <textarea
               id="answer"
               {...register('answer')}
               rows={4}
-              placeholder="Tulis jawaban di sini..."
+              placeholder="Type your answer here..."
               className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-rem-90 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {errors.answer && <p className="text-rem-75 text-destructive">{errors.answer.message}</p>}
@@ -92,12 +92,12 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
 
           <div className="space-y-1.5">
             <label htmlFor="tags" className="text-rem-85 font-medium text-foreground">
-              Tags <span className="text-muted-foreground font-normal">(pisahkan dengan koma)</span>
+              Tags <span className="text-muted-foreground font-normal">(separated by comma)</span>
             </label>
             <input
               id="tags"
               {...register('tags')}
-              placeholder="Contoh: umum, akademik, keuangan"
+              placeholder="Example: general, academic, finance"
               className="w-full rounded-lg border bg-background px-3 py-2 text-rem-90 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -108,7 +108,7 @@ export default function KnowledgeBaseModal({ item, isSaving, onSave, onClose }: 
               onClick={onClose}
               className="rounded-lg border px-4 py-2 text-rem-85 font-medium text-foreground hover:bg-muted transition-colors"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"

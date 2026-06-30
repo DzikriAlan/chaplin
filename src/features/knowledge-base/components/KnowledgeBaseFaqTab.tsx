@@ -18,15 +18,15 @@ export default function KnowledgeBaseFaqTab({ tabStatus, items, onEditFaq, onDel
       {tabStatus === 'empty' && (
         <div className="p-12 text-center">
           <HelpCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-rem-100 font-medium text-foreground">Belum ada FAQ</p>
-          <p className="text-rem-85 text-muted-foreground mt-1">Tambah FAQ baru dengan tombol di atas</p>
+          <p className="text-rem-100 font-medium text-foreground">No FAQs yet</p>
+          <p className="text-rem-85 text-muted-foreground mt-1">Add new FAQ using the button above</p>
         </div>
       )}
 
       {tabStatus === 'error' && (
         <div className="p-12 text-center">
-          <p className="text-rem-100 font-medium text-foreground">Terjadi Kesalahan</p>
-          <p className="text-rem-85 text-muted-foreground mt-1">Silakan coba lagi.</p>
+          <p className="text-rem-100 font-medium text-foreground">Something went wrong</p>
+          <p className="text-rem-85 text-muted-foreground mt-1">Please try again.</p>
         </div>
       )}
 
@@ -52,7 +52,7 @@ export default function KnowledgeBaseFaqTab({ tabStatus, items, onEditFaq, onDel
                     type="button"
                     onClick={() => onDeleteFaq(item.id)}
                     className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
-                    title="Hapus"
+                    title="Delete"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>

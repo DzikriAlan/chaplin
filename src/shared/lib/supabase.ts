@@ -10,7 +10,7 @@ export function getSupabaseClient(): SupabaseClient {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (!url || !key) {
       throw new Error(
-        'Supabase belum dikonfigurasi. Tambahkan NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY ke file .env.local',
+        'Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local',
       )
     }
     _client = createClient(url, key)

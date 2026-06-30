@@ -8,8 +8,8 @@ import { useKBFaqControllers } from '../controllers/knowledgeBaseControllers'
 import Loader from '@/shared/components/Loader'
 
 const schema = z.object({
-  question: z.string().min(5, 'Pertanyaan minimal 5 karakter'),
-  answer: z.string().min(10, 'Jawaban minimal 10 karakter'),
+  question: z.string().min(5, 'Question must be at least 5 characters'),
+  answer: z.string().min(10, 'Answer must be at least 10 characters'),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -50,11 +50,11 @@ export default function KnowledgeBaseForm() {
   const saveKnowledgeBase = async (values: FormValues) => {
     try {
       await storeKnowledgeBase.mutateAsync({ ...values, tags })
-      toast.success('FAQ berhasil ditambahkan')
+      toast.success('FAQ added successfully')
       form.reset()
       setTags([])
     } catch {
-      toast.error('Gagal menyimpan FAQ')
+      toast.error('Failed to save FAQ')
     }
   }
 
@@ -63,16 +63,16 @@ export default function KnowledgeBaseForm() {
     <div className="rounded-xl border bg-card p-6 shadow-card">
       <h2 className="text-rem-110 font-semibold text-dark-text mb-4 flex items-center gap-2">
         <Plus className="h-5 w-5 text-primary" />
-        Tambah FAQ Baru
+        Add New FAQ
       </h2>
 
       <form onSubmit={form.handleSubmit(saveKnowledgeBase)} className="space-y-4">
         <div>
-          <label htmlFor="kb-question" className="block text-rem-85 font-medium text-dark-text mb-1">Pertanyaan</label>
+          <label htmlFor="kb-question" className="block text-rem-85 font-medium text-dark-text mb-1">Question</label>
           <input
             id="kb-question"
             {...form.register('question')}
-            placeholder="Apa jam belajar sekolah?"
+            placeholder="What are the school hours?"
             className="w-full rounded-lg border bg-background px-3 py-2 text-rem-90 text-dark-text placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
           {form.formState.errors.question && (
@@ -81,11 +81,11 @@ export default function KnowledgeBaseForm() {
         </div>
 
         <div>
-          <label htmlFor="kb-answer" className="block text-rem-85 font-medium text-dark-text mb-1">Jawaban</label>
+          <label htmlFor="kb-answer" className="block text-rem-85 font-medium text-dark-text mb-1">Answer</label>
           <textarea
             id="kb-answer"
             {...form.register('answer')}
-            placeholder="Jam belajar sekolah adalah..."
+            placeholder="School hours are..."
             rows={4}
             className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-rem-90 text-dark-text placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -95,14 +95,14 @@ export default function KnowledgeBaseForm() {
         </div>
 
         <div>
-          <label htmlFor="kb-tag" className="block text-rem-85 font-medium text-dark-text mb-1">Tag (opsional)</label>
+          <label htmlFor="kb-tag" className="block text-rem-85 font-medium text-dark-text mb-1">Tags (optional)</label>
           <div className="flex gap-2">
             <input
               id="kb-tag"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={syncTagKeyDown}
-              placeholder="Tambah tag, tekan Enter"
+              placeholder="Add tags, press Enter"
               className="flex-1 rounded-lg border bg-background px-3 py-2 text-rem-90 text-dark-text placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button
@@ -110,7 +110,7 @@ export default function KnowledgeBaseForm() {
               onClick={syncTag}
               className="rounded-lg border px-4 py-2 text-rem-85 font-medium text-dark-text hover:bg-muted"
             >
-              Tambah
+              Add
             </button>
           </div>
           {tags.length > 0 && (
@@ -133,7 +133,7 @@ export default function KnowledgeBaseForm() {
           className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-rem-90 font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
         >
           {isLoading ? <Loader size="sm" inline /> : <Plus className="h-4 w-4" />}
-          {isLoading ? 'Menyimpan...' : 'Simpan FAQ'}
+          {isLoading ? 'Saving...' : 'Save FAQ'}
         </button>
       </form>
     </div>

@@ -73,11 +73,11 @@ export default function Sidebar() {
       <div className="flex h-14 shrink-0 items-center justify-between px-3 overflow-hidden">
         {sidebarOpen ? (
           <>
-            <Image src={chaplinLogo} alt="Chaplin" height={28} className="select-none" />
+            <Image src={chaplinLogo} alt="Chaplin" height={28} className="select-none dark:invert" />
             <button
               type="button"
               onClick={toggleSidebar}
-              title="Tutup sidebar"
+              title="Close sidebar"
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               <PanelLeft className="h-4 w-4" />
@@ -85,11 +85,11 @@ export default function Sidebar() {
           </>
         ) : (
           <div className="group flex w-full justify-center">
-            <Image src={chaplinLogo} alt="Chaplin" height={24} className="select-none group-hover:hidden" />
+            <Image src={chaplinLogo} alt="Chaplin" height={24} className="select-none group-hover:hidden dark:invert" />
             <button
               type="button"
               onClick={toggleSidebar}
-              title="Buka sidebar"
+              title="Open sidebar"
               className="hidden group-hover:flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               <PanelLeft className="h-4 w-4" />
@@ -182,7 +182,7 @@ export default function Sidebar() {
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2">
+          <div className="relative flex flex-col items-center gap-3">
             {displayImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={displayImage} alt={displayName} className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
@@ -198,6 +198,31 @@ export default function Sidebar() {
             >
               <Settings className="h-3.5 w-3.5" />
             </button>
+
+            {showSettings && (
+              <div className="fixed bottom-12 left-20 rounded-xl border bg-card shadow-xl z-50 py-1 whitespace-nowrap">
+                <ThemeToggle collapsed={false} />
+                {session ? (
+                  <button
+                    type="button"
+                    onClick={() => signOut()}
+                    className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-rem-85 font-medium text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" />
+                    Sign Out
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => signIn('google')}
+                    className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-rem-85 font-medium text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" />
+                    Sign In with Google
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
