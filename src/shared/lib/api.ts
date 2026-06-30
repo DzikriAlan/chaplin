@@ -16,21 +16,35 @@ export interface ApiResponse<T = unknown> {
   errors?: Array<{ field: string; message: string }>
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
+const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL ?? ''}/api/v1`
 
 let cachedToken: string | null = null
+let tokenPromise: Promise<string | null> | null = null
 
 export async function getAuthToken(): Promise<string | null> {
   if (cachedToken) return cachedToken
-  try {
-    const res = await fetch('/api/auth/backend-token')
-    if (!res.ok) return null
-    const data = await res.json() as { token?: string }
-    cachedToken = data.token ?? null
-    return cachedToken
-  } catch {
-    return null
-  }
+  if (tokenPromise) return tokenPromise
+
+  tokenPromise = (async () => {
+    try {
+      const res = await fetch('/api/auth/backend-token')
+      if (!res.ok) return null
+      const data = await res.json() as { token?: string }
+      cachedToken = data.token ?? null
+      return cachedToken
+    } catch {
+      return null
+    } finally {
+      tokenPromise = null
+    }
+  })()
+
+  return tokenPromise
+}
+
+export function clearAuthToken() {
+  cachedToken = null
+  tokenPromise = null
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
