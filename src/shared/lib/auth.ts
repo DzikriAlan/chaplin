@@ -15,6 +15,9 @@ export const authOptions: NextAuthOptions = {
     signIn: '/',
   },
   callbacks: {
+    signIn({ user }) {
+      return user.email === 'dzikripride@gmail.com'
+    },
     session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub
