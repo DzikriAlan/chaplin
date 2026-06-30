@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
+import Link from 'next/link'
 import { Plus, ArrowUp, Loader2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useChatControllers } from '@/features/chat/controllers/chatControllers'
@@ -175,9 +176,9 @@ export default function HomeChatView() {
           {hasNoAgent && (
             <p className="mb-4 text-center text-rem-85 text-muted-foreground">
               Buat agent terlebih dahulu di halaman{' '}
-              <a href="/agents" className="text-primary underline">
+              <Link href="/agents" className="text-primary underline">
                 Agents
-              </a>{' '}
+              </Link>{' '}
               untuk mulai chat.
             </p>
           )}
