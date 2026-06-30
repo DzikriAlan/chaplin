@@ -5,17 +5,25 @@ import { authOptions } from '@/shared/lib/auth'
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') return res.status(405).end()
 
-  const session = await getServerSession(req, res, authOptions)
-  if (!session?.user?.id) return res.status(401).json({ message: 'Unauthorized' })
+  try {
+    const session = await getServerSession(req, res, authOptions)
+    if (!session?.user?.id) return res.status(401).json({ message: 'Unauthorized' })
 
-  const { SignJWT } = await import('jose')
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET ?? '')
+    const secret = process.env.NEXTAUTH_SECRET
+    if (!secret) return res.status(500).json({ message: 'Server misconfiguration: NEXTAUTH_SECRET not set' })
 
-  const token = await new SignJWT({ sub: session.user.id, email: session.user.email ?? '' })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(secret)
+    const { SignJWT } = await import('jose')
+    const encodedSecret = new TextEncoder().encode(secret)
 
-  return res.status(200).json({ token })
+    const token = await new SignJWT({ sub: session.user.id, email: session.user.email ?? '' })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('7d')
+      .sign(encodedSecret)
+
+    return res.status(200).json({ token })
+  } catch (error) {
+    console.error('[backend-token]', error)
+    return res.status(500).json({ message: 'Failed to generate token' })
+  }
 }
