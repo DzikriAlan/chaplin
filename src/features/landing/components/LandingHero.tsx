@@ -1,7 +1,5 @@
 import Image from 'next/image'
-import { signIn, useSession } from 'next-auth/react'
-import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { signIn } from 'next-auth/react'
 import chaplinLogo from '@/shared/assets/chaplin.png'
 import { Bot, Database, Wallet, Zap, Shield, Globe, Linkedin, Github } from 'lucide-react'
 
@@ -117,13 +115,6 @@ const techStack = [
 ]
 
 export default function LandingHero() {
-  const { data: session } = useSession()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (session) router.replace('/home')
-  }, [session, router])
-
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-14 pb-14 md:pb-20 md:px-6">
       {/* Grid background */}
