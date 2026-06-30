@@ -7,21 +7,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const session = await getServerSession(req, res, authOptions)
-    if (!session?.user?.id) return res.status(401).json({ message: 'Unauthorized' })
+    if (!session?.user?.email) return res.status(401).json({ message: 'Unauthorized' })
 
-    const secret = process.env.NEXTAUTH_SECRET
-    if (!secret) return res.status(500).json({ message: 'Server misconfiguration: NEXTAUTH_SECRET not set' })
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+    if (!backendUrl) return res.status(500).json({ message: 'Server misconfiguration: NEXT_PUBLIC_API_BASE_URL not set' })
 
-    const { SignJWT } = await import('jose')
-    const encodedSecret = new TextEncoder().encode(secret)
+    const loginRes = await fetch(`${backendUrl}/api/v1/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: session.user.email,
+        name: session.user.name ?? session.user.email.split('@')[0],
+      }),
+    })
 
-    const token = await new SignJWT({ sub: session.user.id, email: session.user.email ?? '' })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('7d')
-      .sign(encodedSecret)
+    if (!loginRes.ok) {
+      console.error('[backend-token] Backend login failed:', loginRes.status)
+      return res.status(502).json({ message: 'Failed to authenticate with backend' })
+    }
 
-    return res.status(200).json({ token })
+    const data = await loginRes.json() as { token?: string }
+    if (!data.token) return res.status(502).json({ message: 'Invalid backend response' })
+
+    return res.status(200).json({ token: data.token })
   } catch (error) {
     console.error('[backend-token]', error)
     return res.status(500).json({ message: 'Failed to generate token' })
