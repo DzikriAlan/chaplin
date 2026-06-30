@@ -26,10 +26,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(502).json({ message: 'Failed to authenticate with backend' })
     }
 
-    const data = await loginRes.json() as { token?: string }
-    if (!data.token) return res.status(502).json({ message: 'Invalid backend response' })
+    const data = await loginRes.json() as { data?: { token?: string } }
+    const token = data?.data?.token
+    if (!token) return res.status(502).json({ message: 'Invalid backend response' })
 
-    return res.status(200).json({ token: data.token })
+    return res.status(200).json({ token })
   } catch (error) {
     console.error('[backend-token]', error)
     return res.status(500).json({ message: 'Failed to generate token' })
