@@ -79,8 +79,8 @@ export default function AgentsSwitch({ selectedAgentId, onSelectAgent }: Readonl
           >
             <Bot className="h-4 w-4 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-rem-80 font-medium truncate">Default (Knowledge Base)</p>
-              <p className="text-rem-70 text-muted-foreground">Menggunakan semua KB</p>
+              <p className="text-rem-80 font-medium truncate">Default Agent</p>
+              <p className="text-rem-70 text-muted-foreground">Prompt AI bawaan</p>
             </div>
           </button>
 

@@ -12,7 +12,10 @@ import { useChatControllers } from '@/features/chat/controllers/chatControllers'
 import { useChatStates } from '@/features/chat/states/chatStates'
 import { useAgentsControllers } from '@/features/agents/controllers/agentsControllers'
 import { useAgentsStates } from '@/features/agents/states/agentsStates'
+import { useUIStates } from '@/shared/states/uiStates'
+import AgentsSwitch from '@/features/agents/components/AgentsSwitch'
 import type { DataChatMessage } from '@/features/chat/types/chatTypes'
+import type { DataAgent } from '@/features/agents/types/agentsTypes'
 import { api } from '@/shared/lib/api'
 
 const defaultName = process.env.NEXT_PUBLIC_USER_NAME ?? 'Anda'
@@ -28,6 +31,7 @@ export default function ChatView({ conversationId }: ChatViewProps) {
   const { chat, setChat } = useChatStates()
   useAgentsControllers()
   const { agentsList } = useAgentsStates()
+  const { selectedAgentId, setSelectedAgentId } = useUIStates()
   const { data: session } = useSession()
 
   // states / variable
@@ -38,7 +42,9 @@ export default function ChatView({ conversationId }: ChatViewProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const messages = useMemo(() => chat.data ?? [], [chat.data])
   const isStreaming = chat.status === 'loading'
-  const defaultAgent = agentsList.data?.find((a) => a.isDefault) ?? agentsList.data?.[0] ?? null
+  const agents = (agentsList.data as DataAgent[]) ?? []
+  const defaultAgent = agents.find((a) => a.isDefault) ?? agents[0] ?? null
+  const activeAgent = agents.find((a) => a.id === selectedAgentId) ?? defaultAgent
   const displayName = session?.user?.name?.split(' ')[0] ?? defaultName
   const isEmptyConversation = messages.length === 0
 
@@ -95,7 +101,7 @@ export default function ChatView({ conversationId }: ChatViewProps) {
         message: text,
         sessionId: sessionIdRef.current,
         ...(session?.user?.id && { userId: session.user.id }),
-        ...(defaultAgent ? { agentId: defaultAgent.id } : {}),
+        ...(activeAgent ? { agentId: activeAgent.id } : {}),
       })
 
       if (response?.body) await readStream(response.body)
@@ -184,14 +190,23 @@ export default function ChatView({ conversationId }: ChatViewProps) {
 
   // template
   const inputBar = (
-    <div className="flex items-center gap-3 rounded-full border border-border bg-background px-4 py-3">
-      <button
-        type="button"
-        aria-label="Tambah"
-        className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <Plus className="h-5 w-5" />
-      </button>
+    <div className="space-y-2">
+      {agents.length > 0 && (
+        <div className="flex justify-end">
+          <AgentsSwitch
+            selectedAgentId={selectedAgentId}
+            onSelectAgent={(agent: DataAgent | null) => setSelectedAgentId(agent?.id ?? null)}
+          />
+        </div>
+      )}
+      <div className="flex items-center gap-3 rounded-full border border-border bg-background px-4 py-3">
+        <button
+          type="button"
+          aria-label="Tambah"
+          className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Plus className="h-5 w-5" />
+        </button>
       <input
         ref={inputRef}
         type="text"
@@ -211,6 +226,7 @@ export default function ChatView({ conversationId }: ChatViewProps) {
       >
         {isStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
       </button>
+    </div>
     </div>
   )
 
