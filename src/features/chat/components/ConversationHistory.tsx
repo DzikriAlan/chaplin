@@ -19,26 +19,37 @@ export default function ConversationHistory({ collapsed }: Readonly<Conversation
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isExpanded, setIsExpanded] = useState(true)
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
 
+  const fetchConversations = async () => {
+    try {
+      const data = await api('GET', '/chat/conversations')
+      if (Array.isArray(data)) {
+        setConversations(data.slice(0, 10))
+      }
+    } catch (error) {
+      console.error('Failed to fetch conversations:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        const data = await api('GET', '/chat/conversations')
-        if (Array.isArray(data)) {
-          setConversations(data.slice(0, 10))
-        }
-      } catch (error) {
-        console.error('Failed to fetch conversations:', error)
-      } finally {
-        setIsLoading(false)
+    void fetchConversations()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const handleRouteChange = (url: string) => {
+      if (url.startsWith('/chat/')) {
+        void fetchConversations()
       }
     }
-
-    void fetchConversations()
-  }, [])
+    router.events.on('routeChangeComplete', handleRouteChange)
+    return () => router.events.off('routeChangeComplete', handleRouteChange)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.events])
 
   const handleDeleteConversation = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation()
@@ -90,12 +101,7 @@ export default function ConversationHistory({ collapsed }: Readonly<Conversation
       {isExpanded && conversations.length > 0 && (
         <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
           {conversations.map((conv) => (
-            <div
-              key={conv.sessionId}
-              onMouseEnter={() => setHoveredId(conv.sessionId)}
-              onMouseLeave={() => setHoveredId(null)}
-              className="group rounded-md"
-            >
+            <div key={conv.sessionId} className="group rounded-md">
               {editingId === conv.sessionId ? (
                 <div className="flex items-center gap-1 px-2 py-1">
                   <input
@@ -127,22 +133,20 @@ export default function ConversationHistory({ collapsed }: Readonly<Conversation
                 >
                   <MessageCircle className="h-3.5 w-3.5 shrink-0" />
                   <span className="flex-1 truncate">{conv.title || 'Untitled'}</span>
-                  {hoveredId === conv.sessionId && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => handleRenameStart(e, conv)}
-                        className="p-1 text-muted-foreground hover:text-blue-400"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={(e) => void handleDeleteConversation(e, conv.sessionId)}
-                        className="p-1 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => handleRenameStart(e, conv)}
+                      className="p-1 text-muted-foreground hover:text-blue-400"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => void handleDeleteConversation(e, conv.sessionId)}
+                      className="p-1 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </button>
               )}
             </div>

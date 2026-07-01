@@ -1,5 +1,8 @@
 'use client'
 
+// Tracks the session ID that was just created via streaming — skip API reload for it
+let justCreatedSessionId: string | null = null
+
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Plus, ArrowUp, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/router'
@@ -29,7 +32,7 @@ export default function ChatView({ conversationId }: ChatViewProps) {
 
   // states / variable
   const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(!!conversationId)
+  const [isLoading, setIsLoading] = useState(!!conversationId && conversationId !== justCreatedSessionId)
   const sessionIdRef = useRef<string>(conversationId || crypto.randomUUID())
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -108,6 +111,7 @@ export default function ChatView({ conversationId }: ChatViewProps) {
       }
 
       if (!conversationId) {
+        justCreatedSessionId = sessionIdRef.current
         await router.push(`/chat/${sessionIdRef.current}`)
       }
     } catch {
@@ -157,9 +161,20 @@ export default function ChatView({ conversationId }: ChatViewProps) {
   }, [messages])
 
   useEffect(() => {
-    if (conversationId && isLoading) {
-      void loadConversationHistory()
+    if (!conversationId) return
+
+    // Skip API call — data already in state from the streaming session
+    if (conversationId === justCreatedSessionId) {
+      justCreatedSessionId = null
+      setIsLoading(false)
+      return
     }
+
+    // Navigate to existing conversation — reset state and load from API
+    setChat({ status: 'loading', statusTitle: 'Memuat...', data: [] })
+    setIsLoading(true)
+    void loadConversationHistory()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId])
 
   // template
