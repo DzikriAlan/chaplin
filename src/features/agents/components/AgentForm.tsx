@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ImageIcon, Eye, Info, Copy, Check as CheckIcon } from 'lucide-react'
+import { ImageIcon, Eye, Info, Copy, Check as CheckIcon, Sparkles } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
 
 export type AgentPrefillData = {
@@ -34,10 +34,11 @@ interface AgentFormProps {
   prefillData?: AgentPrefillData
   onSave: (d: { name: string; description: string; image: string; personalization: string; isDefault: boolean }) => void
   onPreview: (a: DataAgent) => void
+  onGenerateClick?: () => void
 }
 
 const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm(
-  { agent, isSaving, prefillData, onSave, onPreview }: Readonly<AgentFormProps>,
+  { agent, isSaving, prefillData, onSave, onPreview, onGenerateClick }: Readonly<AgentFormProps>,
   ref,
 ) {
   // states / variable
@@ -139,8 +140,17 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
 
   return (
     <div>
-      <div className="mb-5">
+      <div className="mb-5 flex items-center justify-between">
         <h2 className="text-rem-130 font-bold text-foreground tracking-tight">{isEdit ? 'Edit Agent' : 'Buat Agent Baru'}</h2>
+        {!isEdit && onGenerateClick && (
+          <button
+            type="button"
+            onClick={onGenerateClick}
+            className="flex items-center gap-1.5 rounded-xl border px-4 py-2 text-rem-90 font-medium text-foreground hover:bg-muted transition-colors"
+          >
+            <Sparkles className="h-4 w-4 text-primary" /> Generate AI
+          </button>
+        )}
       </div>
 
       <form onSubmit={handleSubmit(saveAgent)} className="space-y-4">

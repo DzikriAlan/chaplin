@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef } from 'react'
-import { Bot, Plus, Search, X, ArrowLeft, PanelLeft, Sparkles } from 'lucide-react'
+import { Bot, Plus, Search, X, ArrowLeft, PanelLeft } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
 import { useAgentsControllers } from '../controllers/agentsControllers'
 import { useAgentsStates } from '../states/agentsStates'
@@ -96,18 +96,11 @@ export default function AgentsList() {
             <ArrowLeft className="h-4 w-4" /> Kembali
           </button>
         </div>
-        {/* Desktop back button + Generate AI button */}
-        <div className="hidden md:flex items-center justify-between mb-4">
-          <button type="button" onClick={syncViewMode} className="flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Kembali ke daftar agent
-          </button>
-          {!editAgent && (
-            <button type="button" onClick={() => setGenerateModalOpen(true)} className="flex items-center gap-1.5 rounded-xl border px-4 py-2 text-rem-90 font-medium text-foreground hover:bg-muted transition-colors">
-              <Sparkles className="h-4 w-4 text-primary" /> Generate AI
-            </button>
-          )}
-        </div>
-        <AgentForm ref={agentFormRef} agent={editAgent} isSaving={isSaving} prefillData={prefillData} onSave={saveAgent} onPreview={loadPreview} />
+        {/* Desktop back button */}
+        <button type="button" onClick={syncViewMode} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <ArrowLeft className="h-4 w-4" /> Kembali ke daftar agent
+        </button>
+        <AgentForm ref={agentFormRef} agent={editAgent} isSaving={isSaving} prefillData={prefillData} onSave={saveAgent} onPreview={loadPreview} onGenerateClick={() => setGenerateModalOpen(true)} />
         <GenerateAgentModal
           open={generateModalOpen}
           onClose={() => setGenerateModalOpen(false)}
