@@ -96,11 +96,23 @@ export default function AgentsList() {
             <ArrowLeft className="h-4 w-4" /> Kembali
           </button>
         </div>
-        {/* Desktop back button */}
-        <button type="button" onClick={syncViewMode} className="hidden md:flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
-          <ArrowLeft className="h-4 w-4" /> Kembali ke daftar agent
-        </button>
+        {/* Desktop back button + Generate AI button */}
+        <div className="hidden md:flex items-center justify-between mb-4">
+          <button type="button" onClick={syncViewMode} className="flex items-center gap-1.5 text-rem-90 font-medium text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Kembali ke daftar agent
+          </button>
+          {!editAgent && (
+            <button type="button" onClick={() => setGenerateModalOpen(true)} className="flex items-center gap-1.5 rounded-xl border px-4 py-2 text-rem-90 font-medium text-foreground hover:bg-muted transition-colors">
+              <Sparkles className="h-4 w-4 text-primary" /> Generate AI
+            </button>
+          )}
+        </div>
         <AgentForm ref={agentFormRef} agent={editAgent} isSaving={isSaving} prefillData={prefillData} onSave={saveAgent} onPreview={loadPreview} />
+        <GenerateAgentModal
+          open={generateModalOpen}
+          onClose={() => setGenerateModalOpen(false)}
+          onGenerated={handleGenerated}
+        />
       </div>
     )
   }
@@ -152,19 +164,10 @@ export default function AgentsList() {
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari agent..." className="w-full rounded-xl border bg-background pl-10 pr-8 py-2.5 text-rem-95 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
           {search && <button type="button" onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>}
         </div>
-        <button type="button" onClick={() => setGenerateModalOpen(true)} className="flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-rem-90 font-medium text-foreground hover:bg-muted transition-colors shrink-0">
-          <Sparkles className="h-4 w-4 text-primary" /> Generate AI
-        </button>
         <button type="button" onClick={() => { setEditAgent(null); setPrefillData(undefined); setViewMode('create') }} className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-rem-90 font-medium text-primary-foreground hover:bg-primary/90 transition-colors shrink-0">
           <Plus className="h-4 w-4" /> Buat Agent
         </button>
       </div>
-
-      <GenerateAgentModal
-        open={generateModalOpen}
-        onClose={() => setGenerateModalOpen(false)}
-        onGenerated={handleGenerated}
-      />
 
       {agentsList.status === 'loading' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
