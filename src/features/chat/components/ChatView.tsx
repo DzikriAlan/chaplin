@@ -15,7 +15,7 @@ import { api } from '@/shared/lib/api'
 const defaultName = process.env.NEXT_PUBLIC_USER_NAME ?? 'Anda'
 
 interface ChatViewProps {
-  conversationId?: string
+  readonly conversationId?: string
 }
 
 export default function ChatView({ conversationId }: ChatViewProps) {
@@ -96,6 +96,16 @@ export default function ChatView({ conversationId }: ChatViewProps) {
       })
 
       if (response?.body) await readStream(response.body)
+
+      // Auto-save title on first message
+      if (!conversationId && isEmptyConversation) {
+        const title = text.slice(0, 50).replace(/[.!?].*/, '') || 'New Conversation'
+        try {
+          await api('POST', `/chat/conversations/${sessionIdRef.current}/rename`, { title })
+        } catch {
+          // Silently fail
+        }
+      }
 
       if (!conversationId) {
         await router.push(`/chat/${sessionIdRef.current}`)
@@ -236,13 +246,16 @@ export default function ChatView({ conversationId }: ChatViewProps) {
                   msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
                 }`}
               >
-                {msg.streaming && <Loader2 className="h-4 w-4 animate-spin" />}
-                {!msg.streaming && msg.role === 'assistant' && (
-                  <div className="prose prose-invert max-w-none prose-p:m-0 prose-ul:my-1 prose-ol:my-1 prose-li:m-0 prose-strong:font-semibold prose-code:text-orange-400 prose-code:bg-black/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-a:text-blue-400 prose-a:underline">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                {msg.role === 'assistant' ? (
+                  <div className={`flex items-end gap-2 ${msg.streaming ? 'min-h-6' : ''}`}>
+                    <div className="prose prose-invert max-w-none prose-p:my-1.5 prose-p:leading-relaxed prose-headings:my-2 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-strong:font-semibold prose-strong:text-white prose-em:italic prose-ul:my-2 prose-ul:list-disc prose-ul:pl-5 prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-5 prose-li:my-0.5 prose-li:text-rem-90 prose-blockquote:border-l-2 prose-blockquote:border-blue-500 prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:text-gray-300 prose-blockquote:my-2 prose-code:text-orange-300 prose-code:bg-black/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-black/70 prose-pre:border prose-pre:border-gray-700 prose-pre:p-3 prose-pre:rounded-lg prose-a:text-blue-400 prose-a:underline prose-a:hover:text-blue-300 flex-1">
+                      <ReactMarkdown>{msg.content || (msg.streaming ? '​' : '')}</ReactMarkdown>
+                    </div>
+                    {msg.streaming && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
                   </div>
+                ) : (
+                  msg.content
                 )}
-                {!msg.streaming && msg.role === 'user' && msg.content}
               </div>
             </div>
           ))}
