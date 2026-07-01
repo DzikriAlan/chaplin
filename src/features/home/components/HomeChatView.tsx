@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Plus, ArrowUp, Loader2 } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 import { useSession } from 'next-auth/react'
 import { useChatControllers } from '@/features/chat/controllers/chatControllers'
 import { useChatStates } from '@/features/chat/states/chatStates'
@@ -188,7 +189,13 @@ export default function HomeChatView() {
                   msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
                 }`}
               >
-                {msg.content || (msg.streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : null)}
+                {msg.streaming && <Loader2 className="h-4 w-4 animate-spin" />}
+                {!msg.streaming && msg.role === 'assistant' && (
+                  <div className="prose prose-invert max-w-none prose-p:m-0 prose-ul:my-1 prose-ol:my-1 prose-li:m-0 prose-strong:font-semibold prose-code:text-orange-400 prose-code:bg-black/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-a:text-blue-400 prose-a:underline">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                )}
+                {!msg.streaming && msg.role === 'user' && msg.content}
               </div>
             </div>
           ))}
