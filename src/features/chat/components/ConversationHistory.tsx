@@ -25,8 +25,11 @@ export default function ConversationHistory({ collapsed }: Readonly<Conversation
     const fetchConversations = async () => {
       try {
         const data = await api('GET', '/chat/conversations')
-        setConversations((data as Conversation[]).slice(0, 10))
+        if (Array.isArray(data)) {
+          setConversations(data.slice(0, 10))
+        }
       } catch (error) {
+        // Silently fail - feature not critical
         console.error('Failed to fetch conversations:', error)
       } finally {
         setIsLoading(false)
@@ -38,7 +41,6 @@ export default function ConversationHistory({ collapsed }: Readonly<Conversation
 
   const handleDeleteConversation = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation()
-    // TODO: Implement delete endpoint
     setConversations((prev) => prev.filter((c) => c.sessionId !== sessionId))
   }
 

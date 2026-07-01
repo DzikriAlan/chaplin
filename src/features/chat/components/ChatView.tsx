@@ -91,7 +91,7 @@ export default function ChatView({ conversationId }: ChatViewProps) {
       const response = await storeChat.mutateAsync({
         message: text,
         sessionId: sessionIdRef.current,
-        userId: session?.user?.id,
+        ...(session?.user?.id && { userId: session.user.id }),
         ...(defaultAgent ? { agentId: defaultAgent.id } : {}),
       })
 
