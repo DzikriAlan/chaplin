@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Layout from '@/shared/components/Layout'
-import HomeChatView from '@/features/home/components/HomeChatView'
+import ChatView from '@/features/chat/components/ChatView'
 
 const HomePage: NextPage = () => {
   return (
@@ -10,7 +10,7 @@ const HomePage: NextPage = () => {
         <title>Home — Chaplin</title>
       </Head>
       <Layout noPadding>
-        <HomeChatView />
+        <ChatView />
       </Layout>
     </>
   )

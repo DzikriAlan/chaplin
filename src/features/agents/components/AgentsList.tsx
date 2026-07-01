@@ -32,8 +32,7 @@ export default function AgentsList() {
   // function / methode
 
   const saveAgent = async (data: {
-    name: string; description: string; image: string; personalization: string
-    knowledgeBaseIds: string[]; isDefault: boolean
+    name: string; description: string; image: string; personalization: string; isDefault: boolean
   }) => {
     if (editAgent) {
       await changeAgent.mutateAsync({ id: editAgent.id, payload: data })

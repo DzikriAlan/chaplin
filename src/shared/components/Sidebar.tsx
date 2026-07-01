@@ -4,12 +4,10 @@ import { useSession, signIn, signOut } from 'next-auth/react'
 import { useState } from 'react'
 import Image from 'next/image'
 import {
-  Database,
   PanelLeft,
   Bot,
   LogOut,
   Settings,
-  Wallet,
   MessageSquarePlus,
 } from 'lucide-react'
 import chaplinLogo from '@/shared/assets/chaplin.png'
@@ -114,20 +112,6 @@ export default function Sidebar() {
           label="Agents"
           collapsed={!sidebarOpen}
           isActive={router.pathname.startsWith('/agents')}
-        />
-        <NavItem
-          href="/knowledge-base"
-          icon={<Database className="h-4 w-4 shrink-0" />}
-          label="Knowledge Base"
-          collapsed={!sidebarOpen}
-          isActive={router.pathname.startsWith('/knowledge-base')}
-        />
-        <NavItem
-          href="/usage"
-          icon={<Wallet className="h-4 w-4 shrink-0" />}
-          label="Usage & Saldo"
-          collapsed={!sidebarOpen}
-          isActive={router.pathname.startsWith('/usage')}
         />
       </nav>
 

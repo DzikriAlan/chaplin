@@ -16,7 +16,6 @@ export const useAgentsStates = create<AgentsStore>((set) => ({
     name: '',
     image: '',
     personalization: '',
-    knowledgeBaseIds: [],
     isDefault: false,
   },
 

@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ImageIcon, Eye, Info, Copy, Check as CheckIcon } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
-import { useKbFaqStates } from '@/features/knowledge-base/states/knowledgeBaseFaqStates'
 
 export const agentSchema = z.object({
   name: z.string().min(2, 'Nama minimal 2 karakter'),
@@ -26,7 +25,7 @@ export interface AgentFormHandle {
 interface AgentFormProps {
   agent: DataAgent | null
   isSaving: boolean
-  onSave: (d: { name: string; description: string; image: string; personalization: string; knowledgeBaseIds: string[]; isDefault: boolean }) => void
+  onSave: (d: { name: string; description: string; image: string; personalization: string; isDefault: boolean }) => void
   onPreview: (a: DataAgent) => void
 }
 
@@ -34,12 +33,8 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
   { agent, isSaving, onSave, onPreview }: Readonly<AgentFormProps>,
   ref,
 ) {
-  // variable importer
-  const { kbFaq } = useKbFaqStates()
-
   // states / variable
   const isEdit = agent != null
-  const [selectedKbIds, setSelectedKbIds] = useState<Set<string>>(new Set(agent?.knowledgeBaseIds ?? []))
   const [imagePreview, setImagePreview] = useState(agent?.image ?? '')
   const [embedCopied, setEmbedCopied] = useState(false)
   const [waCopied, setWaCopied] = useState(false)
@@ -78,19 +73,7 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
   }
 
   const saveAgent = (values: AgentFormValues) => {
-    onSave({ ...values, knowledgeBaseIds: Array.from(selectedKbIds) })
-  }
-
-  const syncKbIds = (id: string) => {
-    setSelectedKbIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      return next
-    })
+    onSave({ ...values })
   }
 
   const syncEmbedCopied = async () => {
@@ -112,7 +95,6 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
       description: formValues.description || null,
       image: formValues.image || null,
       personalization: formValues.personalization || null,
-      knowledgeBaseIds: Array.from(selectedKbIds),
       isDefault: formValues.isDefault,
       embedScript: null,
       whatsappScript: null,
@@ -140,11 +122,9 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
   useEffect(() => {
     if (agent) {
       reset({ name: agent.name, description: agent.description ?? '', image: agent.image ?? '', personalization: agent.personalization ?? '', isDefault: agent.isDefault })
-      setSelectedKbIds(new Set(agent.knowledgeBaseIds))
       setImagePreview(agent.image ?? '')
     } else {
       reset({ name: '', description: '', image: '', personalization: '', isDefault: false })
-      setSelectedKbIds(new Set())
       setImagePreview('')
     }
   }, [agent, reset])
@@ -199,39 +179,14 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
           <textarea id="agent-pers" {...register('personalization')} rows={2} placeholder="Kamu asisten AI yang bantu..." className="w-full resize-none rounded-lg border bg-background px-3 py-2.5 text-rem-95 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mt-1.5" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-rem-85 font-medium text-foreground mb-1.5">Pilih Knowledge Base</p>
-            {(kbFaq.data?.length ?? 0) === 0 ? (
-              <p className="text-rem-85 text-muted-foreground italic">Belum ada knowledge base tersedia.</p>
-            ) : (
-              <div className="max-h-32 overflow-y-auto rounded-lg border divide-y">
-                {(kbFaq.data as Array<{ id: string; question: string; answer: string; tags: string[]; isActive: boolean }>).map((kb) => {
-                  const checked = selectedKbIds.has(kb.id)
-                  return (
-                    <label key={kb.id} className={'flex items-center gap-2 px-2.5 py-2 cursor-pointer transition-colors ' + (checked ? 'bg-primary/[0.08]' : 'hover:bg-muted/40')}>
-                      <input type="checkbox" checked={checked} onChange={() => syncKbIds(kb.id)} className="peer sr-only" />
-                      <span className={'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ' + (checked ? 'border-primary bg-primary' : 'border-border bg-background')}>
-                        {checked && <CheckIcon className="h-2.5 w-2.5 text-primary-foreground stroke-[3]" />}
-                      </span>
-                      <span className="text-rem-85 text-foreground truncate">{kb.question}</span>
-                    </label>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col justify-end gap-3">
-            <div className="flex items-center gap-3">
-              <input type="checkbox" id="agent-isDefault" {...register('isDefault')} className="peer sr-only" />
-              <label htmlFor="agent-isDefault" className="flex items-center gap-2 cursor-pointer">
-                <span className={'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ' + (formValues.isDefault ? 'border-primary bg-primary' : 'border-border bg-background')}>
-                  {formValues.isDefault && <CheckIcon className="h-2.5 w-2.5 text-primary-foreground stroke-[3]" />}
-                </span>
-                <span className="text-rem-85 text-foreground">Jadikan agent default</span>
-              </label>
-            </div>
-          </div>
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="agent-isDefault" {...register('isDefault')} className="peer sr-only" />
+          <label htmlFor="agent-isDefault" className="flex items-center gap-2 cursor-pointer">
+            <span className={'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ' + (formValues.isDefault ? 'border-primary bg-primary' : 'border-border bg-background')}>
+              {formValues.isDefault && <CheckIcon className="h-2.5 w-2.5 text-primary-foreground stroke-[3]" />}
+            </span>
+            <span className="text-rem-85 text-foreground">Jadikan agent default</span>
+          </label>
         </div>
 
         <div>

@@ -3,7 +3,6 @@ export interface PayloadPostAgent {
   description?: string
   image?: string
   personalization?: string
-  knowledgeBaseIds: string[]
   isDefault: boolean
 }
 
@@ -12,7 +11,6 @@ export interface PayloadPatchAgent {
   description?: string
   image?: string
   personalization?: string
-  knowledgeBaseIds?: string[]
   isDefault?: boolean
 }
 
@@ -22,7 +20,6 @@ export interface DataAgent {
   description: string | null
   image: string | null
   personalization: string | null
-  knowledgeBaseIds: string[]
   isDefault: boolean
   embedScript: string | null
   whatsappScript: string | null
