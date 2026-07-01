@@ -39,3 +39,8 @@ export const patchAgent = async (id: string, payload: PayloadPatchAgent) => {
     throw error
   }
 }
+
+export const generateAgent = async (prompt: string): Promise<{ name: string; description: string; personalization: string }> => {
+  const result = await api('POST', '/agent/generate', { prompt })
+  return result as { name: string; description: string; personalization: string }
+}

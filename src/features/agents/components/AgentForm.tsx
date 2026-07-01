@@ -8,6 +8,12 @@ import { z } from 'zod'
 import { ImageIcon, Eye, Info, Copy, Check as CheckIcon } from 'lucide-react'
 import type { DataAgent } from '../types/agentsTypes'
 
+export type AgentPrefillData = {
+  name?: string
+  description?: string
+  personalization?: string
+}
+
 export const agentSchema = z.object({
   name: z.string().min(2, 'Nama minimal 2 karakter'),
   description: z.string(),
@@ -25,19 +31,19 @@ export interface AgentFormHandle {
 interface AgentFormProps {
   agent: DataAgent | null
   isSaving: boolean
+  prefillData?: AgentPrefillData
   onSave: (d: { name: string; description: string; image: string; personalization: string; isDefault: boolean }) => void
   onPreview: (a: DataAgent) => void
 }
 
 const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm(
-  { agent, isSaving, onSave, onPreview }: Readonly<AgentFormProps>,
+  { agent, isSaving, prefillData, onSave, onPreview }: Readonly<AgentFormProps>,
   ref,
 ) {
   // states / variable
   const isEdit = agent != null
   const [imagePreview, setImagePreview] = useState(agent?.image ?? '')
   const [embedCopied, setEmbedCopied] = useState(false)
-  const [waCopied, setWaCopied] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   const [imageBoxSize, setImageBoxSize] = useState(160)
   const rightColRef = useRef<HTMLDivElement>(null)
@@ -61,11 +67,6 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
 ></iframe>`
   }
 
-  const getWhatsAppLink = () => {
-    const num = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '6281234567890'
-    return `https://wa.me/${num}?text=Halo%20AI%20Agent`
-  }
-
   const getSubmitLabel = () => {
     if (isSaving) return 'Menyimpan...'
     if (isEdit) return 'Simpan Perubahan'
@@ -80,12 +81,6 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
     await navigator.clipboard.writeText(getEmbedScript())
     setEmbedCopied(true)
     setTimeout(() => setEmbedCopied(false), 2000)
-  }
-
-  const syncWaCopied = async () => {
-    await navigator.clipboard.writeText(getWhatsAppLink())
-    setWaCopied(true)
-    setTimeout(() => setWaCopied(false), 2000)
   }
 
   const loadPreview = () => {
@@ -128,6 +123,17 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
       setImagePreview('')
     }
   }, [agent, reset])
+
+  useEffect(() => {
+    if (prefillData) {
+      reset((prev) => ({
+        ...prev,
+        ...(prefillData.name !== undefined && { name: prefillData.name }),
+        ...(prefillData.description !== undefined && { description: prefillData.description }),
+        ...(prefillData.personalization !== undefined && { personalization: prefillData.personalization }),
+      }))
+    }
+  }, [prefillData, reset])
 
   useImperativeHandle(ref, () => ({ triggerPreview: loadPreview }))
 
@@ -200,21 +206,6 @@ const AgentForm = forwardRef<AgentFormHandle, AgentFormProps>(function AgentForm
             </pre>
             <button type="button" onClick={syncEmbedCopied} className="absolute right-2 top-2 flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-rem-70 font-medium text-foreground hover:bg-muted transition-colors">
               {embedCopied ? <><CheckIcon className="h-3 w-3" />Tersalin!</> : <><Copy className="h-3 w-3" />Salin</>}
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <p className="text-rem-85 font-medium text-foreground">WhatsApp Chatbot</p>
-            <span className="inline-flex items-center text-muted-foreground cursor-help" title="Bagikan link ini ke pelanggan Anda."><Info className="h-3.5 w-3.5" /></span>
-          </div>
-          <div className="relative">
-            <pre className="overflow-x-auto rounded-lg border bg-muted/30 px-4 py-3 text-rem-70 font-mono leading-relaxed whitespace-pre-wrap text-foreground">
-              {getWhatsAppLink()}
-            </pre>
-            <button type="button" onClick={syncWaCopied} className="absolute right-2 top-2 flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-rem-70 font-medium text-foreground hover:bg-muted transition-colors">
-              {waCopied ? <><CheckIcon className="h-3 w-3" />Tersalin!</> : <><Copy className="h-3 w-3" />Salin</>}
             </button>
           </div>
         </div>
