@@ -2,6 +2,7 @@ export interface PayloadPostChat {
   message: string
   sessionId: string
   agentId?: string
+  userId?: string
 }
 
 export interface DataChatMessage {

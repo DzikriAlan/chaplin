@@ -6,13 +6,19 @@ const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL ?? ''}/api/v1`
 export const postChat = async (payload: PayloadPostChat) => {
   try {
     const token = await getAuthToken()
+    const { message, sessionId, agentId, userId } = payload
     const res = await fetch(`${baseUrl}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token ?? ''}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        message,
+        sessionId,
+        ...(agentId && { agentId }),
+        ...(userId && { userId }),
+      }),
     })
     if (!res.ok) throw new Error(res.statusText)
     return res
