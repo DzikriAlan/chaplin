@@ -6,7 +6,7 @@ interface ChatStore {
   chat: Chat
 
   setPayloadPostChat: (payload: Partial<PayloadPostChat>) => void
-  setChat: (payload: Partial<Chat>) => void
+  setChat: (payload: Partial<Chat> | ((state: Chat) => Partial<Chat>)) => void
 }
 
 export const useChatStates = create<ChatStore>((set) => ({
@@ -28,8 +28,8 @@ export const useChatStates = create<ChatStore>((set) => ({
       payloadPostChat: { ...state.payloadPostChat, ...payload },
     })),
 
-  setChat: (payload: Partial<Chat>) =>
+  setChat: (payload) =>
     set((state) => ({
-      chat: { ...state.chat, ...payload },
+      chat: { ...state.chat, ...(typeof payload === 'function' ? payload(state.chat) : payload) },
     })),
 }))

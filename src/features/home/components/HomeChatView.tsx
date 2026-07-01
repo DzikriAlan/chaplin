@@ -32,21 +32,21 @@ export default function HomeChatView() {
 
   // function / methode
   const appendChunk = (chunk: string) => {
-    setChat({
-      data: chat.data?.map((m, i) =>
-        i === (chat.data?.length ?? 0) - 1 ? { ...m, content: m.content + chunk } : m,
+    setChat((state) => ({
+      data: state.data?.map((m, i) =>
+        i === (state.data?.length ?? 0) - 1 ? { ...m, content: m.content + chunk } : m,
       ) ?? null,
-    })
+    }))
   }
 
   const finalizeStream = () => {
-    setChat({
+    setChat((state) => ({
       status: 'success',
       statusTitle: 'Selesai',
-      data: chat.data?.map((m, i) =>
-        i === (chat.data?.length ?? 0) - 1 ? { ...m, streaming: false } : m,
+      data: state.data?.map((m, i) =>
+        i === (state.data?.length ?? 0) - 1 ? { ...m, streaming: false } : m,
       ) ?? null,
-    })
+    }))
   }
 
   const readStream = async (body: ReadableStream<Uint8Array>) => {
