@@ -305,7 +305,7 @@ export default function LandingHero() {
               <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                 <iframe
                   className="absolute inset-0 h-full w-full"
-                  src="https://www.youtube.com/embed/alTYHqvnPHk?si=EvHTRtWOHNPyJEMg"
+                  src="https://www.youtube.com/embed/KgzH7uZyeT8?si=ZBGQZGxdjInCPHs4"
                   title="Chaplin demo"
                   style={{ border: 0 }}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

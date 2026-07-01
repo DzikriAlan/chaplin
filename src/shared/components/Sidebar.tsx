@@ -15,6 +15,7 @@ import {
 import chaplinLogo from '@/shared/assets/chaplin.png'
 import { useUIStates } from '@/shared/states/uiStates'
 import ThemeToggle from './ThemeToggle'
+import ConversationHistory from '@/features/chat/components/ConversationHistory'
 
 interface NavItemProps {
   href?: string
@@ -101,11 +102,11 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="px-2 py-3 space-y-0.5 shrink-0">
         <NavItem
-          href="/home"
+          href="/chat"
           icon={<MessageSquarePlus className="h-4 w-4 shrink-0" />}
           label="New Chat"
           collapsed={!sidebarOpen}
-          isActive={router.pathname === '/home'}
+          isActive={router.pathname === '/chat' && !router.query.id}
         />
         <NavItem
           href="/agents"
@@ -129,6 +130,8 @@ export default function Sidebar() {
           isActive={router.pathname.startsWith('/usage')}
         />
       </nav>
+
+      {sidebarOpen && <ConversationHistory collapsed={!sidebarOpen} />}
 
       <div className="flex-1" />
 
