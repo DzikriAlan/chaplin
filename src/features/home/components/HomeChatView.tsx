@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
-import Link from 'next/link'
 import { Plus, ArrowUp, Loader2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useChatControllers } from '@/features/chat/controllers/chatControllers'
@@ -28,7 +27,6 @@ export default function HomeChatView() {
   const messages = useMemo(() => chat.data ?? [], [chat.data])
   const isStreaming = chat.status === 'loading'
   const defaultAgent = agentsList.data?.find((a) => a.isDefault) ?? agentsList.data?.[0] ?? null
-  const hasNoAgent = agentsList.status === 'success' && !defaultAgent
   const displayName = session?.user?.name?.split(' ')[0] ?? defaultName
   const isEmptyConversation = messages.length === 0
 
@@ -73,7 +71,7 @@ export default function HomeChatView() {
   }
 
   const saveChatMessage = async (text: string) => {
-    if (!text.trim() || isStreaming || !defaultAgent) return
+    if (!text.trim() || isStreaming) return
 
     const userMsg: DataChatMessage = { id: crypto.randomUUID(), role: 'user', content: text }
     const assistantMsg: DataChatMessage = { id: crypto.randomUUID(), role: 'assistant', content: '', streaming: true }
@@ -84,7 +82,7 @@ export default function HomeChatView() {
       const response = await storeChat.mutateAsync({
         message: text,
         sessionId: sessionIdRef.current,
-        agentId: defaultAgent.id,
+        ...(defaultAgent ? { agentId: defaultAgent.id } : {}),
       })
       if (response?.body) await readStream(response.body)
     } catch {
@@ -137,7 +135,7 @@ export default function HomeChatView() {
       <button
         type="button"
         onClick={() => void saveChatMessage(input)}
-        disabled={!input.trim() || isStreaming || !defaultAgent}
+        disabled={!input.trim() || isStreaming}
         aria-label="Kirim pesan"
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background disabled:opacity-30 hover:opacity-80 transition-opacity"
       >
@@ -172,16 +170,6 @@ export default function HomeChatView() {
               filter: 'blur(60px)',
             }}
           />
-
-          {hasNoAgent && (
-            <p className="mb-4 text-center text-rem-85 text-muted-foreground">
-              Buat agent terlebih dahulu di halaman{' '}
-              <Link href="/agents" className="text-primary underline">
-                Agents
-              </Link>{' '}
-              untuk mulai chat.
-            </p>
-          )}
 
           {inputBar}
         </div>
